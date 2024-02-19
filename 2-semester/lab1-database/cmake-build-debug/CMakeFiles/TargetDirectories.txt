@@ -1,0 +1,3 @@
+D:/Documents/КНУ/github/knu/2-semester/lab1-database/cmake-build-debug/CMakeFiles/lab1_database.dir
+D:/Documents/КНУ/github/knu/2-semester/lab1-database/cmake-build-debug/CMakeFiles/edit_cache.dir
+D:/Documents/КНУ/github/knu/2-semester/lab1-database/cmake-build-debug/CMakeFiles/rebuild_cache.dir
