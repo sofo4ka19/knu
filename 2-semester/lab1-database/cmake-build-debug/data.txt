@@ -1,1 +1,5 @@
-    1| 1234|           Kyiv-Lviv|       ordinary|                  20:30 19.2.2024|                  21:13 19.2.2024|  1.5
+    1| 2345|      KryvyyRig-Kyiv|       ordinary|                  20:57 20.2.2024|                   6:26 21.2.2024|  1.2
+    2| 2357|      Zaporizha-Lviv|          speed|                  17:12 20.2.2024|                  17:30 20.2.2024|  1.1
+    3| 4856|         Kyiv-Warsav|  international|                  20:15 26.2.2024|                  21:5 26.2.2024|    1
+    4|    1|    Kharkiv-Mykolaiv|       ordinary|                  15:17 21.3.2024|                  22:5 21.3.2024|  0.9
+    5| 2567|    Kherson-Uzhhorod|          speed|                  12:28 27.2.2024|                  13:34 27.2.2024|  1.2

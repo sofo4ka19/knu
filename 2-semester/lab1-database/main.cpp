@@ -23,8 +23,27 @@ struct Element{
     bool change;
     Train train;
 };
+void readFile(std::vector<Element>& aray){
+    std::ifstream infile("data.txt");
+    std::string line;
+    while (std::getline(infile, line)) {
+        std::istringstream iss(line);
+        Train train;
+        char delimiter;
+
+        iss >> train.ID >> delimiter >> train.num >> delimiter >> train.name >> train.type >> train.arrive.hour >> delimiter >> train.arrive.minute >> delimiter >>
+            train.arrive.day >> delimiter >> train.arrive.month >> delimiter >>
+            train.arrive.year  >> train.leave.hour >> delimiter >> train.leave.minute >> delimiter >>
+            train.leave.day >> delimiter >> train.leave.month >> delimiter >>
+            train.leave.year >> delimiter >> train.popularity;
+            aray.push_back({false, train});
+    }
+}
 void addElement(std::vector<Element>& aray){
-    static int id=1;
+    int id=1;
+    if(size(aray)!=0){
+        id=aray[size(aray)-1].train.ID+1;
+    }
     Train add = {id};
     std::cout << "add information: code, name, type, time and date of arrive and popularity" << std::endl;
     std::cin >> add.num >> add.name >> add.type >> add.arrive.hour >> add.arrive.minute >> add.arrive.day >> add.arrive.month >> add.arrive.year >> add.leave.hour >> add.leave.minute >> add.leave.day >> add.leave.month >> add.leave.year >> add.popularity;
@@ -32,7 +51,7 @@ void addElement(std::vector<Element>& aray){
     id++;
 }
 void saveText(const Train& cur_train){
-    std::ofstream outfile("data.txt");
+    std::ofstream outfile("data.txt", std::ios::app);
     outfile << std::setw(5) << cur_train.ID << "|";
     outfile << std::setw(5) << cur_train.num << "|";
     outfile << std::setw(20) << cur_train.name << "|";
@@ -43,7 +62,7 @@ void saveText(const Train& cur_train){
     outfile.close();
 }
 void saveBinary(const Train& cur_train){
-    std::ofstream outfile("data.bin", std::ios::binary);
+    std::ofstream outfile("data.bin", std::ios::ate | std::ios::app | std::ios::binary);
     outfile.write(reinterpret_cast<const char*>(&cur_train), sizeof(Train));
     outfile.close();
 }
@@ -56,12 +75,30 @@ void save(std::vector<Element>& aray){
         }
     }
 }
+void printAll(std::vector<Element>& aray){
+    std::cout << std::setw(5) << "Number" << "|";
+    std::cout << std::setw(20) << "Name of the train"<< "|";
+    std::cout << std::setw(15) << "Train type"<< "|";
+    std::cout << std::setw(20) << "Arrival time"<< "|";
+    std::cout << std::setw(20) << "Leave time"<< "|";
+    std::cout << std::setw(5) << "Rate" << std::endl;
+    for(int i=0; i<size(aray)-1; i++){
+        Train el = aray[i].train;
+        std::cout << std::setw(5) << el.num << "|";
+        std::cout << std::setw(20) << el.name << "|";
+        std::cout << std::setw(15) << el.type << "|";
+        std::cout << std::setw(20) << el.arrive.hour << ":" << el.arrive.minute << " " << el.arrive.day << "." << el.arrive.month << "." << el.arrive.year << "|";
+        std::cout << std::setw(20) << el.leave.hour << ":" << el.leave.minute << " " << el.leave.day << "." << el.leave.month << "." << el.leave.year << "|";
+        std::cout << std::setw(5) << el.popularity << std::endl;
+    }
+}
 int main() {
     int choose;
     std::vector<Element> array;
+    readFile(array);
     bool isEnd=false;
     while(!isEnd) {
-        std::cout << "Choose the command: 1 - adding element; 2 - save element" << std::endl;
+        std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information" << std::endl;
         std::cin >> choose;
         switch (choose) {
             case 1:
@@ -69,6 +106,9 @@ int main() {
                 break;
             case 2:
                 save(array);
+                break;
+            case 3:
+                printAll(array);
                 break;
             default:
                 isEnd = true;
