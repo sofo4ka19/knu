@@ -94,9 +94,9 @@ void printAll(std::vector<Element>& aray){
 }
 void search(int choose, std::vector<Element>& aray){
     std::vector<Element> result;
+    std::string search;
     switch (choose) {
         case 1:
-            std::string search;
             std::cout << "enter first symbols of the name of the train" << std::endl;
             std::cin >> search;
             for(int i=0; i<size(aray); i++){
@@ -110,9 +110,49 @@ void search(int choose, std::vector<Element>& aray){
                 }
                 if(isOk) result.push_back(aray[i]);
             }
-            printAll(result);
             break;
+        case 2:
+            int searchNum;
+            std::cout << "enter min number of train" << std::endl;
+            std::cin >> searchNum;
+            for(int i=0; i<size(aray); i++){
+                if(aray[i].train.num>=searchNum) result.push_back(aray[i]);
+            }
+            break;
+        case 3:
+            float rate;
+            std::cout << "enter max rate of the popularity" << std::endl;
+            std::cin >> rate;
+            for(int i=0; i<size(aray); i++){
+                if(aray[i].train.popularity<=rate) result.push_back(aray[i]);
+            }
+            break;
+        /*case 4:
+            Date min, max;
+            std::cout << "enter min time and date of arrival" << std::endl;
+            std::cin >> min.hour >> min.minute >> min.day >> min.month >> min.year;
+            std::cout << "enter max time and date of arrival" << std::endl;
+            std::cin >> max.hour >> max.minute >> max.day >> max.month >> max.year;
+            for(int i=0; i<size(aray); i++){
+                Date el=aray[i].train.arrive;
+                bool isOk=true;
+                if(el.year<min.year || el.year>max.year){
+                    isOk=false;
+                }
+                else if(el.year>min.year && el.year<max.year){}
+                else{
+                    if(el.month<min.month || el.month>max.month){
+                        isOk=false;
+                    }
+                    else{
+
+                    }
+                }
+                if(isOk) result.push_back(aray[i]);
+            }
+            break;*/
     }
+    printAll(result);
 }
 int main() {
     int choose;
