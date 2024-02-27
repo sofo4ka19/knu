@@ -31,12 +31,13 @@ void readFile(std::vector<Element>& aray){
         Train train;
         char delimiter;
 
-        iss >> train.ID >> delimiter >> train.num >> delimiter >> train.name >> train.type >> train.arrive.hour >> delimiter >> train.arrive.minute >> delimiter >>
+        iss >> train.ID >> delimiter >> train.num >> delimiter >> train.name >> delimiter >> train.type >> delimiter >> train.arrive.hour >> delimiter >> train.arrive.minute >>
             train.arrive.day >> delimiter >> train.arrive.month >> delimiter >>
-            train.arrive.year  >> train.leave.hour >> delimiter >> train.leave.minute >> delimiter >>
+            train.arrive.year >> delimiter  >> train.leave.hour >> delimiter >> train.leave.minute >>
             train.leave.day >> delimiter >> train.leave.month >> delimiter >>
             train.leave.year >> delimiter >> train.popularity;
             aray.push_back({false, train});
+            std::cout << train.name << std::endl;
     }
 }
 void addElement(std::vector<Element>& aray){
@@ -54,8 +55,8 @@ void saveText(const Train& cur_train){
     std::ofstream outfile("data.txt", std::ios::app);
     outfile << std::setw(5) << cur_train.ID << "|";
     outfile << std::setw(5) << cur_train.num << "|";
-    outfile << std::setw(20) << cur_train.name << "|";
-    outfile << std::setw(15) << cur_train.type << "|";
+    outfile << std::setw(20) << cur_train.name << " |";
+    outfile << std::setw(15) << cur_train.type << " |";
     outfile << std::setw(20) << cur_train.arrive.hour << ":" << cur_train.arrive.minute << " " << cur_train.arrive.day << "." << cur_train.arrive.month << "." << cur_train.arrive.year << "|";
     outfile << std::setw(20) << cur_train.leave.hour << ":" << cur_train.leave.minute << " " << cur_train.leave.day << "." << cur_train.leave.month << "." << cur_train.leave.year << "|";
     outfile << std::setw(5) << cur_train.popularity << std::endl;
@@ -82,7 +83,7 @@ void printAll(std::vector<Element>& aray){
     std::cout << std::setw(20) << "Arrival time"<< "|";
     std::cout << std::setw(20) << "Leave time"<< "|";
     std::cout << std::setw(5) << "Rate" << std::endl;
-    for(int i=0; i<size(aray)-1; i++){
+    for(int i=0; i<size(aray); i++){
         Train el = aray[i].train;
         std::cout << std::setw(5) << el.num << "|";
         std::cout << std::setw(20) << el.name << "|";
@@ -96,6 +97,7 @@ int main() {
     int choose;
     std::vector<Element> array;
     readFile(array);
+    //std::cout << "Choose the mode: 1 - interactive (you manage all processes), 2 - demonstration, 3 - benchmark" << std::endl;
     bool isEnd=false;
     while(!isEnd) {
         std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information" << std::endl;
