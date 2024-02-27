@@ -37,7 +37,6 @@ void readFile(std::vector<Element>& aray){
             train.leave.day >> delimiter >> train.leave.month >> delimiter >>
             train.leave.year >> delimiter >> train.popularity;
             aray.push_back({false, train});
-            std::cout << train.name << std::endl;
     }
 }
 void addElement(std::vector<Element>& aray){
@@ -93,6 +92,28 @@ void printAll(std::vector<Element>& aray){
         std::cout << std::setw(5) << el.popularity << std::endl;
     }
 }
+void search(int choose, std::vector<Element>& aray){
+    std::vector<Element> result;
+    switch (choose) {
+        case 1:
+            std::string search;
+            std::cout << "enter first symbols of the name of the train" << std::endl;
+            std::cin >> search;
+            for(int i=0; i<size(aray); i++){
+                bool isOk = true;
+                std::string el = aray[i].train.name;
+                for(int k=0; k<search.length(); k++){
+                    if (search[k]!=el[k]){
+                        isOk = false;
+                        break;
+                    }
+                }
+                if(isOk) result.push_back(aray[i]);
+            }
+            printAll(result);
+            break;
+    }
+}
 int main() {
     int choose;
     std::vector<Element> array;
@@ -100,7 +121,7 @@ int main() {
     //std::cout << "Choose the mode: 1 - interactive (you manage all processes), 2 - demonstration, 3 - benchmark" << std::endl;
     bool isEnd=false;
     while(!isEnd) {
-        std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information" << std::endl;
+        std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information; 4 - searching the element" << std::endl;
         std::cin >> choose;
         switch (choose) {
             case 1:
@@ -111,6 +132,12 @@ int main() {
                 break;
             case 3:
                 printAll(array);
+                break;
+            case 4:
+                std::cout << "what criteria you want to choose: 1 - name of the train; 2 - min number of train; 3 - max rate of popularity; 4 - period of time" << std::endl;
+                int choose2;
+                std::cin >> choose2;
+                search(choose2, array);
                 break;
             default:
                 isEnd = true;
