@@ -127,7 +127,7 @@ void search(int choose, std::vector<Element>& aray){
                 if(aray[i].train.popularity<=rate) result.push_back(aray[i]);
             }
             break;
-        /*case 4:
+        case 4:
             Date min, max;
             std::cout << "enter min time and date of arrival" << std::endl;
             std::cin >> min.hour >> min.minute >> min.day >> min.month >> min.year;
@@ -139,18 +139,129 @@ void search(int choose, std::vector<Element>& aray){
                 if(el.year<min.year || el.year>max.year){
                     isOk=false;
                 }
-                else if(el.year>min.year && el.year<max.year){}
-                else{
+                else if(el.year==min.year && el.year==max.year){
                     if(el.month<min.month || el.month>max.month){
                         isOk=false;
                     }
-                    else{
-
+                    else if(el.month==min.month && el.month==max.month){
+                        if(el.day<min.day || el.day>max.day){
+                            isOk=false;
+                        }
+                        else if(el.day==min.day && el.day==max.day){
+                            if(el.hour<min.hour || el.hour>max.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour==min.hour && el.hour==max.hour){
+                                if(el.minute<min.minute || el.minute>max.minute){
+                                    isOk=false;
+                                }
+                            }
+                            else if(el.hour == min.hour){
+                                if(el.minute<min.minute){
+                                    isOk=false;
+                                }
+                            }
+                            else if(el.hour == max.hour){
+                                if(el.minute>max.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                        else if (el.day==min.day){
+                            if (el.hour<min.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == min.hour){
+                                if(el.minute<min.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                        else if (el.day==max.day){
+                            if (el.hour>max.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == max.hour){
+                                if(el.minute>max.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                    }
+                    else if(el.month==min.month){
+                        if(el.day<min.day){
+                            isOk=false;
+                        }
+                        else if (el.day==min.day){
+                            if (el.hour<min.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == min.hour){
+                                if(el.minute<min.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                    }
+                    else if(el.month==max.month){
+                        if(el.day>max.day){
+                            isOk=false;
+                        }
+                        else if (el.day==max.day){
+                            if (el.hour>max.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == max.hour){
+                                if(el.minute>max.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if(el.year==min.year){
+                    if(el.month<min.month){
+                        isOk=false;
+                    }
+                    else if(el.month==min.month){
+                        if(el.day<min.day){
+                            isOk=false;
+                        }
+                        else if (el.day==min.day){
+                            if (el.hour<min.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == min.hour){
+                                if(el.minute<min.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
+                    }
+                }
+                else if(el.year==max.year){
+                    if(el.month>max.month){
+                        isOk=false;
+                    }
+                    else if(el.month==max.month){
+                        if(el.day>max.day){
+                            isOk=false;
+                        }
+                        else if (el.day==max.day){
+                            if (el.hour>max.hour){
+                                isOk=false;
+                            }
+                            else if(el.hour == max.hour){
+                                if(el.minute>max.minute){
+                                    isOk=false;
+                                }
+                            }
+                        }
                     }
                 }
                 if(isOk) result.push_back(aray[i]);
             }
-            break;*/
+            break;
     }
     printAll(result);
 }
