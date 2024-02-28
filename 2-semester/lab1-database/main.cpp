@@ -40,15 +40,15 @@ void readFile(std::vector<Element>& aray){
     }
 }
 void addElement(std::vector<Element>& aray){
-    int id=1;
+    int id;
     if(size(aray)!=0){
         id=aray[size(aray)-1].train.ID+1;
     }
+    else{ id=1;}
     Train add = {id};
     std::cout << "add information: code, name, type, time and date of arrive and popularity" << std::endl;
     std::cin >> add.num >> add.name >> add.type >> add.arrive.hour >> add.arrive.minute >> add.arrive.day >> add.arrive.month >> add.arrive.year >> add.leave.hour >> add.leave.minute >> add.leave.day >> add.leave.month >> add.leave.year >> add.popularity;
     aray.push_back({true,add});
-    id++;
 }
 void saveText(const Train& cur_train){
     std::ofstream outfile("data.txt", std::ios::app);
@@ -92,188 +92,175 @@ void printAll(std::vector<Element>& aray){
         std::cout << std::setw(5) << el.popularity << std::endl;
     }
 }
-void search(int choose, std::vector<Element>& aray){
+std::vector<Element> search1(const std::string search, std::vector<Element>& aray){
     std::vector<Element> result;
-    std::string search;
-    switch (choose) {
-        case 1:
-            std::cout << "enter first symbols of the name of the train" << std::endl;
-            std::cin >> search;
-            for(int i=0; i<size(aray); i++){
-                bool isOk = true;
-                std::string el = aray[i].train.name;
-                for(int k=0; k<search.length(); k++){
-                    if (search[k]!=el[k]){
-                        isOk = false;
-                        break;
-                    }
-                }
-                if(isOk) result.push_back(aray[i]);
+    for(int i=0; i<size(aray); i++){
+        bool isOk = true;
+        std::string el = aray[i].train.name;
+        for(int k=0; k<search.length(); k++){
+            if (search[k]!=el[k]){
+                isOk = false;
+                break;
             }
-            break;
-        case 2:
-            int searchNum;
-            std::cout << "enter min number of train" << std::endl;
-            std::cin >> searchNum;
-            for(int i=0; i<size(aray); i++){
-                if(aray[i].train.num>=searchNum) result.push_back(aray[i]);
+        }
+        if(isOk) result.push_back(aray[i]);
+    }
+    return result;
+}
+std::vector<Element> search2(int searchNum, std::vector<Element>& aray){
+    std::vector<Element> result;
+    for(int i=0; i<size(aray); i++){
+        if(aray[i].train.num>=searchNum) result.push_back(aray[i]);
+    }
+    return result;
+}
+std::vector<Element> search3(float rate, std::vector<Element>& aray){
+    std::vector<Element> result;
+    for(int i=0; i<size(aray); i++){
+        if(aray[i].train.popularity<=rate) result.push_back(aray[i]);
+    }
+    return result;
+}
+std::vector<Element> search4(Date min, Date max, std::vector<Element>& aray){
+    std::vector<Element> result;
+    for(int i=0; i<size(aray); i++){
+        Date el=aray[i].train.arrive;
+        bool isOk=true;
+        if(el.year<min.year || el.year>max.year){
+            isOk=false;
+        }
+        else if(el.year==min.year && el.year==max.year){
+            if(el.month<min.month || el.month>max.month){
+                isOk=false;
             }
-            break;
-        case 3:
-            float rate;
-            std::cout << "enter max rate of the popularity" << std::endl;
-            std::cin >> rate;
-            for(int i=0; i<size(aray); i++){
-                if(aray[i].train.popularity<=rate) result.push_back(aray[i]);
-            }
-            break;
-        case 4:
-            Date min, max;
-            std::cout << "enter min time and date of arrival" << std::endl;
-            std::cin >> min.hour >> min.minute >> min.day >> min.month >> min.year;
-            std::cout << "enter max time and date of arrival" << std::endl;
-            std::cin >> max.hour >> max.minute >> max.day >> max.month >> max.year;
-            for(int i=0; i<size(aray); i++){
-                Date el=aray[i].train.arrive;
-                bool isOk=true;
-                if(el.year<min.year || el.year>max.year){
+            else if(el.month==min.month && el.month==max.month){
+                if(el.day<min.day || el.day>max.day){
                     isOk=false;
                 }
-                else if(el.year==min.year && el.year==max.year){
-                    if(el.month<min.month || el.month>max.month){
+                else if(el.day==min.day && el.day==max.day){
+                    if(el.hour<min.hour || el.hour>max.hour){
                         isOk=false;
                     }
-                    else if(el.month==min.month && el.month==max.month){
-                        if(el.day<min.day || el.day>max.day){
+                    else if(el.hour==min.hour && el.hour==max.hour){
+                        if(el.minute<min.minute || el.minute>max.minute){
                             isOk=false;
-                        }
-                        else if(el.day==min.day && el.day==max.day){
-                            if(el.hour<min.hour || el.hour>max.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour==min.hour && el.hour==max.hour){
-                                if(el.minute<min.minute || el.minute>max.minute){
-                                    isOk=false;
-                                }
-                            }
-                            else if(el.hour == min.hour){
-                                if(el.minute<min.minute){
-                                    isOk=false;
-                                }
-                            }
-                            else if(el.hour == max.hour){
-                                if(el.minute>max.minute){
-                                    isOk=false;
-                                }
-                            }
-                        }
-                        else if (el.day==min.day){
-                            if (el.hour<min.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == min.hour){
-                                if(el.minute<min.minute){
-                                    isOk=false;
-                                }
-                            }
-                        }
-                        else if (el.day==max.day){
-                            if (el.hour>max.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == max.hour){
-                                if(el.minute>max.minute){
-                                    isOk=false;
-                                }
-                            }
                         }
                     }
-                    else if(el.month==min.month){
-                        if(el.day<min.day){
+                    else if(el.hour == min.hour){
+                        if(el.minute<min.minute){
                             isOk=false;
-                        }
-                        else if (el.day==min.day){
-                            if (el.hour<min.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == min.hour){
-                                if(el.minute<min.minute){
-                                    isOk=false;
-                                }
-                            }
                         }
                     }
-                    else if(el.month==max.month){
-                        if(el.day>max.day){
+                    else if(el.hour == max.hour){
+                        if(el.minute>max.minute){
                             isOk=false;
-                        }
-                        else if (el.day==max.day){
-                            if (el.hour>max.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == max.hour){
-                                if(el.minute>max.minute){
-                                    isOk=false;
-                                }
-                            }
                         }
                     }
                 }
-                else if(el.year==min.year){
-                    if(el.month<min.month){
+                else if (el.day==min.day){
+                    if (el.hour<min.hour){
                         isOk=false;
                     }
-                    else if(el.month==min.month){
-                        if(el.day<min.day){
+                    else if(el.hour == min.hour){
+                        if(el.minute<min.minute){
                             isOk=false;
-                        }
-                        else if (el.day==min.day){
-                            if (el.hour<min.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == min.hour){
-                                if(el.minute<min.minute){
-                                    isOk=false;
-                                }
-                            }
                         }
                     }
                 }
-                else if(el.year==max.year){
-                    if(el.month>max.month){
+                else if (el.day==max.day){
+                    if (el.hour>max.hour){
                         isOk=false;
                     }
-                    else if(el.month==max.month){
-                        if(el.day>max.day){
+                    else if(el.hour == max.hour){
+                        if(el.minute>max.minute){
                             isOk=false;
-                        }
-                        else if (el.day==max.day){
-                            if (el.hour>max.hour){
-                                isOk=false;
-                            }
-                            else if(el.hour == max.hour){
-                                if(el.minute>max.minute){
-                                    isOk=false;
-                                }
-                            }
                         }
                     }
                 }
-                if(isOk) result.push_back(aray[i]);
             }
-            break;
+            else if(el.month==min.month){
+                if(el.day<min.day){
+                    isOk=false;
+                }
+                else if (el.day==min.day){
+                    if (el.hour<min.hour){
+                        isOk=false;
+                    }
+                    else if(el.hour == min.hour){
+                        if(el.minute<min.minute){
+                            isOk=false;
+                        }
+                    }
+                }
+            }
+            else if(el.month==max.month){
+                if(el.day>max.day){
+                    isOk=false;
+                }
+                else if (el.day==max.day){
+                    if (el.hour>max.hour){
+                        isOk=false;
+                    }
+                    else if(el.hour == max.hour){
+                        if(el.minute>max.minute){
+                            isOk=false;
+                        }
+                    }
+                }
+            }
+        }
+        else if(el.year==min.year){
+            if(el.month<min.month){
+                isOk=false;
+            }
+            else if(el.month==min.month){
+                if(el.day<min.day){
+                    isOk=false;
+                }
+                else if (el.day==min.day){
+                    if (el.hour<min.hour){
+                        isOk=false;
+                    }
+                    else if(el.hour == min.hour){
+                        if(el.minute<min.minute){
+                            isOk=false;
+                        }
+                    }
+                }
+            }
+        }
+        else if(el.year==max.year){
+            if(el.month>max.month){
+                isOk=false;
+            }
+            else if(el.month==max.month){
+                if(el.day>max.day){
+                    isOk=false;
+                }
+                else if (el.day==max.day){
+                    if (el.hour>max.hour){
+                        isOk=false;
+                    }
+                    else if(el.hour == max.hour){
+                        if(el.minute>max.minute){
+                            isOk=false;
+                        }
+                    }
+                }
+            }
+        }
+        if(isOk) result.push_back(aray[i]);
     }
-    printAll(result);
+    return result;
 }
-int main() {
+void interactive(std::vector<Element>& array){
     int choose;
-    std::vector<Element> array;
-    readFile(array);
-    //std::cout << "Choose the mode: 1 - interactive (you manage all processes), 2 - demonstration, 3 - benchmark" << std::endl;
     bool isEnd=false;
     while(!isEnd) {
         std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information; 4 - searching the element" << std::endl;
         std::cin >> choose;
+        std::vector<Element> result;
+        std::string search;
         switch (choose) {
             case 1:
                 addElement(array);
@@ -288,11 +275,92 @@ int main() {
                 std::cout << "what criteria you want to choose: 1 - name of the train; 2 - min number of train; 3 - max rate of popularity; 4 - period of time" << std::endl;
                 int choose2;
                 std::cin >> choose2;
-                search(choose2, array);
+                switch (choose2) {
+                    case 1:
+                        std::cout << "enter first symbols of the name of the train" << std::endl;
+                        std::cin >> search;
+                        result = search1(search, array);
+                        break;
+                    case 2:
+                        int num;
+                        std::cout << "enter min number of train" << std::endl;
+                        std::cin >> num;
+                        result = search2(num, array);
+                        break;
+                    case 3:
+                        float rate;
+                        std::cout << "enter max rate of the popularity" << std::endl;
+                        std::cin >> rate;
+                        result = search3(rate, array);
+                        break;
+                    case 4:
+                        Date min, max;
+                        std::cout << "enter min time and date of arrival" << std::endl;
+                        std::cin >> min.hour >> min.minute >> min.day >> min.month >> min.year;
+                        std::cout << "enter max time and date of arrival" << std::endl;
+                        std::cin >> max.hour >> max.minute >> max.day >> max.month >> max.year;
+                        result = search4(min, max, array);
+                        break;
+                    default:
+                        std::cout << "Error, try again" << std::endl;
+                        break;
+                }
+                if(!result.empty()) printAll(result);
                 break;
             default:
                 isEnd = true;
         }
     }
+}
+void demo(std::vector<Element>& aray){
+    std::vector<Element> result;
+    std::cout << "0. All data were restored, print it in console" << std::endl;
+    printAll(aray);
+    std::cout << "1. Add an element to the vector (2552, Dnipro-Kyiv, ordinary, 20:55 29.02.2024, 21:15 29.02.2024, 1.1)" << std::endl;
+    int id;
+    if(size(aray)!=0){
+        id=aray[size(aray)-1].train.ID+1;
+    }
+    else{ id=1;}
+    aray.push_back({true, {id, 2552, "Dnipro-Kyiv", "ordinary", {29,02,2024, 20,55}, {29,02,2024,21,15}, 1.1}});
+    std::cout << "2. Save it to binary and text files" << std::endl;
+    save(aray);
+    std::cout << "Now you can check that our information were saved in the files" << std::endl;
+    std::cout << "3. Printing all data" << std::endl;
+    printAll(aray);
+    std::cout << "4. Searching by name (Kyiv)" << std::endl;
+    result = search1("Kyiv", aray);
+    printAll(result);
+    std::cout << "5. Searching by min number (2500)" << std::endl;
+    result=search2(2500, aray);
+    printAll(result);
+    std::cout << "6. Searching by max rate of popularity (1.2)" << std::endl;
+    result = search3(1.2, aray);
+    printAll(result);
+    std::cout << "7. Searching by period of time (20:00 25.02.2024 - 10:10 05.03.2024)" << std::endl;
+    result = search4({25,02,2024,20,00}, {05,03,2024,10,10}, aray);
+    printAll(result);
+    std::cout << "That's all" << std::endl;
+}
+int main() {
+    int choose;
+    std::vector<Element> array;
+    readFile(array);
+    std::cout << "Choose the mode: 1 - interactive (you manage all processes), 2 - demonstration, 3 - benchmark" << std::endl;
+    std::cin >> choose;
+    switch (choose) {
+        case 1:
+            interactive(array);
+            break;
+        case 2:
+            demo(array);
+            break;
+        case 3:
+            break;
+        default:
+            std::cout << "Error";
+            break;
+    }
+
     return 0;
 }

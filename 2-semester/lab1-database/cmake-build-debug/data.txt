@@ -5,3 +5,4 @@
     5| 2567|    Kherson-Uzhhorod |          speed |                  12:28 27.2.2024|                  13:34 27.2.2024|  1.2
     6| 6781|          Odesa-Kyiv |       ordinary |                   7:15 29.2.2024|                   9:10 29.2.2024|  1.5
     7| 4984|        Kyiv-Wroclaw |  international |                  21:30 25.3.2024|                  22:55 25.3.2024|  1.4
+    8| 1879|     Dnipro-Katowice |  international |                  14:25 1.3.2024|                  15:20 1.3.2024|  0.9
