@@ -2,7 +2,9 @@
 #include <vector>
 #include <fstream>
 #include <iomanip>
-
+#include <chrono>
+#include <cstdlib>
+#include <random>
 struct Date{
     int day;
     int month;
@@ -23,8 +25,8 @@ struct Element{
     bool change;
     Train train;
 };
-void readFile(std::vector<Element>& aray){
-    std::ifstream infile("data.txt");
+void readFile(std::vector<Element>& aray, std::string file="data.txt"){
+    std::ifstream infile(file);
     std::string line;
     while (std::getline(infile, line)) {
         std::istringstream iss(line);
@@ -50,8 +52,8 @@ void addElement(std::vector<Element>& aray){
     std::cin >> add.num >> add.name >> add.type >> add.arrive.hour >> add.arrive.minute >> add.arrive.day >> add.arrive.month >> add.arrive.year >> add.leave.hour >> add.leave.minute >> add.leave.day >> add.leave.month >> add.leave.year >> add.popularity;
     aray.push_back({true,add});
 }
-void saveText(const Train& cur_train){
-    std::ofstream outfile("data.txt", std::ios::app);
+void saveText(const Train& cur_train, std::string place){
+    std::ofstream outfile(place, std::ios::app);
     outfile << std::setw(5) << cur_train.ID << "|";
     outfile << std::setw(5) << cur_train.num << "|";
     outfile << std::setw(20) << cur_train.name << " |";
@@ -61,16 +63,16 @@ void saveText(const Train& cur_train){
     outfile << std::setw(5) << cur_train.popularity << std::endl;
     outfile.close();
 }
-void saveBinary(const Train& cur_train){
-    std::ofstream outfile("data.bin", std::ios::ate | std::ios::app | std::ios::binary);
+void saveBinary(const Train& cur_train, std::string place){
+    std::ofstream outfile(place, std::ios::ate | std::ios::app | std::ios::binary);
     outfile.write(reinterpret_cast<const char*>(&cur_train), sizeof(Train));
     outfile.close();
 }
-void save(std::vector<Element>& aray){
+void save(std::vector<Element>& aray, std::string textFile = "data.txt", std::string binFile = "data.bin"){
     for (auto& element : aray) {
         if (element.change) {
-            saveText(element.train);
-            saveBinary(element.train);
+            saveText(element.train, textFile);
+            saveBinary(element.train, binFile);
             element.change=false;
         }
     }
@@ -92,7 +94,8 @@ void printAll(std::vector<Element>& aray){
         std::cout << std::setw(5) << el.popularity << std::endl;
     }
 }
-std::vector<Element> search1(const std::string search, std::vector<Element>& aray){
+
+void search1(const std::string search, std::vector<Element>& aray){
     std::vector<Element> result;
     for(int i=0; i<size(aray); i++){
         bool isOk = true;
@@ -105,23 +108,26 @@ std::vector<Element> search1(const std::string search, std::vector<Element>& ara
         }
         if(isOk) result.push_back(aray[i]);
     }
-    return result;
+    printAll(result);
 }
-std::vector<Element> search2(int searchNum, std::vector<Element>& aray){
+
+void search2(int searchNum, std::vector<Element>& aray){
     std::vector<Element> result;
     for(int i=0; i<size(aray); i++){
         if(aray[i].train.num>=searchNum) result.push_back(aray[i]);
     }
-    return result;
+    printAll(result);
 }
-std::vector<Element> search3(float rate, std::vector<Element>& aray){
+
+void search3(float rate, std::vector<Element>& aray){
     std::vector<Element> result;
     for(int i=0; i<size(aray); i++){
         if(aray[i].train.popularity<=rate) result.push_back(aray[i]);
     }
-    return result;
+    printAll(result);
 }
-std::vector<Element> search4(Date min, Date max, std::vector<Element>& aray){
+
+void search4(Date min, Date max, std::vector<Element>& aray){
     std::vector<Element> result;
     for(int i=0; i<size(aray); i++){
         Date el=aray[i].train.arrive;
@@ -251,7 +257,7 @@ std::vector<Element> search4(Date min, Date max, std::vector<Element>& aray){
         }
         if(isOk) result.push_back(aray[i]);
     }
-    return result;
+    printAll(result);
 }
 void interactive(std::vector<Element>& array){
     int choose;
@@ -259,7 +265,6 @@ void interactive(std::vector<Element>& array){
     while(!isEnd) {
         std::cout << "Choose the command: 1 - adding element; 2 - save element; 3 - print whole information; 4 - searching the element" << std::endl;
         std::cin >> choose;
-        std::vector<Element> result;
         std::string search;
         switch (choose) {
             case 1:
@@ -279,19 +284,19 @@ void interactive(std::vector<Element>& array){
                     case 1:
                         std::cout << "enter first symbols of the name of the train" << std::endl;
                         std::cin >> search;
-                        result = search1(search, array);
+                        search1(search, array);
                         break;
                     case 2:
                         int num;
                         std::cout << "enter min number of train" << std::endl;
                         std::cin >> num;
-                        result = search2(num, array);
+                        search2(num, array);
                         break;
                     case 3:
                         float rate;
                         std::cout << "enter max rate of the popularity" << std::endl;
                         std::cin >> rate;
-                        result = search3(rate, array);
+                        search3(rate, array);
                         break;
                     case 4:
                         Date min, max;
@@ -299,13 +304,12 @@ void interactive(std::vector<Element>& array){
                         std::cin >> min.hour >> min.minute >> min.day >> min.month >> min.year;
                         std::cout << "enter max time and date of arrival" << std::endl;
                         std::cin >> max.hour >> max.minute >> max.day >> max.month >> max.year;
-                        result = search4(min, max, array);
+                        search4(min, max, array);
                         break;
                     default:
                         std::cout << "Error, try again" << std::endl;
                         break;
                 }
-                if(!result.empty()) printAll(result);
                 break;
             default:
                 isEnd = true;
@@ -313,7 +317,6 @@ void interactive(std::vector<Element>& array){
     }
 }
 void demo(std::vector<Element>& aray){
-    std::vector<Element> result;
     std::cout << "0. All data were restored, print it in console" << std::endl;
     printAll(aray);
     std::cout << "1. Add an element to the vector (2552, Dnipro-Kyiv, ordinary, 20:55 29.02.2024, 21:15 29.02.2024, 1.1)" << std::endl;
@@ -329,18 +332,64 @@ void demo(std::vector<Element>& aray){
     std::cout << "3. Printing all data" << std::endl;
     printAll(aray);
     std::cout << "4. Searching by name (Kyiv)" << std::endl;
-    result = search1("Kyiv", aray);
-    printAll(result);
+    search1("Kyiv", aray);
     std::cout << "5. Searching by min number (2500)" << std::endl;
-    result=search2(2500, aray);
-    printAll(result);
+    search2(2500, aray);
     std::cout << "6. Searching by max rate of popularity (1.2)" << std::endl;
-    result = search3(1.2, aray);
-    printAll(result);
+    search3(1.2, aray);
     std::cout << "7. Searching by period of time (20:00 25.02.2024 - 10:10 05.03.2024)" << std::endl;
-    result = search4({25,02,2024,20,00}, {05,03,2024,10,10}, aray);
-    printAll(result);
+    search4({25,02,2024,20,00}, {05,03,2024,10,10}, aray);
     std::cout << "That's all" << std::endl;
+}
+void benchmark(){
+    std::vector<Element> array;
+    std::random_device rd;
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    int id=1;
+    int N=10;
+    bool isEnd;
+    duration<double, std::milli> ms_double;
+    do{
+        auto t0 = high_resolution_clock::now();
+        readFile(array, "benchmark.txt");
+        auto t1 = high_resolution_clock::now();
+        for(int i=0; i<N; i++){
+            array.push_back({true, {id, rand()%10000, std::to_string(mersenne()%100000000000000000), std::to_string(mersenne()%10000000), {rand()%31+1, rand()%12+1, rand()%2030+1, rand()%24, rand()%60}, {rand()%31+1, rand()%12+1, rand()%2030+1, rand()%24, rand()%60}, 0.1*(rand()%20)}});
+            id++;
+        }
+        auto t2 = high_resolution_clock::now();
+        save(array, "benchmark.txt", "benchmark.bin");
+        auto t3 = high_resolution_clock::now();
+        search1(std::to_string(rand()/1000), array);
+        auto t4 = high_resolution_clock::now();
+        search2(rand()%10000, array);
+        auto t5 = high_resolution_clock::now();
+        search3(0.1*(rand()%20), array);
+        auto t6 = high_resolution_clock::now();
+        search4({rand()%31+1, rand()%12+1, rand()%2030+1, rand()%24, rand()%60}, {rand()%31+1, rand()%12+1, rand()%2030+1, rand()%24, rand()%60},array);
+        auto t7 = high_resolution_clock::now();
+        duration<double, std::milli> ms_double1 = t1 - t0;
+        duration<double, std::milli> ms_double2 = t2 - t1;
+        duration<double, std::milli> ms_double3 = t3 - t2;
+        duration<double, std::milli> ms_double4 = t4 - t3;
+        duration<double, std::milli> ms_double5 = t5 - t4;
+        duration<double, std::milli> ms_double6 = t6 - t5;
+        duration<double, std::milli> ms_double7 = t7 - t6;
+        duration<double, std::milli> ms_double = t7 - t0;
+        std::cout << "for " << N << " elements: restoring previous - " << ms_double1.count() << "ms; adding - " << ms_double2.count() << "ms; saving - "<< ms_double3.count() << "ms; searching by name - " << ms_double4.count() << "ms; searching by min num - "<< ms_double5.count() << "ms; searching by max rate - "<< ms_double6.count() << "ms; searching by period of time for arrival - " << ms_double7.count() << "ms; at all - " << ms_double.count() << std::endl;
+        isEnd = ms_double.count()<10000.0;
+        if(ms_double.count()<1000){
+            N*=2;
+        }
+        else{
+            const int N1=N;
+            N+=N1;
+        }
+    }while(isEnd);
 }
 int main() {
     int choose;
@@ -356,6 +405,7 @@ int main() {
             demo(array);
             break;
         case 3:
+            benchmark();
             break;
         default:
             std::cout << "Error";
