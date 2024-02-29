@@ -352,6 +352,7 @@ void benchmark(){
     int id=1;
     int N=10;
     bool isEnd;
+    int N1;
     duration<double, std::milli> ms_double;
     do{
         auto t0 = high_resolution_clock::now();
@@ -384,9 +385,9 @@ void benchmark(){
         isEnd = ms_double.count()<10000.0;
         if(ms_double.count()<1000){
             N*=2;
+            N1=N;
         }
         else{
-            const int N1=N;
             N+=N1;
         }
     }while(isEnd);
