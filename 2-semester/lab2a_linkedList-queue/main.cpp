@@ -6,6 +6,19 @@ struct Point{
     float y;
     float z;
 };
+struct Node{
+    Point value;
+    Node* prev;
+    Node* next;
+
+    Node(Point value, Node* prev = nullptr, Node* next = nullptr): value(value), prev(prev), next(next) { }
+};
+struct LinkedList {
+    Node* start;
+    Node* end;
+
+    LinkedList(Node* start = nullptr, Node* end = nullptr): start(start), end(end) {}
+};
 bool is_empty(std::vector<Point>& array){
     return array.empty();
 }
@@ -80,11 +93,51 @@ void staticPrint(Point *array, int& index){
         }
     }
 }
+void listPrint(Node* start)
+{
+    Node *current = start;
+    if(current == nullptr){
+        std::cout << "list is empty" << std::endl;
+    }
+    else {
+        while (current != nullptr) {
+            std::cout << "(" << current->value.x << ";" << current->value.y << ";" << current->value.z << ")"
+                      << std::endl;
+            current = current->next;
+        }
+    }
+}
+bool listIsEmpty(LinkedList& list){
+    return (list.start == nullptr);
+}
+void listEnqueue(LinkedList& list, Point value = enqueue()){
+    Node* new_node = new Node(value, list.end);
+    listIsEmpty(list)?(list.start = new_node):(list.end->next = new_node);
+    /*if (list.end == nullptr) {
+        list.start = new_node;
+    } else {
+        list.end->next = new_node;
+    }*/
+    list.end = new_node;
+}
+void listDequeue(LinkedList& list){
+    if(listIsEmpty(list)){
+        std::cout << "list is empty" << std::endl;
+    }
+    else{
+        Node* new_start = list.start->next;
+        delete list.start;
+        list.start = new_start;
+        list.start->prev = nullptr;
+        std::cout << "first element was deleted" << std::endl;
+    }
+}
 int main() {
     int type, action=0;
     std::vector<Point> array;
     bool isEnd = false;
     Point* static_array = nullptr;
+    LinkedList list;
     do{
         bool anotherType = false;
         std::cout << "choose type of the list: 1 - static array; 2 - vector (dynamic array); 3 - linked list" << std::endl;
@@ -148,6 +201,27 @@ int main() {
                     }
                     break;
                 case 3:
+                    switch (action){
+                        case 0:
+                            list.start = nullptr;
+                            list.end = nullptr;
+                            break;
+                        case 1:
+                            listEnqueue(list);
+                            break;
+                        case 2:
+                            listDequeue(list);
+                            break;
+                        case 3:
+                            (listIsEmpty(list))?(std::cout << "list is empty" << std::endl):(std::cout << "list is not empty" << std::endl);
+                            break;
+                        case 4:
+                            listPrint(list.start);
+                            break;
+                        default:
+                            anotherType=true;
+                            break;
+                    }
                     break;
                 default:
                     isEnd = true;
