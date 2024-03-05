@@ -59,12 +59,12 @@ bool staticIsEmpty(int& index){
         return false;
     }
 }
-void staticEnqueue(Point *array, int size, int& index){
+void staticEnqueue(Point *array, int size, int& index, Point add = enqueue()){
     if(index==size){
         std::cout << "Error. Your array is full" << std::endl;
     }
     else{
-        array[index]=enqueue();
+        array[index]=add;
         index++;
     }
 }
@@ -124,12 +124,9 @@ void listDequeue(LinkedList& list){
         std::cout << "first element was deleted" << std::endl;
     }
 }
-void interactive(){
+void interactive(std::vector<Point>& array, Point*& static_array, LinkedList& list){
     int type, action=0;
-    std::vector<Point> array;
     bool isEnd = false;
-    Point* static_array = nullptr;
-    LinkedList list;
     while(!isEnd){
         std::cout << "choose type of the list: 1 - static array; 2 - vector (dynamic array); 3 - linked list" << std::endl;
         std::cin >> type;
@@ -229,19 +226,79 @@ void interactive(){
     }
 
 }
-void demo(){
+void demo(std::vector<Point>& array, Point*& static_array, LinkedList& list){
+    std::cout << "firstly, let's work with static array which contains 3 elements" << std::endl;
+    int index=0;
+    static_array = new Point[3];
+    std::cout << "check if it's empty" << std::endl;
+    (staticIsEmpty(index))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+    std::cout << "add element (0;0;0) in the end of the array" << std::endl;
+    staticEnqueue(static_array, 3, index, {0,0,0});
+    std::cout << "add element (-2;0;5) in the end of the array" << std::endl;
+    staticEnqueue(static_array, 3, index, {-2,0,5});
+    std::cout << "add element (0;10;2.5) in the end of the array" << std::endl;
+    staticEnqueue(static_array, 3, index, {0,10,2.5});
+    std::cout << "try to add element (0;3;0) in the end of the array" << std::endl;
+    staticEnqueue(static_array, 3, index, {0,3,0});
+    std::cout << "print what we have" << std::endl;
+    staticPrint(static_array, index);
+    std::cout << "delete the first element" << std::endl;
+    staticDequeue(static_array, index);
+    std::cout << "print what we have" << std::endl;
+    staticPrint(static_array, index);
 
+    std::cout << "now let's work with vector array" << std::endl;
+    array = {};
+    std::cout << "check if it's empty" << std::endl;
+    (is_empty(array))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+    std::cout << "add element (0;1;0) in the end of the array" << std::endl;
+    array.push_back({0,1,0});
+    std::cout << "add element (-2;1;5) in the end of the array" << std::endl;
+    array.push_back({-2,1,5});
+    std::cout << "add element (0;0;2.5) in the end of the array" << std::endl;
+    array.push_back({0,0,2.5});
+    std::cout << "print what we have" << std::endl;
+    print(array);
+    std::cout << "delete the first element" << std::endl;
+    dequeue(array);
+    std::cout << "print what we have" << std::endl;
+    print(array);
+
+    std::cout << "now let's work with linked list" << std::endl;
+    list.start = nullptr;
+    list.end = nullptr;
+    std::cout << "check if it's empty" << std::endl;
+    (listIsEmpty(list))?(std::cout << "list is empty" << std::endl):(std::cout << "list is not empty" << std::endl);
+    std::cout << "add element (0;3;2) in the end of the array" << std::endl;
+    listEnqueue(list, {0,3,2});
+    std::cout << "add element (-2;3;5) in the end of the array" << std::endl;
+    listEnqueue(list, {-2,3,5});
+    std::cout << "add element (0;-1;0.5) in the end of the array" << std::endl;
+    listEnqueue(list, {0,-1,0.5});
+    std::cout << "add element (0;0;2) in the end of the array" << std::endl;
+    listEnqueue(list, {0,0,2});
+    std::cout << "print what we have" << std::endl;
+    listPrint(list.start);
+    std::cout << "delete the first element" << std::endl;
+    listDequeue(list);
+    std::cout << "print what we have" << std::endl;
+    listPrint(list.start);
+
+    std::cout << "that's all" << std::endl;
 }
 int main() {
+    std::vector<Point> array;
+    Point* static_array = nullptr;
+    LinkedList list;
     int mode;
     std::cout << "Choose the mode: 1 - interactive; 2 - demonstration; 3 - benchmark" << std::endl;
     std::cin >> mode;
     switch (mode) {
         case 1:
-            interactive();
+            interactive(array, static_array, list);
             break;
         case 2:
-            demo();
+            demo(array, static_array, list);
             break;
         case 3:
             break;
