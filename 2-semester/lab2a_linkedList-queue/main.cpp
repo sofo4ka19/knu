@@ -32,9 +32,6 @@ void print(std::vector<Point>& array){
         }
     }
 }
-/*void create_empty(){
-    std::vector<Point> array = {};
-}*/
 Point enqueue(){
     Point add;
     std::cout << "enter x coordinate" << std::endl;
@@ -113,11 +110,6 @@ bool listIsEmpty(LinkedList& list){
 void listEnqueue(LinkedList& list, Point value = enqueue()){
     Node* new_node = new Node(value, list.end);
     listIsEmpty(list)?(list.start = new_node):(list.end->next = new_node);
-    /*if (list.end == nullptr) {
-        list.start = new_node;
-    } else {
-        list.end->next = new_node;
-    }*/
     list.end = new_node;
 }
 void listDequeue(LinkedList& list){
@@ -132,17 +124,17 @@ void listDequeue(LinkedList& list){
         std::cout << "first element was deleted" << std::endl;
     }
 }
-int main() {
+void interactive(){
     int type, action=0;
     std::vector<Point> array;
     bool isEnd = false;
     Point* static_array = nullptr;
     LinkedList list;
-    do{
-        bool anotherType = false;
+    while(!isEnd){
         std::cout << "choose type of the list: 1 - static array; 2 - vector (dynamic array); 3 - linked list" << std::endl;
         std::cin >> type;
-        do {
+        bool anotherType = false;
+        while(!anotherType && !isEnd) {
             switch (type) {
                 case 1:
                     int index;
@@ -225,17 +217,37 @@ int main() {
                     break;
                 default:
                     isEnd = true;
-                    std::cout << "error";
+                    std::cout << "error" << std::endl;
                     break;
             }
-            if(!anotherType){
+            if(!anotherType && !isEnd){
                 std::cout << "choose what to do: 0 - create an empty array; 1 - add element to the end; 2 - remove element from the start; 3 - check if it is empty; 4 - print elements" << std::endl;
                 std::cin >> action;
             }
             else{ action = 0;}
-        }while(!anotherType);
-    }while(!isEnd);
+        }
+    }
 
+}
+void demo(){
+
+}
+int main() {
+    int mode;
+    std::cout << "Choose the mode: 1 - interactive; 2 - demonstration; 3 - benchmark" << std::endl;
+    std::cin >> mode;
+    switch (mode) {
+        case 1:
+            interactive();
+            break;
+        case 2:
+            demo();
+            break;
+        case 3:
+            break;
+        default:
+            break;
+    }
 
     return 0;
 }
