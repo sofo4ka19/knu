@@ -1,1 +1,69 @@
 Creating a queue (a type of linked list) with operations, which contains points in 3D space
+
+results of benchmark:
+
+N=100
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.0055ms | 0.0018ms | 0.0001ms |
+| Check emptiness 1 | 0.4086ms | 0.3156ms | 0.2917ms |
+| Add elements | 0.0135ms | 0.0219ms | 0.0613ms |
+| Delete an element | 0.6223ms | 0.3157ms | 0.2663ms |
+| Print all elements | 90.2261ms | 99.9369ms | 96.8573ms |
+| Check emptiness 2 | 0.3623ms | 0.3786ms | 0.7919ms |
+| Total | 91.6383 | 100.971 | 98.2686 |
+
+N=200
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.0263ms | 0.0041ms | 0.0001ms |
+| Check emptiness 1 | 0.2949ms | 0.6458ms | 0.5606ms |
+| Add elements | 0.0237ms | 0.1236ms | 0.0892ms |
+| Delete an element | 0.298ms | 0.2582ms | 0.2493ms |
+| Print all elements | 262.406ms | 267.765ms | 241.384ms |
+| Check emptiness 2 | 0.4491ms | 0.384ms | 0.308ms |
+| Total | 263.498 | 269.181 | 242.591 |
+
+N=400
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.026ms | 0.0033ms | 0.0001ms |
+| Check emptiness 1 | 0.2612ms | 0.4928ms | 0.4069ms |
+| Add elements | 0.0372ms | 0.1178ms | 0.1727ms |
+| Delete an element | 0.2786ms | 0.3681ms | 0.1982ms |
+| Print all elements | 481.924ms | 477.915ms | 421.433ms |
+| Check emptiness 2 | 0.5446ms | 0.3669ms | 0.3303ms   |
+| Total | 483.072 | 479.264 | 422.541 |
+
+N=800
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.0194ms | 0.0022ms | 0.0001ms |
+| Check emptiness 1 | 0.4162ms | 0.2881ms | 0.1857ms |
+| Add elements | 0.0704ms | 0.1524ms | 0.1523ms |
+| Delete an element | 0.2507ms | 0.1739ms | 0.2387ms |
+| Print all elements | 845.227ms | 647.034ms | 682.207ms |
+| Check emptiness 2 | 0.2928ms | 0.1817ms | 0.7667ms   |
+| Total | 846.276 | 647.832 | 683.55 |
+
+N=1600
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.0258ms | 0.0012ms | 0.0001ms |
+| Check emptiness 1 | 0.1528ms | 0.2005ms | 0.1501ms |
+| Add elements | 0.1381ms | 0.2081ms | 0.2743ms |
+| Delete an element | 0.2745ms | 0.2085ms | 0.176ms |
+| Print all elements | 1356.87ms | 1312.48ms | 1343.96ms |
+| Check emptiness 2 | 0.1528ms | 0.1508ms | 0.1769ms   |
+| Total | 1357.62 | 1313.25 | 1344.74 |
+
+N=3200
+| Operation | Static array | Vector | Linked list |
+|-------------|-------------|-------------|-------------|
+| Make new array  | 0.0219ms | 0.0012ms | 0.0001ms |
+| Check emptiness 1 | 0.2351ms | 0.1509ms | 0.1304ms |
+| Add elements | 0.4841ms | 0.3975ms | 0.8776ms |
+| Delete an element | 0.2947ms | 0.1601ms | 2.3717ms |
+| Print all elements | 2513.11ms | 2387.43ms | 1947.08ms |
+| Check emptiness 2 | 0.1724ms | 0.2101ms | 0.1577ms   |
+| Total | 2514.32 | 2388.35 | 1950.62 |
