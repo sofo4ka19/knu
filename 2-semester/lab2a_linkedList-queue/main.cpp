@@ -1,10 +1,12 @@
 #include <iostream>
 #include <vector>
+#include <chrono>
+#include <random>
 
 struct Point{
-    float x;
-    float y;
-    float z;
+    double x;
+    double y;
+    double z;
 };
 struct Node{
     Point value;
@@ -286,6 +288,106 @@ void demo(std::vector<Point>& array, Point*& static_array, LinkedList& list){
 
     std::cout << "that's all" << std::endl;
 }
+void benchmark(std::vector<Point>& array, Point*& static_array, LinkedList& list){
+    std::random_device rd;
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    //duration<double, std::milli> ms_double;
+    int N=100, N1;
+    bool isEnd;
+    do{
+        auto static_t0 = high_resolution_clock::now();
+        int index=0;
+        static_array = new Point[N];
+        auto static_t1 = high_resolution_clock::now();
+        (staticIsEmpty(index))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+        auto static_t2 = high_resolution_clock::now();
+        for(int i=0; i<N; i++){
+            staticEnqueue(static_array, N, index, {rand()/100.0,rand()/100.0,rand()/100.0});
+        }
+        auto static_t3 = high_resolution_clock::now();
+        staticDequeue(static_array, index);
+        auto static_t4 = high_resolution_clock::now();
+        staticPrint(static_array, index);
+        auto static_t5 = high_resolution_clock::now();
+        (staticIsEmpty(index))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+        auto static_t6 = high_resolution_clock::now();
+
+        duration<double, std::milli> static1 = static_t1 - static_t0;
+        duration<double, std::milli> static2 = static_t2 - static_t1;
+        duration<double, std::milli> static3 = static_t3 - static_t2;
+        duration<double, std::milli> static4 = static_t4 - static_t3;
+        duration<double, std::milli> static5 = static_t5 - static_t4;
+        duration<double, std::milli> static6 = static_t6 - static_t5;
+        duration<double, std::milli> staticSum = static_t6 - static_t0;
+        std::cout << "for " << N << " elements in static: making new array - " << static1.count() << "ms; checking if it is empty - " << static2.count() << "ms; adding elements to the end - "<< static3.count() << "ms; deleting elements from the start - " << static4.count() << "ms; printing all elements - "<< static5.count() << "ms; checking if it`s empty (when not empty) - "<< static6.count() <<  "ms; at all - " << staticSum.count() << std::endl;
+
+        auto vector_t0 = high_resolution_clock::now();
+        array = {};
+        auto vector_t1 = high_resolution_clock::now();
+        (is_empty(array))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+        auto vector_t2 = high_resolution_clock::now();
+        for(int i=0; i<N; i++){
+            array.push_back({rand()/100.0,rand()/100.0,rand()/100.0});
+        }
+        auto vector_t3 = high_resolution_clock::now();
+        dequeue(array);
+        auto vector_t4 = high_resolution_clock::now();
+        print(array);
+        auto vector_t5 = high_resolution_clock::now();
+        (is_empty(array))?(std::cout << "array is empty" << std::endl):(std::cout << "array is not empty" << std::endl);
+        auto vector_t6 = high_resolution_clock::now();
+
+        duration<double, std::milli> vector1 = vector_t1 - vector_t0;
+        duration<double, std::milli> vector2 = vector_t2 - vector_t1;
+        duration<double, std::milli> vector3 = vector_t3 - vector_t2;
+        duration<double, std::milli> vector4 = vector_t4 - vector_t3;
+        duration<double, std::milli> vector5 = vector_t5 - vector_t4;
+        duration<double, std::milli> vector6 = vector_t6 - vector_t5;
+        duration<double, std::milli> vectorSum = vector_t6 - vector_t0;
+        std::cout << "for " << N << " elements in vector: making new array - " << vector1.count() << "ms; checking if it is empty - " << vector2.count() << "ms; adding elements to the end - "<< vector3.count() << "ms; deleting elements from the start - " << vector4.count() << "ms; printing all elements - "<< vector5.count() << "ms; checking if it`s empty (when not empty) - "<< vector6.count() <<  "ms; at all - " << vectorSum.count() << std::endl;
+
+        auto list_t0 = high_resolution_clock::now();
+        list.start = nullptr;
+        list.end = nullptr;
+        auto list_t1 = high_resolution_clock::now();
+        (listIsEmpty(list))?(std::cout << "list is empty" << std::endl):(std::cout << "list is not empty" << std::endl);
+        auto list_t2 = high_resolution_clock::now();
+        for(int i=0; i<N; i++){
+            listEnqueue(list, {rand()/100.0,rand()/100.0,rand()/100.0});
+        }
+        auto list_t3 = high_resolution_clock::now();
+        listDequeue(list);
+        auto list_t4 = high_resolution_clock::now();
+        print(array);
+        auto list_t5 = high_resolution_clock::now();
+        (listIsEmpty(list))?(std::cout << "list is empty" << std::endl):(std::cout << "list is not empty" << std::endl);
+        auto list_t6 = high_resolution_clock::now();
+
+
+
+        duration<double, std::milli> list1 = list_t1 - list_t0;
+        duration<double, std::milli> list2 = list_t2 - list_t1;
+        duration<double, std::milli> list3 = list_t3 - list_t2;
+        duration<double, std::milli> list4 = list_t4 - list_t3;
+        duration<double, std::milli> list5 = list_t5 - list_t4;
+        duration<double, std::milli> list6 = list_t6 - list_t5;
+        duration<double, std::milli> listSum = list_t6 - list_t0;
+        std::cout << "for " << N << " elements in list: making new array - " << list1.count() << "ms; checking if it is empty - " << list2.count() << "ms; adding elements to the end - "<< list3.count() << "ms; deleting elements from the start - " << list4.count() << "ms; printing all elements - "<< list5.count() << "ms; checking if it`s empty (when not empty) - "<< list6.count() <<  "ms; at all - " << listSum.count() << std::endl;
+        double ms_double=std::max(staticSum.count(), std::max(vectorSum.count(), listSum.count()));
+        isEnd = ms_double<2000.0;
+        if(ms_double<1000){
+            N*=2;
+            N1=N;
+        }
+        else{
+            N+=N1;
+        }
+    }while(isEnd);
+}
 int main() {
     std::vector<Point> array;
     Point* static_array = nullptr;
@@ -301,8 +403,10 @@ int main() {
             demo(array, static_array, list);
             break;
         case 3:
+            benchmark(array, static_array, list);
             break;
         default:
+            std::cout << "error";
             break;
     }
 
