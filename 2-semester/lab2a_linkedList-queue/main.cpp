@@ -36,12 +36,30 @@ void print(std::vector<Point>& array){
 }
 Point enqueue(){
     Point add;
-    std::cout << "enter x coordinate" << std::endl;
-    std::cin >> add.x;
-    std::cout << "enter y coordinate" << std::endl;
-    std::cin >> add.y;
-    std::cout << "enter z coordinate" << std::endl;
-    std::cin >> add.z;
+    do {
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        std::cout << "enter x coordinate" << std::endl;
+        std::cin >> add.x;
+    }while(std::cin.fail());
+    do {
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        std::cout << "enter y coordinate" << std::endl;
+        std::cin >> add.y;
+    }while(std::cin.fail());
+    do {
+        if(std::cin.fail()) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        }
+        std::cout << "enter z coordinate" << std::endl;
+        std::cin >> add.z;
+    }while(std::cin.fail());
     return add;
 }
 void dequeue(std::vector<Point>& array){
