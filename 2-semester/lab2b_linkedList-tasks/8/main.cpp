@@ -49,6 +49,27 @@ LinkedList interleave(LinkedList list1, LinkedList list2){
     }
     return list;
 }
+LinkedList rotate(LinkedList list, int begin, int end, int new_begin){
+    LinkedList result, add;
+    int i=0;
+    while(list.start!= nullptr) {
+        if(i<begin || i>=new_begin){
+            addElement(result, list.start->value);
+            if(i==end){
+                while(add.start!= nullptr){
+                    addElement(result, add.start->value);
+                    add.start=add.start->next;
+                }
+            }
+        }
+        else{
+            addElement(add, list.start->value);
+        }
+        list.start=list.start->next;
+        i++;
+    }
+    return result;
+}
 void fillList(LinkedList& list){
     while(true){
         int el;
@@ -64,14 +85,34 @@ void fillList(LinkedList& list){
     }
 }
 void interactive(LinkedList& list1, LinkedList& list2){
-    std::cout << "fill the first list (to exit enter a symbol)" << std::endl;
-    fillList(list1);
-    listPrint(list1.start);
-    std::cout << "fill the second list (to exit enter a symbol)" << std::endl;
-    fillList(list2);
-    listPrint(list2.start);
-    std::cout << "the result of interleave" << std::endl;
-    listPrint(interleave(list1, list2).start);
+    int choose;
+    std::cout << "what function you want to have? 1 - interleave, 2 - rotate" << std::endl;
+    std::cin >> choose;
+    switch (choose) {
+        case 1:
+            std::cout << "fill the first list (to exit enter a symbol)" << std::endl;
+            fillList(list1);
+            listPrint(list1.start);
+            std::cout << "fill the second list (to exit enter a symbol)" << std::endl;
+            fillList(list2);
+            listPrint(list2.start);
+            std::cout << "the result of interleave" << std::endl;
+            listPrint(interleave(list1, list2).start);
+            break;
+        case 2:
+            std::cout << "fill the list (to exit enter a symbol)" << std::endl;
+            fillList(list1);
+            listPrint(list1.start);
+            int begin, end, new_begin;
+            std::cout << "enter begin, end, new_begin" << std::endl;
+            std::cin >> begin >> end >> new_begin;
+            std::cout << "the result of rotate" << std::endl;
+            listPrint(rotate(list1, begin, end, new_begin).start);
+            break;
+        default:
+            break;
+    }
+
 }
 void demo(LinkedList& list1, LinkedList& list2){
     std::cout << "fill the first list: 1 2 3 4 5; and the second: 6 7 8 9 10" << std::endl;
