@@ -1,3 +1,0 @@
-D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/8/cmake-build-debug/CMakeFiles/8.dir
-D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/8/cmake-build-debug/CMakeFiles/edit_cache.dir
-D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/8/cmake-build-debug/CMakeFiles/rebuild_cache.dir

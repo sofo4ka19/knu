@@ -1,0 +1,3 @@
+D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/33/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-vd7jfl/CMakeFiles/cmTC_dd61e.dir
+D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/33/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-vd7jfl/CMakeFiles/edit_cache.dir
+D:/Documents/КНУ/github/knu/2-semester/lab2b_linkedList-tasks/33/cmake-build-debug/CMakeFiles/CMakeScratch/TryCompile-vd7jfl/CMakeFiles/rebuild_cache.dir
