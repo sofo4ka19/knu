@@ -68,6 +68,10 @@ LinkedList rotate(LinkedList list, int begin, int end, int new_begin){
         list.start=list.start->next;
         i++;
     }
+    if (i<=end){
+        std::cout << "error" << std::endl;
+        return nullptr;
+    }
     return result;
 }
 void fillList(LinkedList& list){
@@ -106,8 +110,14 @@ void interactive(LinkedList& list1, LinkedList& list2){
             int begin, end, new_begin;
             std::cout << "enter begin, end, new_begin" << std::endl;
             std::cin >> begin >> end >> new_begin;
-            std::cout << "the result of rotate" << std::endl;
-            listPrint(rotate(list1, begin, end, new_begin).start);
+            if(begin>new_begin || new_begin>end || begin<0 || std::cin.fail()){
+                std::cout << "error"<< std::endl;
+            }
+            else if(rotate(list1, begin, end, new_begin).start != nullptr){
+                std::cout << "the result of rotate" << std::endl;
+                listPrint(rotate(list1, begin, end, new_begin).start);
+            }
+
             break;
         default:
             break;
@@ -115,19 +125,21 @@ void interactive(LinkedList& list1, LinkedList& list2){
 
 }
 void demo(LinkedList& list1, LinkedList& list2){
-    std::cout << "fill the first list: 1 2 3 4 5; and the second: 6 7 8 9 10" << std::endl;
-    for(int i=1; i<=5; i++){
+    std::cout << "fill the first list: 1 2 3 4 5 6 7; and the second: 8 9 10 11 12 13 14" << std::endl;
+    for(int i=1; i<=7; i++){
         addElement(list1, i);
-        addElement(list2, i+5);
+        addElement(list2, i+7);
     }
     std::cout << "the result of interleave" << std::endl;
     listPrint(interleave(list1, list2).start);
     std::cout << "add 11 12 13 14 to second list" << std::endl;
-    for(int i=11; i<=14; i++){
+    for(int i=15; i<=20; i++){
         addElement(list2, i);
     }
     std::cout << "the result of interleave" << std::endl;
     listPrint(interleave(list1, list2).start);
+    std::cout << "the result for first list rotate with begin=2, end=5, new_begin=4" << std::endl;
+    listPrint(rotate(list1,2,5,4).start);
 }
 void benchmark(){
     std::random_device rd;
@@ -154,11 +166,14 @@ void benchmark(){
         auto t3 = high_resolution_clock::now();
         interleave(list1, list2);
         auto t4 = high_resolution_clock::now();
+        rotate(list1, 25,75,50);
+        auto t5 = high_resolution_clock::now();
         duration<double, std::milli> ms_double1 = t2-t1;
         duration<double, std::milli> ms_double2 = t4-t3;
-        std::cout << "for " << N << " elements in both arrays, time of interleave is " << ms_double1.count() << "ms; if we add " << N << " elements to the second array, time of interleave is " << ms_double2.count() << "ms" << std::endl;
-        isEnd = ms_double2.count()<1500.0;
-        if(ms_double2.count()<1000.0){
+        duration<double, std::milli> ms_double3 = t5-t4;
+        std::cout << "for " << N << " elements in both arrays, time of interleave is " << ms_double1.count() << "ms; if we add " << N << " elements to the second array, time of interleave is " << ms_double2.count() << "ms; time of rotate with begin=25, end=75, new_begin=50 for first list is " << ms_double3.count() << "ms" << std::endl;
+        isEnd = ms_double2.count()<1500.0 || ms_double3.count()<1500.0;
+        if(ms_double2.count()<1000.0 || ms_double3.count()<1000.0){
             N*=2;
             N1=N;
         }
