@@ -1,5 +1,6 @@
 #include <iostream>
 #include <vector>
+#include <limits>
 
 struct Node{
     int value;
@@ -35,7 +36,45 @@ void addElement(LinkedList& list, int value){
     list.start->prev=list.end;
     list.end->next=list.start;
 }
-
+void task(Node* start, std::vector<int> step, const int& type, const int add=0, int N=0) {
+    Node *current = start;
+    int i = 0, j = 0, k = 0;
+    while (current != current->prev) {
+        if (i == step[j]) {
+            current->prev->next = current->next;
+            current->next->prev = current->prev;
+            switch (type) {
+                case 1:
+                    std::cout << current->value << " ";
+                    break;
+                case 2:
+                    k++;
+                    if (current->value == add) {
+                        std::cout << k << std::endl;
+                    }
+                    break;
+                case 3:
+                    k++;
+                    if (N - k == add) {
+                        std::cout << current->value << std::endl;
+                    }
+                    break;
+                default:
+                    break;
+            }
+            i = 0;
+            (j == step.size() - 1) ? (j = 0) : (j++);
+        } else {
+            i++;
+        }
+        current = current->next;
+    }
+    if (type == 1 || (type == 3 && add == 0)) {
+        std::cout << current->value << std::endl;
+    } else if (type == 2 && add == current->value) {
+        std::cout << ++k << std::endl;
+    }
+}
 int main(){
     LinkedList list;
     int N;
@@ -48,5 +87,36 @@ int main(){
     }
     std::cout << "your list contain next elements" << std::endl;
     listPrint(list.start, list.end);
+    std::vector<int> KK;
+    int step;
+    while(true){
+        std::cout << "enter a step (if it is the end, enter a symbol)" << std::endl;
+        std::cin >> step;
+        if(std::cin.fail()){
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            break;
+        }
+        else{
+            KK.push_back(step);
+        }
+    }
+    int choose, add;
+    std::cout << "choose what to print: 1 - list of elements in order of deleting; 2 - which in order was an element; 3 - which element was deleted in a number from the end" << std::endl;
+    std::cin >> choose;
+    switch (choose) {
+        case 2:
+            std::cout << "enter an element" << std::endl;
+            std::cin >> add;
+            break;
+        case 3:
+            std::cout << "enter a number of order position from the end" << std::endl;
+            std::cin >> add;
+            break;
+        default:
+            break;
 
+    }
+    task(list.start, KK, choose, add, N);
+    return 0;
 }
