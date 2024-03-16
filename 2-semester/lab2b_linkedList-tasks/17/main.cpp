@@ -36,7 +36,7 @@ void addElement(LinkedList& list, int value){
     list.start->prev=list.end;
     list.end->next=list.start;
 }
-void task(Node* start, std::vector<int> step, const int& type, const int add=0, int N=0) {
+void task(Node* start, std::vector<int> step, const int& type, const int add, int N) {
     Node *current = start;
     int i = 0, j = 0, k = 0;
     while (current != current->prev) {
@@ -81,6 +81,9 @@ int main(){
     do {
         std::cout << "enter a number of elements" << std::endl;
         std::cin >> N;
+        if(std::cin.fail()){
+            return 0;
+        }
     }while(N<1);
     for(int i=1; i<=N; i++){
         addElement(list, i);
@@ -104,18 +107,26 @@ int main(){
     int choose, add;
     std::cout << "choose what to print: 1 - list of elements in order of deleting; 2 - which in order was an element; 3 - which element was deleted in a number from the end" << std::endl;
     std::cin >> choose;
+    if(std::cin.fail()){
+        return 0;
+    }
     switch (choose) {
         case 2:
             std::cout << "enter an element" << std::endl;
             std::cin >> add;
+            if(std::cin.fail()){
+                return 0;
+            }
             break;
         case 3:
             std::cout << "enter a number of order position from the end" << std::endl;
             std::cin >> add;
+            if(std::cin.fail()){
+                return 0;
+            }
             break;
         default:
             break;
-
     }
     task(list.start, KK, choose, add, N);
     return 0;
