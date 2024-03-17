@@ -71,5 +71,6 @@ int main() {
     print(array);
     print(bubbleSort(array, 25));
     print(lomuto(array, 0, 24));
+    print(mergeSort(array, 0, 24));
     return 0;
 }
