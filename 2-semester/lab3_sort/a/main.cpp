@@ -32,7 +32,36 @@ std::vector<double> lomuto(std::vector<double>& array, int low, int high){
 
     return array;
 }
+std::vector<double> mergeSort(std::vector<double>& array, int low, int high){
+    int mid = low + (high - low)/2;
 
+    if(mid-low>=1) mergeSort(array, low, mid);
+    if(high - (mid+1) >= 1) mergeSort(array, mid+1, high);
+
+    int i=0, j=mid+1, k=low;
+    std::vector<double> temp;
+    for(int m=low; m<=mid+1; m++){
+        temp.push_back(array[m]);
+    }
+    while(i < temp.size() && j<=high){
+        if(temp[i] >= array[j]){
+            array[k] = temp[i];
+            i++;
+            k++;
+        }
+        else{
+            array[k] = array[j];
+            j++;
+            k++;
+        }
+    }
+    while (i<temp.size()){
+        array[k] = temp[i];
+        i++;
+        k++;
+    }
+    return array;
+}
 
 int main() {
     std::vector<double> array;
