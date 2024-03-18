@@ -17,7 +17,7 @@ std::vector<double> bubbleSort(std::vector<double>& array, int N){
     }
     return array;
 }
-std::vector<double> lomuto(std::vector<double>& array, int low, int high){
+int lomuto(std::vector<double>& array, int low, int high){
     int j=low;
     int pivot = array[high];
     for (int i = low; i < high; ++i) {
@@ -27,9 +27,15 @@ std::vector<double> lomuto(std::vector<double>& array, int low, int high){
         }
     }
     std::swap(array[high], array[j]);
-    if (low<j-1) lomuto(array, low, j-1);
-    if(j+1<high) lomuto(array, j+1, high);
 
+    return j;
+}
+std::vector<double> quickSort(std::vector<double>& array, int low, int high){
+    if(low<high){
+        int pivotNum = lomuto(array,low, high);
+        quickSort(array, low, pivotNum-1);
+        quickSort(array, pivotNum+1, high);
+    }
     return array;
 }
 std::vector<double> mergeSort(std::vector<double>& array, int low, int high){
@@ -62,6 +68,23 @@ std::vector<double> mergeSort(std::vector<double>& array, int low, int high){
     }
     return array;
 }
+std::vector<double> combineSort(std::vector<double> array, int n, int low, int high){
+    int size = high - low + 1;
+    if (size <= 1)
+        return {};
+
+    if (size <= n)
+    {
+        bubbleSort(array,size);
+    }
+    else
+    {
+        int pivotIndex = lomuto(array, low, high);
+        combineSort(array, n, low, pivotIndex-1);
+        combineSort(array, n, pivotIndex+1, high);
+    }
+    return array;
+}
 
 int main() {
     std::vector<double> array;
@@ -70,7 +93,8 @@ int main() {
     }
     print(array);
     print(bubbleSort(array, 25));
-    print(lomuto(array, 0, 24));
+    print(quickSort(array, 0, 24));
     print(mergeSort(array, 0, 24));
+    print(combineSort(array, 10, 0,24));
     return 0;
 }
