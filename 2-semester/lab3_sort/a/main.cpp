@@ -1,5 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <algorithm>
+#include <limits>
+#include <random>
+#include <chrono>
+
 void print(std::vector<double> array){
     for(int i=0; i<array.size(); i++){
         std::cout << array[i] << " ";
@@ -113,10 +118,13 @@ void demo(int size){
     quickSort(current, 0, size-1, true);
     current=right;
     std::cout << "merge sort:" << std::endl;
-    (mergeSort(current, 0, size-1, true));
+    mergeSort(current, 0, size-1, true);
     current=right;
     std::cout << "combine sort:" << std::endl;
-    (combineSort(current, 10, 0,size-1, true));
+    combineSort(current, 34, 0,size-1, true);
+    std::cout << "library sort:" << std::endl;
+    std::sort(right.begin(), right.end(), std::greater<double>());
+    print(right);
 
     std::cout << "actions for array in wrong order:" << std::endl;
     print(wrong);
@@ -128,10 +136,13 @@ void demo(int size){
     quickSort(current, 0, size-1, true);
     current=wrong;
     std::cout << "merge sort:" << std::endl;
-    (mergeSort(current, 0, size-1, true));
+    mergeSort(current, 0, size-1, true);
     current=wrong;
     std::cout << "combine sort:" << std::endl;
-    (combineSort(current, 10, 0,size-1, true));
+    combineSort(current, 34, 0,size-1, true);
+    std::cout << "library sort:" << std::endl;
+    std::sort(wrong.begin(), wrong.end(), std::greater<double>());
+    print(wrong);
 
     std::cout << "actions for array in mixed order:" << std::endl;
     print(mix);
@@ -143,12 +154,139 @@ void demo(int size){
     quickSort(current, 0, size-1, true);
     current=mix;
     std::cout << "merge sort:" << std::endl;
-    (mergeSort(current, 0, size-1, true));
+    mergeSort(current, 0, size-1, true);
     current=mix;
     std::cout << "combine sort:" << std::endl;
-    (combineSort(current, 10, 0,size-1, true));
+    combineSort(current, 34, 0,size-1, true);
+    std::cout << "library sort:" << std::endl;
+    std::sort(mix.begin(), mix.end(), std::greater<double>());
+    print(mix);
+}
+void benchmark() {
+    std::random_device rd;
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    int N = 100;
+    std::vector<double> right, wrong, mix, current;
+    do {
+        create(right, wrong, mix, N);
+        std::cout << "for " << N << " elements:" << std::endl;
+        current = right;
+        auto t0 = high_resolution_clock::now();
+        bubbleSort(current, 0, N - 1, false);
+        auto t1 = high_resolution_clock::now();
+        duration<double, std::milli> ms_double0 = t1 - t0;
+        std::cout << "time for array in right order: bubble sort - " << ms_double0.count() << "ms; ";
+        current = right;
+        t0 = high_resolution_clock::now();
+        quickSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "quick sort (lomuto partition scheme) - " << ms_double0.count() << "ms; ";
+        current = right;
+        t0 = high_resolution_clock::now();
+        mergeSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "merge sort - " << ms_double0.count() << "ms; ";
+        current = right;
+        t0 = high_resolution_clock::now();
+        combineSort(current, 34, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "combine sort - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        std::sort(right.begin(), right.end(), std::greater<double>());
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "library sort - " << ms_double0.count() << "ms" << std::endl;
+
+        current = wrong;
+        t0 = high_resolution_clock::now();
+        bubbleSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "time for array in wrong order: bubble sort - " << ms_double0.count() << "ms; ";
+        current = wrong;
+        t0 = high_resolution_clock::now();
+        quickSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "quick sort (lomuto partition scheme) - " << ms_double0.count() << "ms; ";
+        current = wrong;
+        t0 = high_resolution_clock::now();
+        mergeSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "merge sort - " << ms_double0.count() << "ms; ";
+        current = wrong;
+        t0 = high_resolution_clock::now();
+        combineSort(current, 34, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "combine sort - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        std::sort(wrong.begin(), wrong.end(), std::greater<double>());
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "library sort - " << ms_double0.count() << "ms" << std::endl;
+
+        current = mix;
+        t0 = high_resolution_clock::now();
+        bubbleSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "time for array in mix order: bubble sort - " << ms_double0.count() << "ms; ";
+        current = mix;
+        t0 = high_resolution_clock::now();
+        quickSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "quick sort (lomuto partition scheme) - " << ms_double0.count() << "ms; ";
+        current = mix;
+        t0 = high_resolution_clock::now();
+        mergeSort(current, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "merge sort - " << ms_double0.count() << "ms; ";
+        current = mix;
+        t0 = high_resolution_clock::now();
+        combineSort(current, 34, 0, N - 1, false);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "combine sort - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        std::sort(mix.begin(), mix.end(), std::greater<double>());
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "library sort - " << ms_double0.count() << "ms" << std::endl;
+        N *= 2;
+    } while (N < 25600);
 }
 int main() {
-    demo(25);
+    int choice;
+    std::cout << "choose the mode: 1 - demo, 2 - benchmark" << std::endl;
+    std::cin >> choice;
+    switch (choice) {
+        case 1:
+            int size;
+            std::cout << "enter size of the array" << std::endl;
+            std::cin >> size;
+            if(std::cin.fail()) {
+                std::cin.clear();
+                std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+                break;
+            }
+            demo(size);
+            break;
+        case 2:
+            benchmark();
+            break;
+        default:
+            break;
+    }
     return 0;
 }
