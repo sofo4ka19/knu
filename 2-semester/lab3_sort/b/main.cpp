@@ -185,7 +185,7 @@ int getIndexOfType(const std::string& type){
 void countingSort(std::vector<Train>& array, int start, int end){
     //counting sort can sort only integer, but we have a number of types, so let's sort it as in order in array
     //because of that we can't merge it with next count sort for merge sort
-    int count[train_types.size()];
+    int count[4]={0};
     Train temp[end-start+1];
     for (int i = start; i <= end; ++i) {
         count[getIndexOfType(array[i].type)]++;
