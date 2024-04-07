@@ -175,7 +175,7 @@ void mergeSort(std::vector<Train>& array, int low, int high, int field) {
     mergeSort(array, mid + 1, high, field);
     merge(array, low, mid, high, field);
 }
-int getIndexOfType(std::string type){
+int getIndexOfType(const std::string& type){
     for (int i = 0; i < train_types.size(); ++i) {
         if(type==train_types[i]){
             return i;
@@ -201,15 +201,15 @@ void countingSort(std::vector<Train>& array, int start, int end){
     }
 }
 void countSort(std::vector<Train>& array, int start, int end, int position){
-    int count[10];
+    int count[10] = {0};
     for(int i=start; i<=end; i++){
         count[(array[i].num/position)%10]++;
     }
-    for (int i = 1; i < 10; ++i) {
+    for (int i = 1; i < 10; i++) {
         count[i]+=count[i-1];
     }
     Train temp[end-start+1];
-    for (int i = end; i <= start; --i) {
+    for (int i = end; i >= start; i--) {
         temp[--count[(array[i].num/position)%10]]=array[i];
     }
     for(int i=start; i<=end; i++){
