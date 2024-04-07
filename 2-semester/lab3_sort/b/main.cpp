@@ -72,12 +72,17 @@ bool compare(std::string el1, std::string el2){
     return false;
 }
 bool compare(Date el1, Date el2){
-    if(el1.year > el2.year) return true;
-    if(el1.month > el2.month) return true;
-    if(el1.day > el2.day) return true;
-    if(el1.hour > el2.hour) return true;
-    if(el1.minute > el2.minute) return true;
-    return false;
+    if (el1.year != el2.year) {
+        return el1.year > el2.year;
+    } else if (el1.month != el2.month) {
+        return el1.month > el2.month;
+    } else if (el1.day != el2.day) {
+        return el1.day > el2.day;
+    } else if (el1.hour != el2.hour) {
+        return el1.hour > el2.hour;
+    } else {
+        return el1.minute > el2.minute;
+    }
 }
 bool compare(double el1, double el2){
     if(el2>el1){
@@ -227,7 +232,7 @@ void sort(std::vector<int> fields, std::vector<Train>& array, const int& size){
             countingSort(array, 0, size-1);
             break;
         default:
-            mergeSort(array, 0, size-1,fields[0]);
+            mergeSort(array, 0, size-1, fields[0]);
             break;
     }
 }
