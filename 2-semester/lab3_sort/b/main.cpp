@@ -62,10 +62,10 @@ void randomFillArray(std::vector<Train>& array, int size){
 }
 bool compare(std::string el1, std::string el2){
     for(int i=0; i<std::min(el1.size(), el2.size()); i++){
-        if(el1[0]<el2[0]){
+        if(el1[i]<el2[i]){
             return false;
         }
-        else if(el1[0]>el2[0]){
+        else if(el1[i]>el2[i]){
             return true;
         }
     }
@@ -85,12 +85,7 @@ bool compare(Date el1, Date el2){
     }
 }
 bool compare(double el1, double el2){
-    if(el2>el1){
-        return false;
-    }
-    else{
-        return true;
-    }
+    return el2<=el1;
 }
 void merge(std::vector<Train>& array, int low, int mid, int high, int field) {
     int i = 0, j = mid + 1, k = low;
@@ -182,35 +177,21 @@ int getIndexOfType(const std::string& type){
         }
     }
 };
-void countingSort(std::vector<Train>& array, int start, int end){
-    //counting sort can sort only integer, but we have a number of types, so let's sort it as in order in array
-    //because of that we can't merge it with next count sort for merge sort
-    int count[4]={0};
-    Train temp[end-start+1];
-    for (int i = start; i <= end; ++i) {
-        count[getIndexOfType(array[i].type)]++;
+
+void countingSort(std::vector<Train>& array, int start, int end, int position=0, int size=train_types.size()){
+    int count[size];
+    for(int i=0; i<size; i++){
+        count[i]=0;
     }
-    for (int i = 1; i < train_types.size(); ++i) {
-        count[i]+=count[i-1];
+    for (int i = start; i <= end ; i++) {
+        (position==0)?(count[getIndexOfType(array[i].type)]++):(count[(array[i].num/position)%10]++);
     }
-    for (int i = end; i >= start; --i) {
-        temp[--count[getIndexOfType(array[i].type)]]=array[i];
-    }
-    for(int i=start; i<=end; i++){
-        array[i]= temp[i];
-    }
-}
-void countSort(std::vector<Train>& array, int start, int end, int position){
-    int count[10] = {0};
-    for(int i=start; i<=end; i++){
-        count[(array[i].num/position)%10]++;
-    }
-    for (int i = 1; i < 10; i++) {
+    for(int i=0; i<size; i++){
         count[i]+=count[i-1];
     }
     Train temp[end-start+1];
     for (int i = end; i >= start; i--) {
-        temp[--count[(array[i].num/position)%10]]=array[i];
+        (position==0)?(temp[--count[getIndexOfType(array[i].type)]]=array[i]):(temp[--count[(array[i].num/position)%10]]=array[i]);
     }
     for(int i=start; i<=end; i++){
         array[i]= temp[i];
@@ -218,7 +199,7 @@ void countSort(std::vector<Train>& array, int start, int end, int position){
 }
 void radixSort(std::vector<Train>& array, int start, int end){
         for (int i = 1; i <= 1000; i*=10) {
-            countSort(array, start, end, i);
+            countingSort(array, start, end, i, 10);
         }
 
 }
