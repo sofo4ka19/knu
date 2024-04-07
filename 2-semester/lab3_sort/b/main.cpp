@@ -19,6 +19,10 @@ struct Train{
     Date leave;
     double popularity;
 };
+struct Period{
+    int start;
+    int end;
+};
 std::vector<std::string> train_types = {"international", "speed", "ordinary", "commuter"};
 void print(const std::vector<Train>& aray){
     std::cout << std::setw(4) << "ID" << "|";
@@ -40,8 +44,14 @@ void print(const std::vector<Train>& aray){
 }
 void addElement(std::vector<Train>& aray, int id){
     Train add = {id};
-    std::cout << "add information: code, name, type, time and date of arrive and popularity" << std::endl;
-    std::cin >> add.num >> add.name >> add.type >> add.arrive.hour >> add.arrive.minute >> add.arrive.day >> add.arrive.month >> add.arrive.year >> add.leave.hour >> add.leave.minute >> add.leave.day >> add.leave.month >> add.leave.year >> add.popularity;
+    std::cout << "add information: code, name, time and date (hour, minute, day, month, year) of arrive and left and popularity" << std::endl;
+    std::cin >> add.num >> add.name >> add.arrive.hour >> add.arrive.minute >> add.arrive.day >> add.arrive.month >> add.arrive.year >> add.leave.hour >> add.leave.minute >> add.leave.day >> add.leave.month >> add.leave.year >> add.popularity;
+    if (std::cin.fail()) return;
+    std::cout << "choose type of the train: 0 - international, 1 - speed, 2 - ordinary, 3 - commuter" << std::endl;
+    int i;
+    std::cin >> i;
+    if (std::cin.fail()) return;
+    add.type=train_types[i];
     aray.push_back(add);
 }
 void randomFillArray(std::vector<Train>& array, int size){
@@ -71,10 +81,10 @@ bool compare(Date el1, Date el2){
 }
 bool compare(double el1, double el2){
     if(el2>el1){
-        return true;
+        return false;
     }
     else{
-        return false;
+        return true;
     }
 }
 void merge(std::vector<Train>& array, int low, int mid, int high, int field) {
@@ -160,8 +170,66 @@ void mergeSort(std::vector<Train>& array, int low, int high, int field) {
     mergeSort(array, mid + 1, high, field);
     merge(array, low, mid, high, field);
 }
-void countingSort(){
-    //this method can sort only int type
+int getIndexOfType(std::string type){
+    for (int i = 0; i < train_types.size(); ++i) {
+        if(type==train_types[i]){
+            return i;
+        }
+    }
+};
+void countingSort(std::vector<Train>& array, int start, int end){
+    //counting sort can sort only integer, but we have a number of types, so let's sort it as in order in array
+    //because of that we can't merge it with next count sort for merge sort
+    int count[train_types.size()];
+    Train temp[end-start+1];
+    for (int i = start; i <= end; ++i) {
+        count[getIndexOfType(array[i].type)]++;
+    }
+    for (int i = 1; i < train_types.size(); ++i) {
+        count[i]+=count[i-1];
+    }
+    for (int i = end; i >= start; --i) {
+        temp[--count[getIndexOfType(array[i].type)]]=array[i];
+    }
+    for(int i=start; i<=end; i++){
+        array[i]= temp[i];
+    }
+}
+void countSort(std::vector<Train>& array, int start, int end, int position){
+    int count[10];
+    for(int i=start; i<=end; i++){
+        count[(array[i].num/position)%10]++;
+    }
+    for (int i = 1; i < 10; ++i) {
+        count[i]+=count[i-1];
+    }
+    Train temp[end-start+1];
+    for (int i = end; i <= start; --i) {
+        temp[--count[(array[i].num/position)%10]]=array[i];
+    }
+    for(int i=start; i<=end; i++){
+        array[i]= temp[i];
+    }
+}
+void radixSort(std::vector<Train>& array, int start, int end){
+        for (int i = 1; i <= 1000; i*=10) {
+            countSort(array, start, end, i);
+        }
+
+}
+void sort(std::vector<int> fields, std::vector<Train>& array, const int& size){
+    std::vector<Period> intervals = {{0, size-1}};
+    switch (fields[0]) {
+        case 1:
+            radixSort(array, 0, size-1);
+            break;
+        case 3:
+            countingSort(array, 0, size-1);
+            break;
+        default:
+            mergeSort(array, 0, size-1,fields[0]);
+            break;
+    }
 }
 void interactive(){
     int choose, size;
@@ -185,6 +253,32 @@ void interactive(){
         default:
             return;
     }
+    std::cout << "original database" << std::endl;
+    print(array);
+    std::cout << "How many fields you want use to sort (7 can be the most)?" << std::endl;
+    std::cin >> choose;
+    if(std::cin.fail() || choose>7 || choose<1){
+        return ;
+    }
+    std::vector<int> fields;
+    std::cout << "enter numbers from the list according to the field in order of sorting\n"
+                 "0. ID\n"
+                 "1. Number of the train\n"
+                 "2. Name of the train\n"
+                 "3. Type of the train\n"
+                 "4. Time and date of arrival\n"
+                 "5. Time and date of leaving\n"
+                 "6. Popularity\n";
+    for (int i = 0; i < choose; ++i) {
+        int cur;
+        std::cin >> cur;
+        if (std::cin.fail() || cur>6 || cur<0){
+            std::cout << "error";
+            return;
+        }
+        fields.push_back(cur);
+    }
+    sort(fields, array, size);
     print(array);
 }
 int main() {
