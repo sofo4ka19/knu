@@ -2,6 +2,8 @@
 #include <vector>
 #include <iomanip>
 #include <cstring>
+#include <chrono>
+#include <random>
 
 struct Date{
     int day;
@@ -283,7 +285,6 @@ void sort(const std::vector<int>& fields, std::vector<Train>& array, const int& 
                     break;
             }
         }
-        std::cout<<std::endl;
         intervals.erase(intervals.begin(), intervals.begin()+intervals_size);
 
     }
@@ -340,7 +341,67 @@ void interactive(){
     std::cout << "the result" << std::endl;
     print(array);
 }
+void demo(){
+    std::cout << "let's create an array with 100 elements" << std::endl;
+    std::vector<Train> array;
+    randomFillArray(array, 100);
+    print(array);
+    std::cout << "let's sort it in this order: type of the train (counting sort), popularity (comparison sort), number of the train (radix sort)" << std::endl;
+    sort({3, 6, 1}, array, 100);
+    print(array);
+}
+void benchmark(){
+    std::vector<Train> array;
+    std::random_device rd;
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    int N = 100;
+    do {
+        randomFillArray(array, N);
+        size_t size = array.size();
+        std::cout << "for " << size << " elements:" << std::endl;
+        auto t0 = high_resolution_clock::now();
+        sort({3}, array, size);
+        auto t1 = high_resolution_clock::now();
+        duration<double, std::milli> ms_double0 = t1 - t0;
+        std::cout << "time for counting sort (type field) - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        sort({6}, array, size);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "time for comparison sort (popularity field) - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        sort({1}, array, size);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "time for radix sort (number field) - " << ms_double0.count() << "ms; ";
+        t0 = high_resolution_clock::now();
+        sort({3, 6, 1}, array, size);
+        t1 = high_resolution_clock::now();
+        ms_double0 = t1 - t0;
+        std::cout << "time for sort combination: type, popularity, number - " << ms_double0.count() << "ms" <<std::endl;
+        N*=2;
+    } while (N < 12700);
+}
 int main() {
-    interactive();
+    int choose;
+    std::cout << "choose the mode: 1 - interactive, 2 - demonstration, 3 - benchmark" << std::endl;
+    std::cin >> choose;
+    switch (choose) {
+        case 1:
+            interactive();
+            break;
+        case 2:
+            demo();
+            break;
+        case 3:
+            benchmark();
+            break;
+        default:
+            break;
+    }
     return 0;
 }
