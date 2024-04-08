@@ -184,9 +184,10 @@ void countingSort(std::vector<Train>& array, int start, int end, int position=0,
         count[i]=0;
     }
     for (int i = start; i <= end ; i++) {
-        (position==0)?(count[getIndexOfType(array[i].type)]++):(count[(array[i].num/position)%10]++);
+        (position == 0) ? (count[getIndexOfType(array[i].type)]++) : (count[(array[i].num / position) % 10]++);
     }
-    for(int i=0; i<size; i++){
+
+    for(int i=1; i<size; i++){
         count[i]+=count[i-1];
     }
     Train temp[end-start+1];
@@ -194,7 +195,7 @@ void countingSort(std::vector<Train>& array, int start, int end, int position=0,
         (position==0)?(temp[--count[getIndexOfType(array[i].type)]]=array[i]):(temp[--count[(array[i].num/position)%10]]=array[i]);
     }
     for(int i=start; i<=end; i++){
-        array[i]= temp[i];
+        array[i]= temp[i-start];
     }
 }
 void radixSort(std::vector<Train>& array, int start, int end){
@@ -203,19 +204,90 @@ void radixSort(std::vector<Train>& array, int start, int end){
         }
 
 }
-void sort(std::vector<int> fields, std::vector<Train>& array, const int& size){
-    std::vector<Period> intervals = {{0, size-1}};
-    switch (fields[0]) {
-        case 1:
-            radixSort(array, 0, size-1);
-            break;
-        case 3:
-            countingSort(array, 0, size-1);
-            break;
-        default:
-            mergeSort(array, 0, size-1, fields[0]);
-            break;
+bool isDateEqual(Date el1, Date el2){
+    if(el1.year==el2.year && el1.month==el2.month && el1.day==el2.day && el1.hour==el2.hour && el1.minute==el2.minute) return true;
+    return false;
+}
+void findIntervals(std::vector<Period>& intervals, int field, const std::vector<Train>& array, int start, int end){
+    int new_start=start, new_end=start;
+    for (int i = start+1; i <= end; i++) {
+        switch (field) {
+            case 0:
+                if(array[i].ID!=array[i-1].ID){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 1:
+                if(array[i].num!=array[i-1].num){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 2:
+                if(array[i].name!=array[i-1].name){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 3:
+                if(array[i].type!=array[i-1].type){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 4:
+                if(!isDateEqual(array[i].arrive,array[i-1].arrive)){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 5:
+                if(!isDateEqual(array[i].leave,array[i-1].leave)){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            case 6:
+                if(array[i].popularity!=array[i-1].popularity){
+                    if(new_end-new_start!=0) intervals.push_back({new_start, new_end});
+                    new_start=i;
+                }
+                break;
+            default:
+                return;
+        }
+        new_end=i;
     }
+    if(new_end-new_start!=0){
+        intervals.push_back({new_start, new_end});
+    }
+}
+void sort(const std::vector<int>& fields, std::vector<Train>& array, const int& size){
+    std::vector<Period> intervals = {{0, size-1}};
+    for(int field : fields){
+        size_t intervals_size = intervals.size();
+        for (int j = 0; j < intervals_size; ++j) {
+            switch (field) {
+                case 1:
+                    radixSort(array, intervals[j].start, intervals[j].end);
+                    findIntervals(intervals, field, array, intervals[j].start, intervals[j].end);
+                    break;
+                case 3:
+                    countingSort(array, intervals[j].start, intervals[j].end);
+                    findIntervals(intervals, field, array, intervals[j].start, intervals[j].end);
+                    break;
+                default:
+                    mergeSort(array, intervals[j].start, intervals[j].end, field);
+                    findIntervals(intervals, field, array, intervals[j].start, intervals[j].end);
+                    break;
+            }
+        }
+        std::cout<<std::endl;
+        intervals.erase(intervals.begin(), intervals.begin()+intervals_size);
+
+    }
+
 }
 void interactive(){
     int choose, size;
@@ -265,6 +337,7 @@ void interactive(){
         fields.push_back(cur);
     }
     sort(fields, array, size);
+    std::cout << "the result" << std::endl;
     print(array);
 }
 int main() {
