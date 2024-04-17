@@ -192,11 +192,12 @@ void printStraightOrder(BinaryTree* root){
 enum NodeType {
     Constant,
     Variable,
-    Operation
+    Operation,
+    Unknown
 };
 
 NodeType get_type_from_string(std::string value) {
-    if(value[0]=='-' || (value[0]<='9' && value[0]>='0')){
+    if((value[0]=='-'  && value.size() > 1 && isdigit(value[1])) || (isdigit(value[0]))){
         for(int i=1; i<value.size(); i++){
             assert((value[i]<='9' && value[i]>='0') || value[i]=='.');
         }
@@ -206,7 +207,7 @@ NodeType get_type_from_string(std::string value) {
         return Operation;
     }
     if(isalpha(value[0])) return Variable;
-    assert(false);
+    return Unknown;
 }
 
 struct ExpressionTree {
@@ -249,28 +250,48 @@ double calculate(std::string operation, double num1, double num2){
         }
     }
 }
-std::string createExpression(ExpressionTree* root){
-    assert(root!= nullptr);
+int getPriority(const std::string& op) {
+    if (op == "^") {
+        return 3;
+    } else if (op == "*" || op == "/") {
+        return 2;
+    } else if (op == "+" || op == "-") {
+        return 1;
+    } else {
+        return 0;  // для змінних та констант
+    }
+}
+
+std::string createExpression(ExpressionTree* root) {
+    assert(root != nullptr);
+
     if (root->type == Operation) {
         std::string left = createExpression(root->left);
         std::string right = createExpression(root->right);
-        if(get_type_from_string(left)==Constant && get_type_from_string(right)==Constant){
+
+        if(get_type_from_string(left) == Constant && get_type_from_string(right)==Constant){
             return std::to_string(calculate(root->value, std::stod(left), std::stod(right)));
         }
-        std::string result = left + root->value + right ;
-        if(root->value=="^") return "(" + result + ")";
+        // Додаємо дужки для підвиразів, якщо вони мають нижчий пріоритет
+        if (root->left->type == Operation && getPriority(root->value) > getPriority(root->left->value)) {
+            left = "(" + left + ")";
+        }
+        if (root->right->type == Operation && getPriority(root->value) > getPriority(root->right->value)) {
+            right = "(" + right + ")";
+        }
+        std::string result = left + root->value + right;
         return result;
-    }
-    else {
+    } else {
         return root->value;
     }
 }
+
 double calculateValue(ExpressionTree* root, std::map<std::string, int> variable_values){
     assert(root!= nullptr);
     if (root->type == Operation) {
         double left_value = calculateValue(root->left, variable_values);
         double right_value = calculateValue(root->right, variable_values);
-        calculate(root->value, left_value, right_value);
+        return calculate(root->value, left_value, right_value);
     }
     if (root->type == Constant) {
         return std::stod(root->value); // converts string to double
@@ -279,17 +300,25 @@ double calculateValue(ExpressionTree* root, std::map<std::string, int> variable_
         return variable_values[root->value];
     }
 }
-void createExpressionTree(ExpressionTree* root){
+void findVariables(ExpressionTree* root, std::vector<std::string>& result){
+    if(root->left!= nullptr)findVariables(root->left, result);
+    if(root->right!= nullptr)findVariables(root->right, result);
+    if(root->type==Variable){
+        bool repeated = false;
+        for(std::string element:result){
+            if(element==root->value) {
+                repeated=true;
+                break;
+            }
+        }
+        if(!repeated) result.push_back(root->value);
+    }
+}
+void createExpressionTree(ExpressionTree*& root){
     std::string value;
-    if (root== nullptr) {
-        std::cout << "Enter the operation for the root" << std::endl;
-        std::cin >> value;
-        assert(get_type_from_string(value) == Operation);
-    }
-    else{
-        std::cout << "Enter the element for node" << std::endl;
-        std::cin >> value;
-    }
+    std::cout << "Enter the element for node" << std::endl;
+    std::cin >> value;
+    assert(get_type_from_string(value)!=Unknown);
     root = new ExpressionTree(value);
     if(get_type_from_string(value) == Operation){
         createExpressionTree(root->left);
@@ -472,6 +501,34 @@ void interactive(){
         }
     }
      else if(choose==3) {
+        ExpressionTree* root;
+        createExpressionTree(root);
+        while(true){
+            std::cout << "choose what to do:\n"
+                         "1. Print expression in plain mathematical mode\n"
+                         "2. Count with entered variables" << std::endl;
+            std::cin >> choose;
+            if (std::cin.fail()) return;
+            if(choose==1){
+                std::cout << createExpression(root) << std::endl;
+            }
+            else if(choose==2){
+                std::vector<std::string> variables;
+                findVariables(root, variables);
+                std::map<std::string, int> variable_values;
+                for (std::string variable: variables) {
+                    std::cout << "enter the value of " << variable << std::endl;
+                    std::cin >> value;
+                    if (std::cin.fail()) return;
+                    variable_values[variable] = value;
+                }
+                std::cout << "the result is " << calculateValue(root, variable_values) << std::endl;
+            }
+            else{
+                print(root);
+                return;
+            }
+        }
     }
      else{
             return;
