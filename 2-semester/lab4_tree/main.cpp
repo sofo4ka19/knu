@@ -237,7 +237,7 @@ double calculate(std::string operation, double num1, double num2){
         }
         double result=1;
         if (num2<0){
-            for (int i = 0; i < num2; ++i) {
+            for (int i = 0; i < -num2; ++i) {
                 result/=num1;
             }
             return (result);
@@ -535,7 +535,96 @@ void interactive(){
     }
 
 }
+void demo(){
+    std::cout << "let's start working with n-ary tree with root=5" << std::endl;
+    TreeNode* root1 = new TreeNode(5);
+    std::cout << "add elements to have the tree like 5(15, 17(75,13(1)), 25)" << std::endl;
+    addTheElement(root1,15,{});
+    addTheElement(root1,17,{});
+    addTheElement(root1,25,{});
+    addTheElement(root1,75,{1});
+    addTheElement(root1,13,{1});
+    addTheElement(root1,1,{1,1});
+    std::cout << "print it with ()" << std::endl;
+    print(root1);
+    std::cout << std::endl;
+    std::cout << "let's find the way to the element with value 13" << std::endl;
+    printWay(findTheWay(13, root1));
+    std::cout << std::endl;
+    std::cout << "let's find the element by the way {1, 1}" << std::endl;
+    std::cout << findTheElement({1,1}, root1)->value << std::endl;
+    std::cout << "let's print tree with way for each element" << std::endl;
+    printWithWay(root1);
+    std::cout << std::endl;
+    std::cout << "let's print deleted by the way of {1,1} subtree" << std::endl;
+    TreeNode* deleted = deleteByWay({1,1}, root1);
+    print(deleted);
+    std::cout << std::endl;
+    std::cout << "let's print deleted subtree with the root 17" << std::endl;
+    deleted= deleteAndPrintByElement(17,root1);
+    print(deleted);
+    std::cout << std::endl;
+    std::cout << "let's print delete subtree with the root 25 and free memory" << std::endl;
+    deleteByElement(25, root1);
+    print(root1);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "now let's working with binary tree with root=7" << std::endl;
+    BinaryTree* root2 = new BinaryTree(7);
+    std::cout << "now add 10 random numbers from 0 to 25" << std::endl;
+    for (int i = 0; i < 10; ++i) {
+        addToBinary(rand()%26, root2);
+    }
+    std::cout << "let's print it with ()" << std::endl;
+    print(root2);
+    std::cout << std::endl;
+    std::cout << "let's print with ways" << std::endl;
+    printWithWay(root2);
+    std::cout << std::endl;
+    std::cout << "let's print in straight order" << std::endl;
+    printStraightOrder(root2);
+    std::cout << std::endl;
+    std::cout << std::endl;
+    std::cout << "now let's working with expression tree which means an expression ((x+2)/y)^(2*z)" << std::endl;
+    ExpressionTree* root3 = new ExpressionTree("^");
+    root3->left = new ExpressionTree("/");
+    root3->left->left = new ExpressionTree("+");
+    root3->left->left->left = new ExpressionTree("x");
+    root3->left->left->right = new ExpressionTree("2");
+    root3->left->right = new ExpressionTree("y");
+    root3->right = new ExpressionTree("*");
+    root3->right->left = new ExpressionTree("2");
+    root3->right->right = new ExpressionTree("z");
+    std::cout << "now print it as a tree" << std::endl;
+    print(root3);
+    std::cout << std::endl;
+    std::cout << "print as mathematical expression:" << std::endl;
+    std::cout << createExpression(root3) << std::endl;
+    std::cout << "let's count it with this variables: x=10, y=4, z=2" << std::endl;
+    std::map<std::string, int> variables;
+    variables["x"]=10;
+    variables["y"]=4;
+    variables["z"]=2;
+    std::cout << calculateValue(root3, variables)<<std::endl;
+    std::cout << "let's count it with this variables: x=-6, y=2, z=-3" << std::endl;
+    variables["x"]=-6;
+    variables["y"]=2;
+    variables["z"]=-3;
+    std::cout << calculateValue(root3, variables);
+}
 int main() {
-    interactive();
+    int choose;
+    std::cout << "choose the mode: 1 - interactive; 2 - demonstration" << std::endl;
+    std::cin >> choose;
+    switch (choose) {
+        case 1:
+            interactive();
+            break;
+        case 2:
+            demo();
+            break;
+        default:
+            break;
+    }
     return 0;
 }
