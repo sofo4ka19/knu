@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 Game</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="settings">
+        <h2>Game Settings</h2>
+        <label for="width">Width:</label>
+        <input type="number" id="width" min="4" max="10" value="4">
+        <label for="height">Height:</label>
+        <input type="number" id="height" min="4" max="10" value="4">
+        <label for="initial-value">Initial Value:</label>
+        <input type="number" id="initial-value" min="2" max="10" value="2">
+        <label for="operation">Operation:</label>
+        <select id="operation">
+            <option value="addition">Addition</option>
+            <option value="multiplication">Multiplication</option>
+        </select>
+        <button id="start-game">Start Game</button>
+    </div>
+    <div class="game-container">
+        <h2>2048 Game</h2>
+        <div class="game-board" id="game-board"></div>
+        <p>Score: <span id="current-score">0</span></p>
+        <p>High Score: <span id="high-score">0</span></p>
+        <p id="details">details...</p>
+    </div>
+    <div class="overlay" id="overlay">
+        <div class="popup" id="popup"> 
+            <h2>Details about game with high score</h2>  
+            <p>Size of the field: <span id="size"></span></p>
+            <p>Initial value: <span id="value"></span></p>
+            <p>Operation: <span id="best-operation"></span></p>
+            <p>Start of the game: <span id="start"></span></p>
+            <p>End of the game: <span id="end"></span></p>
+            <p>Duration: <span id="duration"></span></p>
+        </div>
+    </div>
+    
+    <script src="js/script.js"></script>
+</body>
+</html>
