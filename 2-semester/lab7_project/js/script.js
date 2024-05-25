@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const operationSelect = document.getElementById('operation');
     const currentScoreDisplay = document.getElementById('current-score');
     const highScoreDisplay = document.getElementById('high-score');
+    const details = document.getElementById('popup');
 
     let board = [];
     let boardWidth = 4;
@@ -15,7 +16,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let operation = 'addition';
     let score = 0;
     let highScore = parseInt(localStorage.getItem('highScore')) || 0;
-    //let startTime=0;
+    let highScoreBoardWidth = parseInt(localStorage.getItem('highScoreBoardWidth')) || 0;
+    let highScoreBoardHeight = parseInt(localStorage.getItem('highScoreBoardHeight')) || 0;
+    let highScoreValue = parseInt(localStorage.getItem('highScoreValue')) || 0;
+    let highScoreOperation = (localStorage.getItem('highScoreOperation')) || 0;
+    let highScoreStartTime = parseInt(localStorage.getItem('highScoreStartTime')) || 0;
+    let highScoreEndTime = parseInt(localStorage.getItem('highScoreEndTime')) || 0;
+    let highScoreDuration = parseInt(localStorage.getItem('highScoreDuration')) || 0;
+    let startTime;
 
     highScoreDisplay.textContent = highScore;
 
@@ -33,7 +41,7 @@ document.addEventListener('DOMContentLoaded', () => {
         generateTile();
         drawBoard();
         document.addEventListener('keydown', handleInput);
-        let startTime=Date.now();
+        startTime=Date.now();
     }
 
     function resetBoard() {
@@ -157,10 +165,31 @@ document.addEventListener('DOMContentLoaded', () => {
         if (score > highScore) {
             highScore = score;
             localStorage.setItem('highScore', highScore);
+            localStorage.setItem('highScoreBoardWidth', boardWidth);
+            localStorage.setItem('highScoreBoardHeight', boardHeight);
+            localStorage.setItem('highScoreValue', initialValue);
+            localStorage.setItem('highScoreOperation', operation);
+            localStorage.setItem('highScoreStartTime', startTime);
+            localStorage.setItem('highScoreEndTime', Date.now());
+            localStorage.setItem('highScoreDuration', (Date.now()-startTime)/1000);
             highScoreDisplay.textContent = highScore;
         }
     }
-    const moreButton = document.getElementById('more-button');
+    function getTimeTaken(){
+        let hours = Math.floor(highScoreDuration/3600);
+        let minutes = Math.floor(highScoreDuration/60) - hours*60;
+        let seconds = highScoreDuration - hours*3600 - minutes*60;
+        if(hours!=0){
+            return `${hours} hours ${minutes} minutes ${seconds} seconds`;
+        }
+        else if(minutes!=0){
+            return `${minutes} minutes ${seconds} seconds`;
+        }
+        else{
+            return `${seconds} seconds`;
+        }
+    }
+    const moreButton = document.getElementById('more-info');
     moreButton.addEventListener('click', showSettings);
 
     function showSettings() {
@@ -168,16 +197,20 @@ document.addEventListener('DOMContentLoaded', () => {
         settingsPopup.classList.add('settings-popup');
         settingsPopup.innerHTML = `
             <h2>Settings Used for High Score</h2>
-            <p>Board Size: ${boardWidth}x${boardHeight}</p>
-            <p>Initial Value: ${initialValue}</p>
-            <p>Operation: ${operation}</p>
-            <p>Time Taken: ${getTimeTaken()} seconds</p>
+            <p>Board Size: ${highScoreBoardWidth}x${highScoreBoardHeight}</p>
+            <p>Initial Value: ${highScoreValue}</p>
+            <p>Operation: ${highScoreOperation}</p>
+            <p>Start time: ${new Date(highScoreStartTime).getDate()}.${new Date(highScoreStartTime).getMonth()+1}.${new Date(highScoreStartTime).getFullYear()} ${new Date(highScoreStartTime).getHours()}:${new Date(highScoreStartTime).getMinutes()}:${new Date(highScoreStartTime).getSeconds()}</p>
+            <p>End time: ${new Date(highScoreEndTime).getDate()}.${new Date(highScoreEndTime).getMonth()+1}.${new Date(highScoreEndTime).getFullYear()} ${new Date(highScoreEndTime).getHours()}:${new Date(highScoreEndTime).getMinutes()}:${new Date(highScoreEndTime).getSeconds()}</p>
+            <p>Time Taken: ${getTimeTaken()}</p>
             <button id="close-popup">Close</button>
         `;
-        document.body.appendChild(settingsPopup);
+        details.appendChild(settingsPopup);
+        document.getElementById('overlay').style.display="flex";
 
         const closeButton = settingsPopup.querySelector('#close-popup');
         closeButton.addEventListener('click', () => {
+            document.getElementById('overlay').style.display="none";
             settingsPopup.remove();
         });
     }
@@ -190,11 +223,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (y < boardHeight - 1 && board[y][x] === board[y + 1][x]) return false;
             }
         }
-        let endTime = Date.now();
         return true;
-    }
-
-    function getTimeTaken() {
-        return endTime-startTime;
     }
 });

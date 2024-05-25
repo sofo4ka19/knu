@@ -26,21 +26,11 @@
         <h2>2048 Game</h2>
         <div class="game-board" id="game-board"></div>
         <p>Score: <span id="current-score">0</span></p>
-        <p>High Score: <span id="high-score">0</span></p>
-        <p id="details">details...</p>
+        <p>High Score: <span id="high-score">0</span> <button id="more-info">More</button></p>
     </div>
     <div class="overlay" id="overlay">
-        <div class="popup" id="popup"> 
-            <h2>Details about game with high score</h2>  
-            <p>Size of the field: <span id="size"></span></p>
-            <p>Initial value: <span id="value"></span></p>
-            <p>Operation: <span id="best-operation"></span></p>
-            <p>Start of the game: <span id="start"></span></p>
-            <p>End of the game: <span id="end"></span></p>
-            <p>Duration: <span id="duration"></span></p>
-        </div>
+        <div id="popup"></div>
     </div>
-    
     <script src="js/script.js"></script>
 </body>
 </html>
