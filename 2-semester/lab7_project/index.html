@@ -5,32 +5,46 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>2048 Game</title>
     <link rel="stylesheet" href="css/style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Edu+TAS+Beginner:wght@400..700&family=Poetsen+One&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="settings">
         <h2>Game Settings</h2>
-        <label for="width">Width:</label>
-        <input type="number" id="width" min="4" max="10" value="4">
-        <label for="height">Height:</label>
-        <input type="number" id="height" min="4" max="10" value="4">
-        <label for="initial-value">Initial Value:</label>
-        <input type="number" id="initial-value" min="2" max="10" value="2">
-        <label for="operation">Operation:</label>
-        <select id="operation">
-            <option value="addition">Addition</option>
-            <option value="multiplication">Multiplication</option>
-        </select>
+        <div class="settings__parameters">
+            <div class="settings__item">
+                <label for="width">Width:</label>
+                <input type="number" id="width" min="4" max="10" value="4">
+            </div>
+            <div class="settings__item">
+                <label for="height">Height:</label>
+                <input type="number" id="height" min="4" max="10" value="4">
+            </div>
+            <div class="settings__item">
+                <label for="initial-value">Initial Value:</label>
+                <input type="number" id="initial-value" min="2" max="10" value="2">
+            </div>
+            <div class="settings__item">
+                <label for="operation">Operation:</label>
+                <select id="operation">
+                    <option value="addition">Addition</option>
+                    <option value="multiplication">Multiplication</option>
+                </select>
+            </div>
+        </div>
+        
+        
         <button id="start-game">Start Game</button>
     </div>
     <div class="game-container">
         <h2>2048 Game</h2>
         <div class="game-board" id="game-board"></div>
         <p>Score: <span id="current-score">0</span></p>
-        <p>High Score: <span id="high-score">0</span> <button id="more-info">More</button></p>
+        <p>High Score: <span id="high-score">0</span> </p>
+        <button id="more-info">More about high score</button>
     </div>
-    <div class="overlay" id="overlay">
-        <div id="popup"></div>
-    </div>
+    <div class="overlay" id="overlay"></div>
     <script src="js/script.js"></script>
 </body>
 </html>

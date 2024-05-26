@@ -1,19 +1,48 @@
 body {
-  font-family: Arial, sans-serif;
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   min-height: 100vh;
-  background-color: #faf8ef;
+  background-color: #faeff1;
+  font-family: "Edu TAS Beginner", cursive;
+  font-size: 22px;
 }
 
-.settings, .game-container {
+h2 {
+  font-family: "Poetsen One", sans-serif;
+  font-size: 32px;
+}
+
+.settings, .game-container, .settings-popup {
   margin: 20px;
-  padding: 20px;
+  padding: 15px 50px;
   border: 1px solid #ccc;
   border-radius: 10px;
   background-color: #fff;
+}
+
+.settings {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.settings h2 {
+  width: 100%;
+}
+
+.settings__parameters {
+  width: 80%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+}
+
+.settings__item {
+  width: 45%;
+  margin: 10px 0;
 }
 
 .game-board {
@@ -33,19 +62,11 @@ body {
   border-radius: 5px;
 }
 
-/*.tile[data-value="2"] { background-color: #eee4da; }
-.tile[data-value="4"] { background-color: #ede0c8; }
-.tile[data-value="8"] { background-color: #f2b179; color: #f9f6f2; }
-.tile[data-value="16"] { background-color: #f59563; color: #f9f6f2; }*/
-/* Add more tile styles as needed */
 .settings-popup {
   position: fixed;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background-color: white;
-  padding: 20px;
-  border: 2px solid #ccc;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
 }
@@ -55,17 +76,40 @@ body {
   justify-content: center;
   align-items: center;
   position: fixed;
+  top: 0;
+  left: 0;
   width: 100%;
-  height: 100%;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.1);
 }
 
-.popup {
-  transform: translate(-50%, -50%);
-  width: 300px;
-  padding: 20px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
-  text-align: center;
+input, select, button {
+  font-family: "Edu TAS Beginner", cursive;
+  font-size: 22px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 5px 10px;
+}
+
+button:hover, select:hover {
+  cursor: pointer;
+}
+
+#start-game {
+  background: rgb(54, 196, 139);
+  height: 50px;
+}
+
+#start-game:hover {
+  background: rgb(35, 146, 102);
+}
+
+input:focus {
+  border: 2px solid rgb(54, 196, 139);
+  outline: none;
+}
+
+option {
+  font-size: 18px;
 }/*# sourceMappingURL=style.css.map */

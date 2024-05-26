@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const operationSelect = document.getElementById('operation');
     const currentScoreDisplay = document.getElementById('current-score');
     const highScoreDisplay = document.getElementById('high-score');
-    const details = document.getElementById('popup');
+    const details = document.getElementById('overlay');
 
     let board = [];
     let boardWidth = 4;
@@ -224,11 +224,13 @@ document.addEventListener('DOMContentLoaded', () => {
             <button id="close-popup">Close</button>
         `;
         details.appendChild(settingsPopup);
-        document.getElementById('overlay').style.display="flex";
+        details.style.display="flex";
+        document.body.style.overflow="hidden";
 
         const closeButton = settingsPopup.querySelector('#close-popup');
         closeButton.addEventListener('click', () => {
-            document.getElementById('overlay').style.display="none";
+            details.style.display="none";
+            document.body.style.overflow="";
             settingsPopup.remove();
         });
     }
