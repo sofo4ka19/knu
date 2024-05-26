@@ -16,13 +16,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let operation = 'addition';
     let score = 0;
     let highScore = parseInt(localStorage.getItem('highScore')) || 0;
-    let highScoreBoardWidth = parseInt(localStorage.getItem('highScoreBoardWidth')) || 0;
-    let highScoreBoardHeight = parseInt(localStorage.getItem('highScoreBoardHeight')) || 0;
-    let highScoreValue = parseInt(localStorage.getItem('highScoreValue')) || 0;
-    let highScoreOperation = (localStorage.getItem('highScoreOperation')) || 0;
-    let highScoreStartTime = parseInt(localStorage.getItem('highScoreStartTime')) || 0;
-    let highScoreEndTime = parseInt(localStorage.getItem('highScoreEndTime')) || 0;
-    let highScoreDuration = parseInt(localStorage.getItem('highScoreDuration')) || 0;
     let startTime;
 
     highScoreDisplay.textContent = highScore;
@@ -176,6 +169,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     function getTimeTaken(){
+        let highScoreDuration = parseInt(localStorage.getItem('highScoreDuration'))
         let hours = Math.floor(highScoreDuration/3600);
         let minutes = Math.floor(highScoreDuration/60) - hours*60;
         let seconds = highScoreDuration - hours*3600 - minutes*60;
@@ -193,13 +187,15 @@ document.addEventListener('DOMContentLoaded', () => {
     moreButton.addEventListener('click', showSettings);
 
     function showSettings() {
+        let highScoreStartTime = parseInt(localStorage.getItem('highScoreStartTime'));
+        let highScoreEndTime = parseInt(localStorage.getItem('highScoreEndTime'));
         const settingsPopup = document.createElement('div');
         settingsPopup.classList.add('settings-popup');
         settingsPopup.innerHTML = `
             <h2>Settings Used for High Score</h2>
-            <p>Board Size: ${highScoreBoardWidth}x${highScoreBoardHeight}</p>
-            <p>Initial Value: ${highScoreValue}</p>
-            <p>Operation: ${highScoreOperation}</p>
+            <p>Board Size: ${localStorage.getItem('highScoreBoardWidth')}x${localStorage.getItem('highScoreBoardHeight')}</p>
+            <p>Initial Value: ${localStorage.getItem('highScoreValue')}</p>
+            <p>Operation: ${localStorage.getItem('highScoreOperation')}</p>
             <p>Start time: ${new Date(highScoreStartTime).getDate()}.${new Date(highScoreStartTime).getMonth()+1}.${new Date(highScoreStartTime).getFullYear()} ${new Date(highScoreStartTime).getHours()}:${new Date(highScoreStartTime).getMinutes()}:${new Date(highScoreStartTime).getSeconds()}</p>
             <p>End time: ${new Date(highScoreEndTime).getDate()}.${new Date(highScoreEndTime).getMonth()+1}.${new Date(highScoreEndTime).getFullYear()} ${new Date(highScoreEndTime).getHours()}:${new Date(highScoreEndTime).getMinutes()}:${new Date(highScoreEndTime).getSeconds()}</p>
             <p>Time Taken: ${getTimeTaken()}</p>
