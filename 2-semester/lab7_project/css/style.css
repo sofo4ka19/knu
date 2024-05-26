@@ -33,24 +33,10 @@ body {
   border-radius: 5px;
 }
 
-.tile[data-value="2"] {
-  background-color: #eee4da;
-}
-
-.tile[data-value="4"] {
-  background-color: #ede0c8;
-}
-
-.tile[data-value="8"] {
-  background-color: #f2b179;
-  color: #f9f6f2;
-}
-
-.tile[data-value="16"] {
-  background-color: #f59563;
-  color: #f9f6f2;
-}
-
+/*.tile[data-value="2"] { background-color: #eee4da; }
+.tile[data-value="4"] { background-color: #ede0c8; }
+.tile[data-value="8"] { background-color: #f2b179; color: #f9f6f2; }
+.tile[data-value="16"] { background-color: #f59563; color: #f9f6f2; }*/
 /* Add more tile styles as needed */
 .settings-popup {
   position: fixed;

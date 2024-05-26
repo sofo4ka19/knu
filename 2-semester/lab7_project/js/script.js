@@ -55,6 +55,28 @@ document.addEventListener('DOMContentLoaded', () => {
             board[y][x] = initialValue;
         }
     }
+    function generateTileColor(tile, value) {
+         let color = {
+            red: 255,
+            green: 225,
+            blue: 225
+         };
+        let i = initialValue;
+        while(i<=value){
+            if(color.green>5 & color.blue>5){
+                color.green-=10;
+                color.blue-=10;
+            }
+            else{
+                color.red = Math.floor(Math.random*250+5);
+                color.blue = Math.floor(Math.random*250+5);
+                color.green = Math.floor(Math.random*250+5);
+            }
+            (operation=="addition")?(i*=2):(i*=i);
+        }
+        return `rgb(${color.red}, ${color.green}, ${color.blue})`;
+
+    }
 
     function drawBoard() {
         gameBoard.innerHTML = '';
@@ -65,7 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 tile.classList.add('tile');
                 if (value > 0) {
                     tile.textContent = value;
-                    tile.dataset.value = value;
+                    tile.style.backgroundColor=generateTileColor(tile, value);
                 }
                 gameBoard.appendChild(tile);
             });
