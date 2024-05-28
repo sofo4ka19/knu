@@ -1,8 +1,11 @@
 // Block 0: 1, 2
+// Block 1: 5
 
 #include <iostream>
 #include <vector>
 #include <random>
+#include <stack>
+#include <queue>
 
 struct MatrixGraph{
     int vertices;
@@ -56,6 +59,26 @@ struct MatrixGraph{
                 this->addEdge(v1(gen), v2(gen), weightDist(gen));
             }
         }
+    }
+    bool isConnected(){
+        std::vector<bool> visited(vertices, false);
+        std::stack<int> stack;
+        stack.push(0);
+        visited[0] = true;
+        int visitedCount = 1;
+
+        while (!stack.empty()) {
+            int vertex = stack.top();
+            stack.pop();
+            for (int i = 0; i < vertices; i++) {
+                if (graph[vertex][i] && !visited[i]) {
+                    stack.push(i);
+                    visited[i] = true;
+                    visitedCount++;
+                }
+            }
+        }
+        return visitedCount == vertices;
     }
 };
 
@@ -141,6 +164,27 @@ struct Graph {
             }
         }
     }
+    bool isConnected(){
+        std::vector<bool> visited(vertices.size(), false);
+        std::queue<int> queue;
+        int visitedCount = 1;
+        queue.push(0);
+        visited[0] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+
+            for (const Edge& edge : vertices[vertex].edges) {
+                if (!visited[edge.destination]) {
+                    queue.push(edge.destination);
+                    visited[edge.destination] = true;
+                    visitedCount++;
+                }
+            }
+        }
+        return visitedCount == vertices.size();
+    }
 };
 
 MatrixGraph fromStructureToMatrix(Graph& graph){
@@ -172,10 +216,11 @@ void interactiveGraph(GraphType& graph) {
                      "2. Print the graph\n"
                      "3. Create random graph\n"
                      "4. Convert graph and print\n"
-                     "5. Exit\n";
+                     "5. Check if the graph is connected\n"
+                     "6. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 5) {
+        if (std::cin.fail() || action < 1 || action > 6) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -211,9 +256,19 @@ void interactiveGraph(GraphType& graph) {
                 }
                 break;
             }
-            default:
+            case 5:
+                if (graph.isConnected()){
+                    std::cout << "Graph is connected" << std::endl;
+                }
+                else{
+                    std::cout << "Graph is not connected" << std::endl;
+                }
+                break;
+            case 6:
                 running = false;
                 break;
+            default:
+                return;
         }
     }
 }
