@@ -1,6 +1,7 @@
 //Block 0: 1, 2
 //Block 1: 5
 //Block 2: 13
+//Block 3: 14
 
 #include <iostream>
 #include <vector>
@@ -9,6 +10,8 @@
 #include <queue>
 #include <cmath>
 #include <algorithm>
+#include <xmath.h>
+#include <cassert>
 
 struct MatrixGraph {
     int vertices;
@@ -141,6 +144,39 @@ struct MatrixGraph {
                 queue.push(neighbor.first);
             }
         }
+    }
+    std::vector<int> dijkstra(int start) const {
+        assert(start<vertices);
+        std::vector<int> distance(vertices, std::numeric_limits<int>::max());
+        std::vector<bool> visited(vertices, false);
+        distance[start] = 0;
+
+        for (int i = 0; i < vertices; ++i) {
+            int minDistance = std::numeric_limits<int>::max();
+            int u = -1;
+            for (int j = 0; j < vertices; ++j) {
+                if (!visited[j] && distance[j] < minDistance) {
+                    minDistance = distance[j];
+                    u = j;
+                }
+            }
+            if (u == -1) break;
+            visited[u] = true;
+
+            for (int v = 0; v < vertices; ++v) {
+                if (graph[u][v] != 0 && !visited[v]) {
+                    int newDist = distance[u] + graph[u][v];
+                    if (newDist < distance[v]) {
+                        distance[v] = newDist;
+                    }
+                }
+            }
+        }
+
+        return distance;
+    }
+    int size(){
+        return vertices;
     }
 };
 
@@ -308,6 +344,37 @@ struct ListGraph {
             }
         }
     }
+    std::vector<int> dijkstra(int start) const {
+        assert(start<vertices.size());
+        std::vector<int> distance(vertices.size(), std::numeric_limits<int>::max());
+        std::vector<bool> visited(vertices.size(), false);
+        distance[start] = 0;
+
+        for (int i = 0; i < vertices.size(); ++i) {
+            int u = -1;
+            for (int j = 0; j < vertices.size(); ++j) {
+                if (!visited[j] && (u == -1 || distance[j] < distance[u])) {
+                    u = j;
+                }
+            }
+
+            if (distance[u] == std::numeric_limits<int>::max())
+                break;
+
+            visited[u] = true;
+            for (const auto& edge : vertices[u].edges) {
+                int v = edge.destination;
+                if (!visited[v] && distance[u] + edge.weight < distance[v]) {
+                    distance[v] = distance[u] + edge.weight;
+                }
+            }
+        }
+
+        return distance;
+    }
+    int size(){
+        return vertices.size();
+    }
 };
 
 MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
@@ -343,10 +410,11 @@ void interactiveGraph(GraphType& graph) {
                      "4. Convert graph and print\n"
                      "5. Check if the graph is connected\n"
                      "6. BFS\n"
-                     "7. Exit\n";
+                     "7. Find the shortest way (Dijkstra algorithm)\n"
+                     "8. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 7) {
+        if (std::cin.fail() || action < 1 || action > 8) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -396,6 +464,64 @@ void interactiveGraph(GraphType& graph) {
                 (isWeight)?(graph.BFS_Weight(vertex)):(graph.BFS(vertex));
                 break;
             case 7:
+                int choose;
+                std::cout << "which way you want to find:\n"
+                             "1. Between 2 vertices\n"
+                             "2. From the vertex to the everyone\n"
+                             "3. From everyone to everyone"
+                             << std::endl;
+                std::cin >> choose;
+                if(std::cin.fail() || choose<1 || choose>3) return;
+                switch (choose) {
+                    case 1:
+                        int v1, v2;
+                        std::cout << "enter 2 vertices" << std::endl;
+                        std::cin >> v1 >> v2;
+                        if (std::cin.fail() || v1<0 || v2<0 || v2>=graph.size() || v1>=graph.size()){
+                            std::cout << "error";
+                            return;
+                        }
+                        if(graph.dijkstra(v1)[v2]!=std::numeric_limits<int>::max()){
+                            std::cout << graph.dijkstra(v1)[v2] << std::endl;
+                        }
+                        else{
+                            std::cout << "There is no way" << std::endl;
+                        }
+                        break;
+                    case 2:
+                        std::cout << "enter vertex" << std::endl;
+                        std::cin >> v1;
+                        if (std::cin.fail() || v1<0 || v1>=graph.size()){
+                            std::cout << "error";
+                            return;
+                        }
+                        int i;
+                        i=0;
+                        std::cout << "From vertex " << v1 << " to vertex:\n";
+                        for(int way : graph.dijkstra(v1)){
+                            if (way!=std::numeric_limits<int>::max()){
+                                 std::cout << i << " - " << way << std::endl;
+                            }
+                            i++;
+                        }
+                        break;
+                    case 3:
+                        for (int j = 0; j < graph.size(); ++j) {
+                            std::cout << "From vertex " << j << " to vertex:" << std::endl;
+                            i=0;
+                            for(int way : graph.dijkstra(j)){
+                                if (way!=std::numeric_limits<int>::max()){
+                                    std::cout << i << " - " << way << std::endl;
+                                }
+                                i++;
+                            }
+                        }
+                        break;
+                    default:
+                        return;
+                }
+                break;
+            case 8:
                 running = false;
                 break;
             default:
