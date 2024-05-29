@@ -2,6 +2,7 @@
 //Block 1: 5
 //Block 2: 13
 //Block 3: 14
+//Block 4: 17
 
 #include <iostream>
 #include <vector>
@@ -177,6 +178,58 @@ struct MatrixGraph {
     }
     int size(){
         return vertices;
+    }
+
+    /*void topologySort(std::vector<bool>& visited, std::vector<int>& sorted,int n){
+            visited[n]=true;
+            for (int i = 0; i < vertices; ++i) {
+                if (graph[n][i] != 0 && !visited[i]) topologySort(visited,sorted,i);
+            }
+            sorted.push_back(n);
+    }*/
+    void topologySortKan(){
+        std::vector<int> inDegree(vertices, 0);
+
+        for (int u = 0; u < vertices; ++u) {
+            for (int v = 0; v < vertices; ++v) {
+                if (graph[u][v] != 0) {
+                    inDegree[v]++;
+                }
+            }
+        }
+
+        std::queue<int> q;
+        for (int i = 0; i < vertices; ++i) {
+            if (inDegree[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        int count = 0;
+        std::vector<int> topOrder;
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topOrder.push_back(u);
+
+            for (int v = 0; v < vertices; ++v) {
+                if (graph[u][v] != 0 && --inDegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+            count++;
+        }
+
+        if (count != vertices) {
+            std::cout << "Cycle detected in the graph." << std::endl;
+            return;
+        }
+
+        for (int i : topOrder) {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
     }
 };
 
@@ -375,6 +428,57 @@ struct ListGraph {
     int size(){
         return vertices.size();
     }
+    void topologySortKan(){
+        std::vector<int> inDegree(vertices.size(), 0);
+
+        for (int u = 0; u < vertices.size(); ++u) {
+            for (int v = 0; v < vertices.size(); ++v) {
+                if (vertices[u].hasEdge(v)) {
+                    inDegree[v]++;
+                }
+            }
+        }
+
+        std::queue<int> q;
+        for (int i = 0; i < vertices.size(); ++i) {
+            if (inDegree[i] == 0) {
+                q.push(i);
+            }
+        }
+
+        int count = 0;
+        std::vector<int> topOrder;
+
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topOrder.push_back(u);
+
+            for (int v = 0; v < vertices.size(); ++v) {
+                if (vertices[u].hasEdge(v) && --inDegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+            count++;
+        }
+
+        if (count != vertices.size()) {
+            std::cout << "Cycle detected in the graph." << std::endl;
+            return;
+        }
+
+        for (int i : topOrder) {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+    }
+    /*void topologySort(std::vector<bool>& visited, std::vector<int>& sorted,int n){
+        visited[n]=true;
+        for (int i = 0; i < vertices.size(); ++i) {
+            if (vertices[n].hasEdge(i) && !visited[i]) topologySort(visited,sorted,i);
+        }
+        sorted.push_back(n);
+    }*/
 };
 
 MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
@@ -399,6 +503,21 @@ ListGraph fromMatrixToStructure(const MatrixGraph& matrixGraph) {
     return graph;
 }
 
+/*template <typename GraphType>
+void topologySortMain(GraphType& graph){
+    std::vector<int> sorted;
+    std::vector<bool> visited(graph.size(), false);
+    for (int i = 0; i < graph.size(); ++i) {
+        if(!visited[i]){
+            graph.topologySort(visited, sorted, i);
+        }
+    }
+    while (!sorted.empty()){
+        std::cout << sorted[sorted.size()-1] << " ";
+    }
+    std::cout << std::endl;
+}*/ //needs checking if there is a cycle before
+
 template <typename GraphType>
 void interactiveGraph(GraphType& graph) {
     bool running = true;
@@ -411,10 +530,11 @@ void interactiveGraph(GraphType& graph) {
                      "5. Check if the graph is connected\n"
                      "6. BFS\n"
                      "7. Find the shortest way (Dijkstra algorithm)\n"
-                     "8. Exit\n";
+                     "8. Topology sort\n"
+                     "9. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 8) {
+        if (std::cin.fail() || action < 1 || action > 9) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -522,6 +642,13 @@ void interactiveGraph(GraphType& graph) {
                 }
                 break;
             case 8:
+                if (!graph.oriented){
+                    std::cout << "Graph is not oriented, you can't do a topology sort" << std::endl;
+                } else{
+                    graph.topologySortKan();
+                }
+                break;
+            case 9:
                 running = false;
                 break;
             default:
