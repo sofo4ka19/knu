@@ -1,3 +1,7 @@
+//Block 0: 1, 2
+//Block 1: 5
+//Block 2: 11
+
 #include <iostream>
 #include <vector>
 #include <random>
@@ -65,17 +69,17 @@ struct MatrixGraph {
         }
     }
 
-    bool isConnected() const {
+    bool isConnectedOne(int vertice) const {
         std::vector<bool> visited(vertices, false);
         std::stack<int> stack;
-        stack.push(0);
-        visited[0] = true;
+        stack.push(vertice);
+        visited[vertice] = true;
         int visitedCount = 1;
 
         while (!stack.empty()) {
             int vertex = stack.top();
             stack.pop();
-            for (int i = 0; i < vertices; ++i) {
+            for (int i = 0; i < vertices; i++) {
                 if (graph[vertex][i] && !visited[i]) {
                     stack.push(i);
                     visited[i] = true;
@@ -84,6 +88,13 @@ struct MatrixGraph {
             }
         }
         return visitedCount == vertices;
+    }
+    bool isConnected(){
+        if (!oriented) return isConnectedOne(0);
+        for (int i = 0; i < vertices; ++i) {
+            if (!isConnectedOne(i)) return false;
+        }
+        return true;
     }
 };
 
@@ -175,11 +186,11 @@ struct ListGraph {
         }
     }
 
-    bool isConnected() const {
+    bool isConnectedOne(int vertice) const { //needs updating for oriented graph
         std::vector<bool> visited(vertices.size(), false);
         std::queue<int> queue;
-        queue.push(0);
-        visited[0] = true;
+        queue.push(vertice);
+        visited[vertice] = true;
         int visitedCount = 1;
 
         while (!queue.empty()) {
@@ -194,6 +205,13 @@ struct ListGraph {
             }
         }
         return visitedCount == vertices.size();
+    }
+    bool isConnected(){
+        if(!oriented) return isConnectedOne(0);
+        for (int i = 0; i < vertices.size(); ++i) {
+            if(!isConnectedOne(i)) return false;
+        }
+        return true;
     }
 };
 
@@ -210,7 +228,7 @@ MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
 ListGraph fromMatrixToStructure(const MatrixGraph& matrixGraph) {
     ListGraph graph(matrixGraph.vertices, matrixGraph.oriented);
     for (int i = 0; i < matrixGraph.vertices; ++i) {
-        for (int j = 0; j < matrixGraph.vertices; ++j) {
+        for (int j = (matrixGraph.oriented ? 0 : i); j < matrixGraph.vertices; ++j) {
             if (matrixGraph.graph[i][j] != 0) {
                 graph.addEdge(i, j, matrixGraph.graph[i][j]);
             }
