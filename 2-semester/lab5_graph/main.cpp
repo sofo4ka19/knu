@@ -1,66 +1,71 @@
-// Block 0: 1, 2
-// Block 1: 5
-
 #include <iostream>
 #include <vector>
 #include <random>
 #include <stack>
 #include <queue>
+#include <cmath>
+#include <algorithm>
 
-struct MatrixGraph{
+struct MatrixGraph {
     int vertices;
     bool oriented;
     std::vector<std::vector<int>> graph;
 
-    MatrixGraph(int vertices, bool oriented): vertices{vertices}, oriented(oriented) {
-        graph.resize(vertices, std::vector<int>(vertices,0));
+    MatrixGraph(int vertices, bool oriented) : vertices{vertices}, oriented(oriented) {
+        graph.resize(vertices, std::vector<int>(vertices, 0));
     }
-    void addEdge(int v1, int v2, int weight=1){
-        if(v1>=vertices || v2>=vertices || v1<0 || v2<0){
-            std::cout << "inappropriate value" << std::endl;
+
+    void addEdge(int v1, int v2, int weight = 1) {
+        if (v1 >= vertices || v2 >= vertices || v1 < 0 || v2 < 0 || v1 == v2) {
+            std::cout << "Inappropriate value" << std::endl;
             return;
         }
-        if(graph[v1][v2]!=0){
-            std::cout << "there's an edge yet" << std::endl;
+        if (graph[v1][v2] != 0) {
+            std::cout << "Edge already exists" << std::endl;
             return;
         }
-        graph[v1][v2]=weight;
-        if (!oriented) graph[v2][v1]=weight;
+        graph[v1][v2] = weight;
+        if (!oriented) graph[v2][v1] = weight;
     }
-    void print(){
-        for (int i = 0; i < vertices; ++i) {
-            for (int j = 0; j < vertices; ++j) {
-                std::cout << graph[i][j] << " ";
+
+    void print() const {
+        for (const auto& row : graph) {
+            for (int val : row) {
+                std::cout << val << " ";
             }
             std::cout << std::endl;
         }
     }
-    void clear(){
-        for (int i = 0; i < vertices; ++i) {
-            for (int j = 0; j < vertices; ++j) {
-                graph[i][j]=0;
-            }
+
+    void clear() {
+        for (auto& row : graph) {
+            std::fill(row.begin(), row.end(), 0);
         }
     }
-    void createRandom(int edges){
-        if (edges<0 || edges>2*vertices){
-            std::cout << "inappropriate value" << std::endl;
+
+    void createRandom(int edges) {
+        if (edges < 0 || edges > vertices * (vertices - 1) / 2) {
+            std::cout << "Inappropriate value" << std::endl;
             return;
         }
-        this->clear();
+        clear();
         std::random_device rd;
         std::mt19937 gen(rd());
-        for (int i = 0; i < edges; ++i) {
-            std::uniform_int_distribution<> v1(0, vertices - 1);
-            std::uniform_int_distribution<> v2(0, vertices - 1);
-            std::uniform_int_distribution<> weightDist(1, 10);
-            if (graph[v1(gen)][v2(gen)]!=0){ i--; }
-            else{
-                this->addEdge(v1(gen), v2(gen), weightDist(gen));
+        std::uniform_int_distribution<> dist(0, vertices - 1);
+        std::uniform_int_distribution<> weightDist(1, 10);
+
+        int count = 0;
+        while (count < edges) {
+            int v1 = dist(gen);
+            int v2 = dist(gen);
+            if (graph[v1][v2] == 0 && v1 != v2) {
+                addEdge(v1, v2, weightDist(gen));
+                count++;
             }
         }
     }
-    bool isConnected(){
+
+    bool isConnected() const {
         std::vector<bool> visited(vertices, false);
         std::stack<int> stack;
         stack.push(0);
@@ -70,7 +75,7 @@ struct MatrixGraph{
         while (!stack.empty()) {
             int vertex = stack.top();
             stack.pop();
-            for (int i = 0; i < vertices; i++) {
+            for (int i = 0; i < vertices; ++i) {
                 if (graph[vertex][i] && !visited[i]) {
                     stack.push(i);
                     visited[i] = true;
@@ -81,7 +86,6 @@ struct MatrixGraph{
         return visitedCount == vertices;
     }
 };
-
 
 struct Edge {
     int destination;
@@ -96,86 +100,92 @@ struct Vertex {
     void addEdge(int dest, int weight) {
         edges.emplace_back(dest, weight);
     }
-    void printEdges(){
-        for (int i = 0; i < edges.size(); ++i) {
-            std::cout << "(" << edges[i].destination << ", " << edges[i].weight << ") ";
+
+    void printEdges() const {
+        for (const auto& edge : edges) {
+            std::cout << "(" << edge.destination << ", " << edge.weight << ") ";
         }
     }
+
     bool hasEdge(int dest) const {
-        for (const Edge& edge : edges) {
-            if (edge.destination == dest) {
-                return true;
-            }
-        }
-        return false;
+        return std::any_of(edges.begin(), edges.end(), [dest](const Edge& edge) {
+            return edge.destination == dest;
+        });
     }
+
     void clear() {
         edges.clear();
     }
 };
 
-struct Graph {
+struct ListGraph {
     std::vector<Vertex> vertices;
     bool oriented;
 
-    Graph(int size, bool oriented): oriented(oriented){
-            vertices.resize(size);
+    ListGraph(int size, bool oriented) : oriented(oriented) {
+        vertices.resize(size);
     }
 
-    void addEdge(int v1, int v2, int weight=1) {
-        if(v1>=vertices.size() || v2>=vertices.size() || v1<0 || v2<0){
-            std::cout << "inappropriate value" << std::endl;
+    void addEdge(int v1, int v2, int weight = 1) {
+        if (v1 >= vertices.size() || v2 >= vertices.size() || v1 < 0 || v2 < 0 || v1 == v2) {
+            std::cout << "Inappropriate value" << std::endl;
             return;
         }
-        if(vertices[v1].hasEdge(v2)){
-            std::cout << "there's an edge yet" << std::endl;
+        if (vertices[v1].hasEdge(v2)) {
+            std::cout << "Edge already exists" << std::endl;
             return;
         }
         vertices[v1].addEdge(v2, weight);
-        if(!oriented) vertices[v2].addEdge(v1, weight);
+        if (!oriented) vertices[v2].addEdge(v1, weight);
     }
-    void print(){
+
+    void print() const {
         for (int i = 0; i < vertices.size(); ++i) {
-            std::cout << "Vertice " << i << ": ";
+            std::cout << "Vertex " << i << ": ";
             vertices[i].printEdges();
             std::cout << std::endl;
         }
     }
-    void clear(){
+
+    void clear() {
         for (auto& vertex : vertices) {
             vertex.clear();
         }
     }
-    void createRandom(int edges){
-        if (edges<0 || edges>2*vertices.size()){
-            std::cout << "inappropriate value" << std::endl;
+
+    void createRandom(int edges) {
+        if (edges < 0 || (edges > floor(vertices.size() * vertices.size() / 2) && !oriented) || edges > vertices.size() * vertices.size()) {
+            std::cout << "Inappropriate value" << std::endl;
             return;
         }
-        this->clear();
+        clear();
         std::random_device rd;
         std::mt19937 gen(rd());
-        for (int i = 0; i < edges; ++i) {
-            std::uniform_int_distribution<> v1(0, vertices.size() - 1);
-            std::uniform_int_distribution<> v2(0, vertices.size() - 1);
-            std::uniform_int_distribution<> weightDist(1, 10);
-            if (vertices[v1(gen)].hasEdge(v2(gen))){ i--; }
-            else{
-                this->addEdge(v1(gen), v2(gen), weightDist(gen));
+        std::uniform_int_distribution<> dist(0, vertices.size() - 1);
+        std::uniform_int_distribution<> weightDist(1, 10);
+
+        int count = 0;
+        while (count < edges) {
+            int v1 = dist(gen);
+            int v2 = dist(gen);
+            if (!vertices[v1].hasEdge(v2) && v1 != v2) {
+                addEdge(v1, v2, weightDist(gen));
+                count++;
             }
         }
     }
-    bool isConnected(){
+
+    bool isConnected() const {
         std::vector<bool> visited(vertices.size(), false);
         std::queue<int> queue;
-        int visitedCount = 1;
         queue.push(0);
         visited[0] = true;
+        int visitedCount = 1;
 
         while (!queue.empty()) {
             int vertex = queue.front();
             queue.pop();
-
-            for (const Edge& edge : vertices[vertex].edges) {
+            for (const auto& edge : vertices[vertex].edges) {
                 if (!visited[edge.destination]) {
                     queue.push(edge.destination);
                     visited[edge.destination] = true;
@@ -187,34 +197,36 @@ struct Graph {
     }
 };
 
-MatrixGraph fromStructureToMatrix(Graph& graph){
+MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
     MatrixGraph matrixGraph(graph.vertices.size(), graph.oriented);
     for (int i = 0; i < graph.vertices.size(); ++i) {
-        for (int j = 0; j < graph.vertices[i].edges.size(); ++j) {
-            matrixGraph.addEdge(i,graph.vertices[i].edges[j].destination, graph.vertices[i].edges[j].weight);
+        for (const auto& edge : graph.vertices[i].edges) {
+            matrixGraph.addEdge(i, edge.destination, edge.weight);
         }
     }
     return matrixGraph;
 }
-Graph fromMatrixToStructure(MatrixGraph& matrixGraph){
-    Graph graph(matrixGraph.vertices, matrixGraph.oriented);
+
+ListGraph fromMatrixToStructure(const MatrixGraph& matrixGraph) {
+    ListGraph graph(matrixGraph.vertices, matrixGraph.oriented);
     for (int i = 0; i < matrixGraph.vertices; ++i) {
-        for (int j = (matrixGraph.oriented ? 0 : i); j < matrixGraph.vertices; ++j) {
-            if (matrixGraph.graph[i][j]!=0){
-                graph.addEdge(i,j,matrixGraph.graph[i][j]);
+        for (int j = 0; j < matrixGraph.vertices; ++j) {
+            if (matrixGraph.graph[i][j] != 0) {
+                graph.addEdge(i, j, matrixGraph.graph[i][j]);
             }
         }
     }
     return graph;
 }
+
 template <typename GraphType>
 void interactiveGraph(GraphType& graph) {
     bool running = true;
     while (running) {
-        std::cout << "Choose what you want to do:\n"
+        std::cout << "Choose an action:\n"
                      "1. Add an edge\n"
                      "2. Print the graph\n"
-                     "3. Create random graph\n"
+                     "3. Create a random graph\n"
                      "4. Convert graph and print\n"
                      "5. Check if the graph is connected\n"
                      "6. Exit\n";
@@ -244,25 +256,18 @@ void interactiveGraph(GraphType& graph) {
             }
             case 4: {
                 if constexpr (std::is_same<GraphType, MatrixGraph>::value) {
-                    Graph listGraph = fromMatrixToStructure(graph);
+                    ListGraph listGraph = fromMatrixToStructure(graph);
                     listGraph.print();
                     interactiveGraph(listGraph);
-                    return;
                 } else {
                     MatrixGraph matrixGraph = fromStructureToMatrix(graph);
                     matrixGraph.print();
                     interactiveGraph(matrixGraph);
-                    return;
                 }
-                break;
+                return;
             }
             case 5:
-                if (graph.isConnected()){
-                    std::cout << "Graph is connected" << std::endl;
-                }
-                else{
-                    std::cout << "Graph is not connected" << std::endl;
-                }
+                std::cout << (graph.isConnected() ? "Graph is connected" : "Graph is not connected") << std::endl;
                 break;
             case 6:
                 running = false;
@@ -273,18 +278,18 @@ void interactiveGraph(GraphType& graph) {
     }
 }
 
-void interactive(){
+void interactive() {
     std::cout << "Enter the number of vertices: ";
     int numVertices;
     std::cin >> numVertices;
-    if (std::cin.fail() || numVertices < 1) return ;
+    if (std::cin.fail() || numVertices < 1) return;
 
     std::cout << "Is the graph oriented? (0 for no, 1 for yes): ";
     bool oriented;
     std::cin >> oriented;
     if (std::cin.fail()) return;
 
-    std::cout << "Choose type of graph's structure: 1 - adjacency matrix; 2 - adjacency list: ";
+    std::cout << "Choose the type of graph structure: 1 - adjacency matrix; 2 - adjacency list: ";
     int choice;
     std::cin >> choice;
 
@@ -292,14 +297,14 @@ void interactive(){
         MatrixGraph graph(numVertices, oriented);
         interactiveGraph(graph);
     } else if (choice == 2) {
-        Graph graph(numVertices, oriented);
+        ListGraph graph(numVertices, oriented);
         interactiveGraph(graph);
     } else {
         std::cout << "Invalid choice" << std::endl;
         return;
     }
-
 }
+
 int main() {
     interactive();
     return 0;
