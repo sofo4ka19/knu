@@ -1,6 +1,6 @@
 //Block 0: 1, 2
 //Block 1: 5
-//Block 2: 11
+//Block 2: 13
 
 #include <iostream>
 #include <vector>
@@ -96,6 +96,52 @@ struct MatrixGraph {
         }
         return true;
     }
+    void BFS(int start) const {
+        std::vector<bool> visited(graph.size(), false);
+        std::queue<int> queue;
+        queue.push(start);
+        visited[start] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+            std::cout << vertex << " ";
+
+            for (int i = 0; i < graph.size(); ++i) {
+                if (graph[vertex][i] != 0 && !visited[i]) {
+                    queue.push(i);
+                    visited[i] = true;
+                }
+            }
+        }
+    }
+    void BFS_Weight(int start) const {
+        std::vector<bool> visited(graph.size(), false);
+        std::queue<int> queue;
+        queue.push(start);
+        visited[start] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+            std::cout << vertex << " ";
+
+            std::vector<std::pair<int, int>> neighbors;
+            for (int i = 0; i < graph.size(); ++i) {
+                if (graph[vertex][i] != 0 && !visited[i]) {
+                    neighbors.push_back({i,graph[vertex][i]} );
+                    visited[i] = true;
+                }
+            }
+
+            std::sort(neighbors.begin(), neighbors.end(), [](const std::pair<int, int>& a, const std::pair<int, int>& b) {
+                return a.second < b.second;
+            });
+            for (std::pair<int, int> neighbor : neighbors) {
+                queue.push(neighbor.first);
+            }
+        }
+    }
 };
 
 struct Edge {
@@ -126,6 +172,13 @@ struct Vertex {
 
     void clear() {
         edges.clear();
+    }
+    static bool compareEdges(const Edge& a, const Edge& b) {
+        return a.weight < b.weight;
+    }
+
+    void sortEdgesByWeight() {
+        std::sort(edges.begin(), edges.end(), compareEdges);
     }
 };
 
@@ -165,7 +218,7 @@ struct ListGraph {
     }
 
     void createRandom(int edges) {
-        if (edges < 0 || (edges > floor(vertices.size() * vertices.size() / 2) && !oriented) || edges > vertices.size() * vertices.size()) {
+        if (edges < 0 || (edges > floor(vertices.size() * (vertices.size()-1) / 2) && !oriented) || edges > vertices.size() * (vertices.size()-1)) {
             std::cout << "Inappropriate value" << std::endl;
             return;
         }
@@ -213,6 +266,48 @@ struct ListGraph {
         }
         return true;
     }
+    void BFS(int start) const {
+        std::vector<bool> visited(vertices.size(), false);
+        std::queue<int> queue;
+        queue.push(start);
+        visited[start] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+            std::cout << vertex << " ";
+
+            for (const auto& neighbor : vertices[vertex].edges) {
+                int dest = neighbor.destination;
+                if (!visited[dest]) {
+                    queue.push(dest);
+                    visited[dest] = true;
+                }
+            }
+        }
+    }
+    void BFS_Weight(int start){
+        std::vector<bool> visited(vertices.size(), false);
+        std::queue<int> queue;
+        queue.push(start);
+        visited[start] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+            std::cout << vertex << " ";
+
+            vertices[vertex].sortEdgesByWeight();
+
+            for (const auto& neighbor : vertices[vertex].edges) {
+                int dest = neighbor.destination;
+                if (!visited[dest]) {
+                    queue.push(dest);
+                    visited[dest] = true;
+                }
+            }
+        }
+    }
 };
 
 MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
@@ -247,10 +342,11 @@ void interactiveGraph(GraphType& graph) {
                      "3. Create a random graph\n"
                      "4. Convert graph and print\n"
                      "5. Check if the graph is connected\n"
-                     "6. Exit\n";
+                     "6. BFS\n"
+                     "7. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 6) {
+        if (std::cin.fail() || action < 1 || action > 7) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -259,6 +355,7 @@ void interactiveGraph(GraphType& graph) {
                 int v1, v2, weight;
                 std::cout << "Enter vertices (v1 v2) and weight: ";
                 std::cin >> v1 >> v2 >> weight;
+                if (std::cin.fail()) return;
                 graph.addEdge(v1, v2, weight);
                 break;
             }
@@ -269,6 +366,7 @@ void interactiveGraph(GraphType& graph) {
                 int edges;
                 std::cout << "Enter number of edges: ";
                 std::cin >> edges;
+                if (std::cin.fail()) return;
                 graph.createRandom(edges);
                 break;
             }
@@ -288,6 +386,16 @@ void interactiveGraph(GraphType& graph) {
                 std::cout << (graph.isConnected() ? "Graph is connected" : "Graph is not connected") << std::endl;
                 break;
             case 6:
+                int vertex;
+                bool isWeight;
+                std::cout << "choose the start vertex" << std::endl;
+                std::cin >> vertex;
+                std::cout << "it should be according to the weight (1) or ordinary (0)" << std::endl;
+                std::cin >> isWeight;
+                if (std::cin.fail()) return;
+                (isWeight)?(graph.BFS_Weight(vertex)):(graph.BFS(vertex));
+                break;
+            case 7:
                 running = false;
                 break;
             default:
