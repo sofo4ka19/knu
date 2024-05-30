@@ -4,6 +4,7 @@
 //Block 3: 14
 //Block 4: 17
 //Block 5: 20
+//Block 6: 21
 
 #include <iostream>
 #include <vector>
@@ -14,6 +15,38 @@
 #include <algorithm>
 #include <xmath.h>
 #include <cassert>
+
+struct KruskalEdge{
+    int v1;
+    int v2;
+    int weight;
+    KruskalEdge(int v1, int v2, int weight) : v1(v1), v2(v2), weight(weight) {}
+};
+
+template <typename EdgeType>
+static bool compareEdges(const EdgeType& a, const EdgeType& b) {
+    return a.weight < b.weight;
+}
+int findSet(int u, std::vector<int>& parent) {
+    if (parent[u] != u)
+        parent[u] = findSet(parent[u], parent);
+    return parent[u];
+}
+
+void unionSets(int u, int v, std::vector<int>& parent, std::vector<int>& rank) {
+    int rootU = findSet(u, parent);
+    int rootV = findSet(v, parent);
+    if (rootU != rootV) {
+        if (rank[rootU] < rank[rootV])
+            parent[rootU] = rootV;
+        else if (rank[rootU] > rank[rootV])
+            parent[rootV] = rootU;
+        else {
+            parent[rootV] = rootU;
+            rank[rootU]++;
+        }
+    }
+}
 
 struct MatrixGraph {
     int vertices;
@@ -265,6 +298,34 @@ struct MatrixGraph {
         }
         return sumWeight;
     }
+    MatrixGraph kruskalMST() {
+        std::vector<KruskalEdge> edges;
+        for (int i = 0; i < vertices; i++) {
+            for (int j = 0; j < vertices; j++) {
+                if (graph[i][j] != 0) {
+                    edges.emplace_back(i, j, graph[i][j]);
+                }
+            }
+        }
+
+        std::sort(edges.begin(), edges.end(), compareEdges<KruskalEdge>);
+
+        MatrixGraph mst(vertices, oriented);
+        std::vector<int> parent(vertices);
+        std::vector<int> rank(vertices, 0);
+
+        for (int i = 0; i < vertices; i++)
+            parent[i] = i;
+
+        for (const auto& edge : edges) {
+            if (findSet(edge.v1, parent) != findSet(edge.v2, parent)) {
+                mst.addEdge(edge.v1, edge.v2, edge.weight);
+                unionSets(edge.v1, edge.v2, parent, rank);
+            }
+        }
+
+        return mst;
+    }
 };
 
 struct Edge {
@@ -273,7 +334,6 @@ struct Edge {
 
     Edge(int dest, int w) : destination(dest), weight(w) {}
 };
-
 struct Vertex {
     std::vector<Edge> edges;
 
@@ -296,12 +356,9 @@ struct Vertex {
     void clear() {
         edges.clear();
     }
-    static bool compareEdges(const Edge& a, const Edge& b) {
-        return a.weight < b.weight;
-    }
 
     void sortEdgesByWeight() {
-        std::sort(edges.begin(), edges.end(), compareEdges);
+        std::sort(edges.begin(), edges.end(), compareEdges<Edge>);
     }
 };
 
@@ -549,6 +606,32 @@ struct ListGraph {
         }
         return sumWeight/2;
     }
+    ListGraph kruskalMST() {
+        std::vector<KruskalEdge> edges;
+        for (int i = 0; i < vertices.size(); i++) {
+            for (const auto& edge : vertices[i].edges) {
+                edges.emplace_back(i, edge.destination, edge.weight);
+            }
+        }
+
+        std::sort(edges.begin(), edges.end(), compareEdges<KruskalEdge>);
+
+        ListGraph mst(vertices.size(), oriented);
+        std::vector<int> parent(vertices.size());
+        std::vector<int> rank(vertices.size(), 0);
+
+        for (int i = 0; i < vertices.size(); i++)
+            parent[i] = i;
+
+        for (const auto& edge : edges) {
+            if (findSet(edge.v1, parent) != findSet(edge.v2, parent)) {
+                mst.addEdge(edge.v1, edge.v2, edge.weight);
+                unionSets(edge.v1, edge.v2, parent, rank);
+            }
+        }
+
+        return mst;
+    }
 };
 
 MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
@@ -602,10 +685,11 @@ void interactiveGraph(GraphType& graph) {
                      "7. Find the shortest way (Dijkstra algorithm)\n"
                      "8. Topology sort\n"
                      "9. Build spanning tree\n"
-                     "10. Exit\n";
+                     "10. Build minimal spanning tree by Kruskal algorithm\n"
+                     "11. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 10) {
+        if (std::cin.fail() || action < 1 || action > 11) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -729,6 +813,15 @@ void interactiveGraph(GraphType& graph) {
                 }
                 break;
             case 10:
+                if (graph.isConnected() && !graph.oriented){
+                    graph.kruskalMST().print();
+                    std::cout << "Weight: " << graph.kruskalMST().weight() << std::endl;
+                }
+                else{
+                    std::cout << "Sorry, for building minimal spanning tree your graph is required to be connected and no-oriented" << std::endl;
+                }
+                break;
+            case 11:
                 running = false;
                 break;
             default:
