@@ -3,6 +3,7 @@
 //Block 2: 13
 //Block 3: 14
 //Block 4: 17
+//Block 5: 20
 
 #include <iostream>
 #include <vector>
@@ -230,6 +231,39 @@ struct MatrixGraph {
             std::cout << i << " ";
         }
         std::cout << std::endl;
+    }
+    MatrixGraph buildSpanningTree(){
+        std::vector<bool> visited(vertices, false);
+        MatrixGraph spanningTree(vertices, oriented);
+        std::queue<int> queue;
+
+        queue.push(0);
+        visited[0] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+
+            for (int i = 0; i < vertices; ++i) {
+                if (graph[vertex][i] != 0 && !visited[i]) {
+                    queue.push(i);
+                    visited[i] = true;
+                    spanningTree.graph[vertex][i]=graph[vertex][i];
+                    if(!oriented) spanningTree.graph[i][vertex]=graph[vertex][i];
+                }
+            }
+        }
+
+        return spanningTree;
+    }
+    int weight(){
+        int sumWeight=0;
+        for(int i=0; i<vertices; i++){
+            for (int j = (oriented)?(0):(i); j < vertices; ++j) {
+                sumWeight+=graph[i][j];
+            }
+        }
+        return sumWeight;
     }
 };
 
@@ -479,6 +513,42 @@ struct ListGraph {
         }
         sorted.push_back(n);
     }*/
+    ListGraph buildSpanningTree(){
+        std::vector<bool> visited(vertices.size(), false);
+        ListGraph spanningTree(vertices.size(), oriented);
+        std::queue<int> queue;
+
+        queue.push(0);
+        visited[0] = true;
+
+        while (!queue.empty()) {
+            int vertex = queue.front();
+            queue.pop();
+
+                for (Edge& edge : vertices[vertex].edges) {
+                int dest = edge.destination;
+                if (!visited[dest]) {
+                    queue.push(dest);
+                    visited[dest] = true;
+                    spanningTree.addEdge(vertex, dest, edge.weight);
+                }
+            }
+        }
+
+        return spanningTree;
+    }
+    int weight(){
+        int sumWeight=0;
+        for (Vertex& vertex:vertices) {
+            for (Edge& edge:vertex.edges) {
+                sumWeight+=edge.weight;
+            }
+        }
+        if(oriented){
+            return sumWeight;
+        }
+        return sumWeight/2;
+    }
 };
 
 MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
@@ -531,10 +601,11 @@ void interactiveGraph(GraphType& graph) {
                      "6. BFS\n"
                      "7. Find the shortest way (Dijkstra algorithm)\n"
                      "8. Topology sort\n"
-                     "9. Exit\n";
+                     "9. Build spanning tree\n"
+                     "10. Exit\n";
         int action;
         std::cin >> action;
-        if (std::cin.fail() || action < 1 || action > 9) {
+        if (std::cin.fail() || action < 1 || action > 10) {
             std::cout << "Error" << std::endl;
             return;
         }
@@ -649,6 +720,15 @@ void interactiveGraph(GraphType& graph) {
                 }
                 break;
             case 9:
+                if(graph.isConnected()) {
+                    graph.buildSpanningTree().print();
+                    std::cout << "Weight: " << graph.buildSpanningTree().weight() << std::endl;
+                }
+                else{
+                    std::cout << "Sorry, you can't to make spanning tree, because your graph is not connected" << std::endl;
+                }
+                break;
+            case 10:
                 running = false;
                 break;
             default:
