@@ -86,7 +86,7 @@ struct MatrixGraph {
     }
 
     void createRandom(int edges) {
-        if (edges < 0 || edges > vertices * (vertices - 1) / 2) {
+        if (edges < 0 || (edges > floor(vertices * (vertices-1) / 2) && !oriented) || edges > vertices * (vertices-1)) {
             std::cout << "Inappropriate value" << std::endl;
             return;
         }
@@ -152,6 +152,7 @@ struct MatrixGraph {
                 }
             }
         }
+        std::cout << std::endl;
     }
     void BFS_Weight(int start) const {
         std::vector<bool> visited(graph.size(), false);
@@ -179,6 +180,7 @@ struct MatrixGraph {
                 queue.push(neighbor.first);
             }
         }
+        std::cout << std::endl;
     }
     std::vector<int> dijkstra(int start) const {
         assert(start<vertices);
@@ -465,6 +467,7 @@ struct ListGraph {
                 }
             }
         }
+        std::cout << std::endl;
     }
     void BFS_Weight(int start){
         std::vector<bool> visited(vertices.size(), false);
@@ -487,6 +490,7 @@ struct ListGraph {
                 }
             }
         }
+        std::cout << std::endl;
     }
     std::vector<int> dijkstra(int start) const {
         assert(start<vertices.size());
@@ -638,7 +642,9 @@ MatrixGraph fromStructureToMatrix(const ListGraph& graph) {
     MatrixGraph matrixGraph(graph.vertices.size(), graph.oriented);
     for (int i = 0; i < graph.vertices.size(); ++i) {
         for (const auto& edge : graph.vertices[i].edges) {
-            matrixGraph.addEdge(i, edge.destination, edge.weight);
+            if(matrixGraph.graph[i][edge.destination]==0){
+                matrixGraph.addEdge(i, edge.destination, edge.weight);
+            }
         }
     }
     return matrixGraph;
@@ -856,8 +862,142 @@ void interactive() {
         return;
     }
 }
+void demo(){
+    std::cout << "let's have a random non-oriented graph with 5 vertices and 8 edges in matrix form" << std::endl;
+    MatrixGraph matrixGraph(5,false);
+    matrixGraph.createRandom(8);
+    matrixGraph.print();
+    std::cout << "let's check if it's connected" << std::endl;
+    std::cout << (matrixGraph.isConnected() ? "Graph is connected" : "Graph is not connected") << std::endl;
+    std::cout << "let's have a BFS from 0 vertex" << std::endl;
+    matrixGraph.BFS(0);
+    std::cout << "let's have a BFS by weight from 3 vertex" << std::endl;
+    matrixGraph.BFS_Weight(3);
+    std::cout << "let's find the shortest way with Dijkstra algorithm between 1 and 4 vertices" << std::endl;
+    if(matrixGraph.dijkstra(1)[4]!=std::numeric_limits<int>::max()){
+        std::cout << matrixGraph.dijkstra(1)[4] << std::endl;
+    }
+    else{
+        std::cout << "There is no way" << std::endl;
+    }
+    std::cout << "let's find the shortest ways with Dijkstra algorithm from 2 vertex" << std::endl;
+    int i=0;
+    for(int way : matrixGraph.dijkstra(2)){
+        if (way!=std::numeric_limits<int>::max()){
+            std::cout << i << " - " << way << std::endl;
+        }
+        i++;
+    }
+    std::cout << "let's find the shortest ways with Dijkstra algorithm between different vertices" << std::endl;
+    for (int j = 0; j < matrixGraph.size(); ++j) {
+        std::cout << "From vertex " << j << " to vertex:" << std::endl;
+        i=0;
+        for(int way : matrixGraph.dijkstra(j)){
+            if (way!=std::numeric_limits<int>::max()){
+                std::cout << i << " - " << way << std::endl;
+            }
+            i++;
+        }
+    }
+    if(matrixGraph.isConnected()){
+        std::cout << "let's build the spanning tree" << std::endl;
+        matrixGraph.buildSpanningTree().print();
+        std::cout << "Weight: " << matrixGraph.buildSpanningTree().weight() << std::endl;
+        std::cout << "let's build the minimal spanning tree by Kruskal algorithm" << std::endl;
+        matrixGraph.kruskalMST().print();
+        std::cout << "Weight: " << matrixGraph.kruskalMST().weight() << std::endl;
+    }
+    else{
+        std::cout << "sorry, we can't build spanning tree, because graph isn't connected" << std::endl;
+    }
+    std::cout << "let's make new oriented graph in matrix form with 5 vertices and 7 edges" << std::endl;
+    matrixGraph.oriented= true;
+    matrixGraph.createRandom(7);
+    matrixGraph.print();
+    std::cout << "let's have a topology sort" << std::endl;
+    matrixGraph.topologySortKan();
+    std::cout << "let's modify it to the structure form" << std::endl;
+    fromMatrixToStructure(matrixGraph).print();
 
+    std::cout << "let's have a random oriented graph with 7 vertices and 12 edges in structure form" << std::endl;
+    ListGraph listGraph(7, true);
+    listGraph.createRandom(12);
+    listGraph.print();
+    std::cout << "let's check if it's connected" << std::endl;
+    std::cout << (listGraph.isConnected() ? "Graph is connected" : "Graph is not connected") << std::endl;
+    std::cout << "let's have a BFS from 0 vertex" << std::endl;
+    listGraph.BFS(0);
+    std::cout << "let's have a BFS by weight from 3 vertex" << std::endl;
+    listGraph.BFS_Weight(3);
+    std::cout << "let's find the shortest way with Dijkstra algorithm between 1 and 4 vertices" << std::endl;
+    if(listGraph.dijkstra(1)[4]!=std::numeric_limits<int>::max()){
+        std::cout << listGraph.dijkstra(1)[4] << std::endl;
+    }
+    else{
+        std::cout << "There is no way" << std::endl;
+    }
+    std::cout << "let's find the shortest ways with Dijkstra algorithm from 2 vertex" << std::endl;
+    i=0;
+    for(int way : listGraph.dijkstra(2)){
+        if (way!=std::numeric_limits<int>::max()){
+            std::cout << i << " - " << way << std::endl;
+        }
+        i++;
+    }
+    std::cout << "let's find the shortest ways with Dijkstra algorithm between different vertices" << std::endl;
+    for (int j = 0; j < listGraph.size(); ++j) {
+        std::cout << "From vertex " << j << " to vertex:" << std::endl;
+        i=0;
+        for(int way : listGraph.dijkstra(j)){
+            if (way!=std::numeric_limits<int>::max()){
+                std::cout << i << " - " << way << std::endl;
+            }
+            i++;
+        }
+    }
+    std::cout << "let's have a topology sort" << std::endl;
+    listGraph.topologySortKan();
+    std::cout << "let's make new non-oriented graph in matrix form with 7 vertices and 10 edges" << std::endl;
+    listGraph.oriented= false;
+    listGraph.createRandom(10);
+    listGraph.print();
+    if(listGraph.isConnected()){
+        std::cout << "let's build the spanning tree" << std::endl;
+        listGraph.buildSpanningTree().print();
+        std::cout << "Weight: " << listGraph.buildSpanningTree().weight() << std::endl;
+        std::cout << "let's build the minimal spanning tree by Kruskal algorithm" << std::endl;
+        listGraph.kruskalMST().print();
+        std::cout << "Weight: " << listGraph.kruskalMST().weight() << std::endl;
+    }
+    else{
+        std::cout << "sorry, we can't build spanning tree, because graph isn't connected" << std::endl;
+    }
+    std::cout << "let's modify it to the matrix form" << std::endl;
+    fromStructureToMatrix(listGraph).print();
+}
+void benchmark(){
+
+}
 int main() {
-    interactive();
+    int mode;
+    std::cout << "choose the mode: 1 - interactive; 2 - demonstration; 3 - benchmark" << std::endl;
+    std::cin >> mode;
+    if (std::cin.fail() || mode<1 || mode>3){
+        std::cout << "error";
+        return 0;
+    }
+    switch (mode) {
+        case 1:
+            interactive();
+            break;
+        case 2:
+            demo();
+            break;
+        case 3:
+            benchmark();
+            break;
+        default:
+            return 0;
+    }
     return 0;
 }
