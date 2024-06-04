@@ -16,6 +16,8 @@
 #include <xmath.h>
 #include <cassert>
 #include <chrono>
+#include "benchmark.h"
+
 
 struct KruskalEdge{
     int v1;
@@ -994,23 +996,47 @@ void benchmark() {
     std::cout << "matrix graph (oriented):" << std::endl;
     auto t0 = high_resolution_clock::now();
     MatrixGraph matrixGraph(v, true);
-    matrixGraph.createRandom(numEdges);
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        matrixGraph.createRandom(numEdges);
+    }
     auto t1 = high_resolution_clock::now();
-    matrixGraph.print();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        matrixGraph.print();
+    }
     auto t2 = high_resolution_clock::now();
-    matrixGraph.BFS(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS");
+        matrixGraph.BFS(rand() % v);
+    }
     auto t3 = high_resolution_clock::now();
-    matrixGraph.BFS_Weight(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS with weight");
+        matrixGraph.BFS_Weight(rand() % v);
+    }
     auto t4 = high_resolution_clock::now();
-    matrixGraph.dijkstra(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("dijkstra algorithm");
+        matrixGraph.dijkstra(rand() % v);
+    }
     auto t5 = high_resolution_clock::now();
-    matrixGraph.topologySortKan();
+    {
+        BenchmarkMax memoryBenchmark("topology sorting");
+        matrixGraph.topologySortKan();
+    }
     auto t6 = high_resolution_clock::now();
-    fromMatrixToStructure(matrixGraph);
+    {
+        BenchmarkMax memoryBenchmark("change form from matrix to structure");
+        fromMatrixToStructure(matrixGraph);
+    }
     auto t7 = high_resolution_clock::now();
     if (matrixGraph.isConnected()) {
         auto st = high_resolution_clock::now();
-        matrixGraph.buildSpanningTree().weight();
+        {
+            BenchmarkMax memoryBenchmark("building spanning tree");
+            matrixGraph.buildSpanningTree().weight();
+        }
         end = high_resolution_clock::now();
         std::cout << "checking if it's connected - " << (st - t7).count() << "ms\n building spanning tree - "
                   << (end - st).count() << "ms" << std::endl;
@@ -1027,23 +1053,46 @@ void benchmark() {
     std::cout << "matrix graph (not oriented):" << std::endl;
     matrixGraph.oriented = false;
     t0 = high_resolution_clock::now();
-    matrixGraph.createRandom(numEdges);
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        matrixGraph.createRandom(numEdges);
+    }
     t1 = high_resolution_clock::now();
-    matrixGraph.print();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        matrixGraph.print();
+    }
     t2 = high_resolution_clock::now();
-    matrixGraph.BFS(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS");
+        matrixGraph.BFS(rand() % v);
+    }
     t3 = high_resolution_clock::now();
-    matrixGraph.BFS_Weight(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS with weight");
+        matrixGraph.BFS_Weight(rand() % v);
+    }
     t4 = high_resolution_clock::now();
-    matrixGraph.dijkstra(rand() % v);
-    t5 = high_resolution_clock::now();
-    fromMatrixToStructure(matrixGraph);
+    {
+        BenchmarkMax memoryBenchmark("dijkstra algorithm");
+        matrixGraph.dijkstra(rand() % v);
+    }t5 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("changing form from matrix to structure");
+        fromMatrixToStructure(matrixGraph);
+    }
     t6 = high_resolution_clock::now();
     if (matrixGraph.isConnected()) {
         auto st = high_resolution_clock::now();
-        matrixGraph.buildSpanningTree().weight();
+        {
+            BenchmarkMax memoryBenchmark("building spanning tree");
+            matrixGraph.buildSpanningTree().weight();
+        }
         t7 = high_resolution_clock::now();
-        matrixGraph.kruskalMST().weight();
+        {
+            BenchmarkMax memoryBenchmark("kruskal algorithm");
+            matrixGraph.kruskalMST().weight();
+        }
         end = high_resolution_clock::now();
         std::cout << "checking if it's connected - " << (st - t6).count() << "ms\n building spanning tree - "
                   << (t7 - st).count() << "ms\n building MST by kruskal algorithm - " << (end - t7).count() << "ms"
@@ -1061,23 +1110,47 @@ void benchmark() {
     std::cout << "list graph (oriented):" << std::endl;
     t0 = high_resolution_clock::now();
     ListGraph listGraph(v, true);
-    listGraph.createRandom(numEdges);
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        listGraph.createRandom(numEdges);
+    }
     t1 = high_resolution_clock::now();
-    listGraph.print();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        listGraph.print();
+    }
     t2 = high_resolution_clock::now();
-    listGraph.BFS(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS");
+        listGraph.BFS(rand() % v);
+    }
     t3 = high_resolution_clock::now();
-    listGraph.BFS_Weight(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS with weight");
+        listGraph.BFS_Weight(rand() % v);
+    }
     t4 = high_resolution_clock::now();
-    listGraph.dijkstra(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("dijkstra algorithm");
+        listGraph.dijkstra(rand() % v);
+    }
     t5 = high_resolution_clock::now();
-    listGraph.topologySortKan();
+    {
+        BenchmarkMax memoryBenchmark("topology sort");
+        listGraph.topologySortKan();
+    }
     t6 = high_resolution_clock::now();
-    fromStructureToMatrix(listGraph);
+    {
+        BenchmarkMax memoryBenchmark("changing form from structure to matrix");
+        fromStructureToMatrix(listGraph);
+    }
     t7 = high_resolution_clock::now();
     if (listGraph.isConnected()) {
         auto st = high_resolution_clock::now();
-        listGraph.buildSpanningTree().weight();
+        {
+            BenchmarkMax memoryBenchmark("building spanning tree");
+            listGraph.buildSpanningTree().weight();
+        }
         end = high_resolution_clock::now();
         std::cout << "checking if it's connected - " << (st - t7).count() << "ms\n building spanning tree - "
                   << (end - st).count() << "ms" << std::endl;
@@ -1094,23 +1167,47 @@ void benchmark() {
     std::cout << "list graph (not oriented):" << std::endl;
     listGraph.oriented = false;
     t0 = high_resolution_clock::now();
-    listGraph.createRandom(numEdges);
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        listGraph.createRandom(numEdges);
+    }
     t1 = high_resolution_clock::now();
-    listGraph.print();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        listGraph.print();
+    }
     t2 = high_resolution_clock::now();
-    listGraph.BFS(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS");
+        listGraph.BFS(rand() % v);
+    }
     t3 = high_resolution_clock::now();
-    listGraph.BFS_Weight(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("BFS with weight");
+        listGraph.BFS_Weight(rand() % v);
+    }
     t4 = high_resolution_clock::now();
-    listGraph.dijkstra(rand() % v);
+    {
+        BenchmarkMax memoryBenchmark("dijkstra algorithm");
+        listGraph.dijkstra(rand() % v);
+    }
     t5 = high_resolution_clock::now();
-    fromStructureToMatrix(listGraph);
+    {
+        BenchmarkMax memoryBenchmark("changing form from structure to matrix");
+        fromStructureToMatrix(listGraph);
+    }
     t6 = high_resolution_clock::now();
     if (listGraph.isConnected()) {
         auto st = high_resolution_clock::now();
-        listGraph.buildSpanningTree().weight();
+        {
+            BenchmarkMax memoryBenchmark("building spanning tree");
+            listGraph.buildSpanningTree().weight();
+        }
         t7 = high_resolution_clock::now();
-        listGraph.kruskalMST().weight();
+        {
+            BenchmarkMax memoryBenchmark("kruskal algorithm");
+            listGraph.kruskalMST().weight();
+        }
         end = high_resolution_clock::now();
         std::cout << "checking if it's connected - " << (st - t6).count() << "ms\n building spanning tree - "
                   << (t7 - st).count() << "ms\n building MST by kruskal algorithm - " << (end - t7).count() << "ms"
