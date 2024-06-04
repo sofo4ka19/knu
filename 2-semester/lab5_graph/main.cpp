@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <xmath.h>
 #include <cassert>
+#include <chrono>
 
 struct KruskalEdge{
     int v1;
@@ -975,8 +976,153 @@ void demo(){
     std::cout << "let's modify it to the matrix form" << std::endl;
     fromStructureToMatrix(listGraph).print();
 }
-void benchmark(){
+void benchmark() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    std::uniform_int_distribution<> vert(3, 30);
+    int v = vert(gen);
+    bool isEnd;
+    auto end = high_resolution_clock::now();
+    std::uniform_int_distribution<> e(v / 2, v * v / 2 - 1);
+    int numEdges = e(gen);
+    std::cout << "for " << v << " vertices and " << numEdges << " edges:" << std::endl;
+    std::cout << "matrix graph (oriented):" << std::endl;
+    auto t0 = high_resolution_clock::now();
+    MatrixGraph matrixGraph(v, true);
+    matrixGraph.createRandom(numEdges);
+    auto t1 = high_resolution_clock::now();
+    matrixGraph.print();
+    auto t2 = high_resolution_clock::now();
+    matrixGraph.BFS(rand() % v);
+    auto t3 = high_resolution_clock::now();
+    matrixGraph.BFS_Weight(rand() % v);
+    auto t4 = high_resolution_clock::now();
+    matrixGraph.dijkstra(rand() % v);
+    auto t5 = high_resolution_clock::now();
+    matrixGraph.topologySortKan();
+    auto t6 = high_resolution_clock::now();
+    fromMatrixToStructure(matrixGraph);
+    auto t7 = high_resolution_clock::now();
+    if (matrixGraph.isConnected()) {
+        auto st = high_resolution_clock::now();
+        matrixGraph.buildSpanningTree().weight();
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (st - t7).count() << "ms\n building spanning tree - "
+                  << (end - st).count() << "ms" << std::endl;
+    } else {
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (end - t7).count() << "ms" << std::endl;
+    }
+    std::cout << "creating - " << (t1 - t0).count() << "ms\n printing - " << (t2 - t1).count() << "ms\n BFS - "
+              << (t3 - t2).count() << "ms\n BFS by weight - " << (t4 - t3).count() << "ms\n dijkstra algorithm - "
+              << (t5 - t4).count() << "ms\n topology sort - " << (t6 - t5).count() << "ms\n change form - "
+              << (t7 - t6).count() << "ms\n at all - " << (end - t0).count() << std::endl;
 
+    std::cout << std::endl;
+    std::cout << "matrix graph (not oriented):" << std::endl;
+    matrixGraph.oriented = false;
+    t0 = high_resolution_clock::now();
+    matrixGraph.createRandom(numEdges);
+    t1 = high_resolution_clock::now();
+    matrixGraph.print();
+    t2 = high_resolution_clock::now();
+    matrixGraph.BFS(rand() % v);
+    t3 = high_resolution_clock::now();
+    matrixGraph.BFS_Weight(rand() % v);
+    t4 = high_resolution_clock::now();
+    matrixGraph.dijkstra(rand() % v);
+    t5 = high_resolution_clock::now();
+    fromMatrixToStructure(matrixGraph);
+    t6 = high_resolution_clock::now();
+    if (matrixGraph.isConnected()) {
+        auto st = high_resolution_clock::now();
+        matrixGraph.buildSpanningTree().weight();
+        t7 = high_resolution_clock::now();
+        matrixGraph.kruskalMST().weight();
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (st - t6).count() << "ms\n building spanning tree - "
+                  << (t7 - st).count() << "ms\n building MST by kruskal algorithm - " << (end - t7).count() << "ms"
+                  << std::endl;
+    } else {
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (end - t6).count() << "ms" << std::endl;
+    }
+    std::cout << "creating - " << (t1 - t0).count() << "ms\n printing - " << (t2 - t1).count() << "ms\n BFS - "
+              << (t3 - t2).count() << "ms\n BFS by weight - " << (t4 - t3).count() << "ms\n dijkstra algorithm - "
+              << (t5 - t4).count() << "ms\n change form - " << (t6 - t5).count() << "ms\n at all - "
+              << (end - t0).count() << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "list graph (oriented):" << std::endl;
+    t0 = high_resolution_clock::now();
+    ListGraph listGraph(v, true);
+    listGraph.createRandom(numEdges);
+    t1 = high_resolution_clock::now();
+    listGraph.print();
+    t2 = high_resolution_clock::now();
+    listGraph.BFS(rand() % v);
+    t3 = high_resolution_clock::now();
+    listGraph.BFS_Weight(rand() % v);
+    t4 = high_resolution_clock::now();
+    listGraph.dijkstra(rand() % v);
+    t5 = high_resolution_clock::now();
+    listGraph.topologySortKan();
+    t6 = high_resolution_clock::now();
+    fromStructureToMatrix(listGraph);
+    t7 = high_resolution_clock::now();
+    if (listGraph.isConnected()) {
+        auto st = high_resolution_clock::now();
+        listGraph.buildSpanningTree().weight();
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (st - t7).count() << "ms\n building spanning tree - "
+                  << (end - st).count() << "ms" << std::endl;
+    } else {
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (end - t7).count() << "ms" << std::endl;
+    }
+    std::cout << "creating - " << (t1 - t0).count() << "ms\n printing - " << (t2 - t1).count() << "ms\n BFS - "
+              << (t3 - t2).count() << "ms\n BFS by weight - " << (t4 - t3).count() << "ms\n dijkstra algorithm - "
+              << (t5 - t4).count() << "ms\n topology sort - " << (t6 - t5).count() << "ms\n change form - "
+              << (t7 - t6).count() << "ms\n at all - " << (end - t0).count() << std::endl;
+
+    std::cout << std::endl;
+    std::cout << "list graph (not oriented):" << std::endl;
+    listGraph.oriented = false;
+    t0 = high_resolution_clock::now();
+    listGraph.createRandom(numEdges);
+    t1 = high_resolution_clock::now();
+    listGraph.print();
+    t2 = high_resolution_clock::now();
+    listGraph.BFS(rand() % v);
+    t3 = high_resolution_clock::now();
+    listGraph.BFS_Weight(rand() % v);
+    t4 = high_resolution_clock::now();
+    listGraph.dijkstra(rand() % v);
+    t5 = high_resolution_clock::now();
+    fromStructureToMatrix(listGraph);
+    t6 = high_resolution_clock::now();
+    if (listGraph.isConnected()) {
+        auto st = high_resolution_clock::now();
+        listGraph.buildSpanningTree().weight();
+        t7 = high_resolution_clock::now();
+        listGraph.kruskalMST().weight();
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (st - t6).count() << "ms\n building spanning tree - "
+                  << (t7 - st).count() << "ms\n building MST by kruskal algorithm - " << (end - t7).count() << "ms"
+                  << std::endl;
+    } else {
+        end = high_resolution_clock::now();
+        std::cout << "checking if it's connected - " << (end - t6).count() << "ms" << std::endl;
+    }
+    std::cout << "creating - " << (t1 - t0).count() << "ms\n printing - " << (t2 - t1).count() << "ms\n BFS - "
+              << (t3 - t2).count() << "ms\n BFS by weight - " << (t4 - t3).count() << "ms\n dijkstra algorithm - "
+              << (t5 - t4).count() << "ms\n change form - " << (t6 - t5).count() << "ms\n at all - "
+              << (end - t0).count() << std::endl;
 }
 int main() {
     int mode;
