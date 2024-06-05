@@ -90,7 +90,8 @@ struct LinkedList {
             delete current;
         }
     }
-    int findNum(const Node* item){
+    int findNum(const std::string& data){
+        Node* item = findElement(data);
         if (start== nullptr || item== nullptr){
             return 0;
         }
@@ -175,22 +176,99 @@ struct LinkedList {
             std::cout << std::endl;
         }
     }
-    void fillRandom(int n){
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_int_distribution<> length(1, 10);
-        std::uniform_int_distribution<> code(65, 90);
-        for (int i = 0; i < n; ++i) {
-            std::string item;
-            int len = length(gen);
-            for (int j=0; j<len; j++){
-                char c = code(gen);
-                item+=c;
+};
+
+struct ArrayList{
+    std::vector<std::string> list;
+
+    void addElement(const std::string& data){
+        for (int i = 0; i < list.size(); ++i) {
+            if (comparison(data, list[i])){
+                list.insert(list.begin()+i, data);
+                return;
             }
-            addElement(item);
+        }
+        list.push_back(data);
+    }
+    int findNum(const std::string& data){
+        for (int i = 0; i < list.size(); ++i) {
+            if (list[i]==data) return i+1;
+        }
+        std::cout << "there is no such element" << std::endl;
+        return 0;
+    }
+    void deleteElement(const std::string& data){
+        if (list.empty()){
+            std::cout << "Sorry, your list is empty" << std::endl;
+        }
+        else if (findNum(data)!=0){
+            list.erase(list.begin()+findNum(data)-1);
         }
     }
+    ArrayList findInterval(std::string v1, std::string v2){
+        if (list.empty()){
+            std::cout << "Sorry, your list is empty" << std::endl;
+            return {};
+        }
+        if (comparison(v2,v1) || comparison(v2, list[0]) || comparison(list[list.size()-1], v1)){
+            std::cout << "Inappropriate values" << std::endl;
+            return {};
+        }
+        ArrayList result;
+        int v0,v;
+        if(findNum(v1) != 0){
+            v0 = findNum(v1)-1;
+        }
+        else{
+            int i=0;
+            while(i<list.size()-1 && comparison(list[i], v1)){
+                i++;
+            }
+            v0=i;
+        }
+        if (findNum(v2)!= 0){
+            v = findNum(v2)-1;
+        } else{
+            int i=list.size()-1;
+            while(i>0 && comparison(v2, list[i])){
+                i--;
+            }
+            v=i;
+        }
+        if (v0>v){
+            std::cout << "There is no elements in such interval" << std::endl;
+            return {};
+        }
+        result.list.assign(list.begin()+v0, list.begin()+v+1);
+        return result;
+    }
+    void print(){
+        if (list.empty()){
+            std::cout << "Sorry, your list is empty" << std::endl;
+            return;
+        }
+        for (const auto & i : list) {
+            std::cout << i << " ";
+        }
+        std::cout << std::endl;
+    }
 };
+template <typename ListType>
+void fillRandom(int n, ListType& list){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> length(1, 10);
+    std::uniform_int_distribution<> code(65, 90);
+    for (int i = 0; i < n; ++i) {
+        std::string item;
+        int len = length(gen);
+        for (int j=0; j<len; j++){
+            char c = code(gen);
+            item+=c;
+        }
+        list.addElement(item);
+    }
+}
 template <typename ListType>
 void interactiveChoose(ListType& list){
     while (true){
@@ -237,8 +315,8 @@ void interactiveChoose(ListType& list){
                     std::cout << "Inappropriate value" << std::endl;
                     return;
                 }
-                if(list.findElement(value)!= nullptr) {
-                    std::cout << "this element has number " << list.findNum(list.findElement(value)) << " in order"
+                if(list.findNum(value)!= 0) {
+                    std::cout << "this element has number " << list.findNum(value) << " in order"
                               << std::endl;
                 }
                 break;
@@ -261,7 +339,7 @@ void interactiveChoose(ListType& list){
                     std::cout << "error" << std::endl;
                     return;
                 }
-                list.fillRandom(n);
+                fillRandom(n, list);
                 break;
             case 7:
                 return;
@@ -285,11 +363,12 @@ void interactive(){
         std::cout << "Invalid value" << std::endl;
         return;
     }
-    switch (type) {
-        case 1:
-            LinkedList list;
-            interactiveChoose(list);
-
+    if (type==1){
+        LinkedList list;
+        interactiveChoose(list);
+    } else if(type == 2){
+        ArrayList list;
+        interactiveChoose(list);
     }
 }
 int main() {
