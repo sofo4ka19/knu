@@ -1,6 +1,7 @@
 //Текстові рядки, спершу за довжиною, за зростанням (“A”<”B”<”AA”<”AB”)
 #include <iostream>
 #include <random>
+#include <algorithm>
 
 bool comparison(const std::string& v1, const std::string& v2){
     if(v1.size()==v2.size()){
@@ -117,7 +118,7 @@ struct LinkedList {
                 current=current->next;
             }
             if (current== nullptr){
-                std::cout << "there is no such element" << std::endl;
+                //std::cout << "there is no such element" << std::endl;
                 return nullptr;
             }
             else{
@@ -194,7 +195,7 @@ struct ArrayList{
         for (int i = 0; i < list.size(); ++i) {
             if (list[i]==data) return i+1;
         }
-        std::cout << "there is no such element" << std::endl;
+        //std::cout << "there is no such element" << std::endl;
         return 0;
     }
     void deleteElement(const std::string& data){
@@ -311,12 +312,25 @@ struct BinaryTree{
         }
         return 1 + countNodes(node->left) + countNodes(node->right);
     }
+
     int findNum(const std::string& data) {
-        if (findElement(data)!= nullptr){
-            return countNodes(findElement(data)->left)+1;
+        int count = 0;
+        findNumHelper(root, data, count);
+        return count;
+    }
+
+    void findNumHelper(BinaryTreeNode* node, const std::string& data, int& count) {
+        if (node == nullptr) {
+            return;
         }
-        std::cout << "there is no such element" << std::endl;
-        return 0;
+        if (comparison(data, node->value)) {
+            findNumHelper(node->left, data, count);
+        } else if (comparison(node->value, data)) {
+            count += 1 + countNodes(node->left);
+            findNumHelper(node->right, data, count);
+        } else { // node->value == data
+            count += countNodes(node->left) + 1;
+        }
     }
 
 
@@ -395,7 +409,7 @@ struct BinaryTree{
         }
         BinaryTreeNode* start = findClosestElement(root, v1, true);
         BinaryTreeNode* end = findClosestElement(root, v2, false);
-        if (start == nullptr || end == nullptr || start->value > end->value) {
+        if (start == nullptr || end == nullptr || comparison(end->value,start->value)) {
             std::cout << "No elements in the given interval" << std::endl;
             return result;
         }
@@ -506,41 +520,41 @@ struct AVLTree{
         root = deleteHelper(root, value);
     }
 
-    AVLTreeNode* deleteHelper(AVLTreeNode* root, const std::string& value) {
-        if (!root) {
+    AVLTreeNode* deleteHelper(AVLTreeNode* node, const std::string& value) {
+        if (node== nullptr) {
             std::cout << "Sorry, there is no such element" << std::endl;
-            return root;
+            return node;
         }
-        if (value < root->value) root->left = deleteHelper(root->left, value);
-        else if (value > root->value) root->right = deleteHelper(root->right, value);
+        if (comparison(value, node->value)) node->left = deleteHelper(node->left, value);
+        else if (comparison(node->value, value)) node->right = deleteHelper(node->right, value);
         else {
-            if (!root->left || !root->right) {
-                AVLTreeNode* temp = root->left ? root->left : root->right;
-                if (!temp) {
-                    temp = root;
-                    root = nullptr;
-                } else *root = *temp;
+            if (node->left == nullptr || node->right== nullptr) {
+                AVLTreeNode* temp = node->left!= nullptr ? node->left : node->right;
+                if (temp == nullptr) {
+                    temp = node;
+                    node = nullptr;
+                } else *node = *temp;
                 delete temp;
             } else {
-                AVLTreeNode* temp = minValueNode(root->right);
-                root->value = temp->value;
-                root->right = deleteHelper(root->right, temp->value);
+                AVLTreeNode* temp = minValueNode(node->right);
+                node->value = temp->value;
+                node->right = deleteHelper(node->right, temp->value);
             }
         }
-        if (!root) return root;
-        root->height = 1 + std::max(height(root->left), height(root->right));
-        int balance = getBalance(root);
-        if (balance > 1 && getBalance(root->left) >= 0) return rightRotate(root);
-        if (balance > 1 && getBalance(root->left) < 0) {
-            root->left = leftRotate(root->left);
-            return rightRotate(root);
+        if (node== nullptr) return node;
+        node->height = 1 + std::max(height(node->left), height(node->right));
+        int balance = getBalance(node);
+        if (balance > 1 && getBalance(node->left) >= 0) return rightRotate(node);
+        if (balance > 1 && getBalance(node->left) < 0) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
         }
-        if (balance < -1 && getBalance(root->right) <= 0) return leftRotate(root);
-        if (balance < -1 && getBalance(root->right) > 0) {
-            root->right = rightRotate(root->right);
-            return leftRotate(root);
+        if (balance < -1 && getBalance(node->right) <= 0) return leftRotate(node);
+        if (balance < -1 && getBalance(node->right) > 0) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
         }
-        return root;
+        return node;
     }
     AVLTreeNode* minValueNode(AVLTreeNode* node) {
         AVLTreeNode* current = node;
@@ -553,12 +567,25 @@ struct AVLTree{
         }
         return 1 + countNodes(node->left) + countNodes(node->right);
     }
+
     int findNum(const std::string& data) {
-        if (findElement(data)!= nullptr){
-            return countNodes(findElement(data)->left)+1;
+        int count = 0;
+        findNumHelper(root, data, count);
+        return count;
+    }
+
+    void findNumHelper(AVLTreeNode* node, const std::string& data, int& count) {
+        if (node == nullptr) {
+            return;
         }
-        std::cout << "there is no such element" << std::endl;
-        return 0;
+        if (comparison(data, node->value)) {
+            findNumHelper(node->left, data, count);
+        } else if (comparison(node->value, data)) {
+            count += 1 + countNodes(node->left);
+            findNumHelper(node->right, data, count);
+        } else { // node->value == data
+            count += countNodes(node->left) + 1;
+        }
     }
 
     AVLTreeNode* findElement(const std::string& value) {
@@ -566,8 +593,8 @@ struct AVLTree{
     }
 
     AVLTreeNode* findElementHelper(AVLTreeNode* node, const std::string& value) {
-        if (!node) {
-            std::cout << "Sorry, there is no such element" << std::endl;
+        if (node== nullptr) {
+           // std::cout << "Sorry, there is no such element" << std::endl;
             return nullptr;
         }
         if (value == node->value) return node;
@@ -613,7 +640,7 @@ struct AVLTree{
         }
         AVLTreeNode* start = findClosestElement(root, v1, true);
         AVLTreeNode* end = findClosestElement(root, v2, false);
-        if (start == nullptr || end == nullptr || start->value > end->value) {
+        if (start == nullptr || end == nullptr || comparison(end->value, start->value)) {
             std::cout << "No elements in the given interval" << std::endl;
             return result;
         }
@@ -651,6 +678,326 @@ struct AVLTree{
         printSubtree(node->right);
     }
 };
+/*
+struct TwoThreeNode {
+    std::vector<std::string> values;
+    std::vector<TwoThreeNode*> children;
+
+    TwoThreeNode(const std::string& value) {
+        values.push_back(value);
+        children.push_back(nullptr);
+        children.push_back(nullptr);
+    }
+};
+
+struct TwoThreeTree {
+    TwoThreeNode *root;
+
+    TwoThreeTree() : root(nullptr) {}
+
+    void addElement(const std::string& value) {
+        if (root == nullptr) {
+            root = new TwoThreeNode(value);
+        } else {
+            addElementHelper(root, value);
+            if (root->values.size() == 3) {
+                splitRoot();
+            }
+        }
+    }
+
+    void addElementHelper(TwoThreeNode* node, const std::string& value) {
+        // Якщо вузол є листом
+        if (node->children[0] == nullptr) {
+            node->values.push_back(value);
+            std::sort(node->values.begin(), node->values.end());
+        } else {
+            // Якщо вузол не є листом
+            if (value < node->values[0]) {
+                addElementHelper(node->children[0], value);
+            } else if (node->values.size() == 1 || value < node->values[1]) {
+                addElementHelper(node->children[1], value);
+            } else {
+                if (node->children.size() == 2) {
+                    node->children.push_back(nullptr);
+                }
+                addElementHelper(node->children[2], value);
+            }
+
+            // Перевірка на переповнення дітей
+            for (int i = 0; i < node->children.size(); ++i) {
+                if (node->children[i] && node->children[i]->values.size() == 3) {
+                    splitNode(node, i);
+                }
+            }
+        }
+    }
+
+    void splitNode(TwoThreeNode* parent, int index) {
+        TwoThreeNode* node = parent->children[index];
+        parent->values.insert(parent->values.begin() + index, node->values[1]);
+
+        TwoThreeNode* leftChild = new TwoThreeNode(node->values[0]);
+        TwoThreeNode* rightChild = new TwoThreeNode(node->values[2]);
+
+        if (node->children.size() > 2) {
+            leftChild->children = { node->children[0], node->children[1] };
+            rightChild->children = { node->children[2], node->children[3] };
+        }
+
+        parent->children[index] = leftChild;
+        parent->children.insert(parent->children.begin() + index + 1, rightChild);
+
+        delete node;
+    }
+
+    void splitRoot() {
+        TwoThreeNode* oldRoot = root;
+        root = new TwoThreeNode(oldRoot->values[1]);
+
+        root->children[0] = new TwoThreeNode(oldRoot->values[0]);
+        root->children[1] = new TwoThreeNode(oldRoot->values[2]);
+
+        if (oldRoot->children.size() > 2) {
+            root->children[0]->children = { oldRoot->children[0], oldRoot->children[1] };
+            root->children[1]->children = { oldRoot->children[2], oldRoot->children[3] };
+        }
+
+        delete oldRoot;
+    }
+
+    void deleteElement(const std::string &value) {
+        if (root != nullptr) {
+            deleteHelper(root, value);
+            if (root->values.empty()) {
+                TwoThreeNode *oldRoot = root;
+                root = root->children[0];
+                delete oldRoot;
+            }
+        } else {
+            std::cout << "Sorry, there is no such element" << std::endl;
+        }
+    }
+
+    void deleteHelper(TwoThreeNode *node, const std::string &value) {
+        auto it = std::find(node->values.begin(), node->values.end(), value);
+        if (it != node->values.end()) {
+            if (node->children[0] == nullptr) {
+                node->values.erase(it);
+            } else {
+                int idx = std::distance(node->values.begin(), it);
+                node->values[idx] = findMin(node->children[idx + 1]);
+                deleteHelper(node->children[idx + 1], node->values[idx]);
+                if (node->children[idx + 1]->values.empty()) {
+                    mergeNodes(node, idx + 1);
+                }
+            }
+        } else {
+            int childIdx = value < node->values[0] ? 0 : (node->values.size() == 1 || value < node->values[1] ? 1 : 2);
+            deleteHelper(node->children[childIdx], value);
+            if (node->children[childIdx]->values.empty()) {
+                mergeNodes(node, childIdx);
+            }
+        }
+    }
+
+    std::string findMin(TwoThreeNode *subtreeRoot) {
+        if (subtreeRoot == nullptr) {
+            throw std::runtime_error("Subtree is empty");
+        }
+
+        TwoThreeNode *node = subtreeRoot;
+        while (node->children[0] != nullptr) {
+            node = node->children[0];
+        }
+
+        return node->values[0];
+    }
+
+    std::string findMax(TwoThreeNode *subtreeRoot) {
+        if (subtreeRoot == nullptr) {
+            throw std::runtime_error("Subtree is empty");
+        }
+
+        TwoThreeNode *node = subtreeRoot;
+        while (node->children[node->children.size() - 1] != nullptr) {
+            node = node->children[node->children.size() - 1];
+        }
+
+        return node->values[node->values.size() - 1];
+    }
+
+    TwoThreeTree findInterval(const std::string &v1, const std::string &v2) {
+        TwoThreeTree resultTree;
+
+        if (root == nullptr) {
+            return resultTree;
+        }
+
+        if (comparison(v2, v1) || comparison(v2, findMin(root)) || comparison(findMax(root), v1)) {
+            std::cout << "Invalid interval" << std::endl;
+            return resultTree;
+        }
+
+        TwoThreeNode *start = findClosestElement(root, v1, true);
+        TwoThreeNode *end = findClosestElement(root, v2, false);
+
+        if (start == nullptr || end == nullptr || start->values[0] > end->values[0]) {
+            std::cout << "No elements in the given interval" << std::endl;
+            return resultTree;
+        }
+
+        findInterval23(root, v1, v2, resultTree);
+
+        return resultTree;
+    }
+
+    void findInterval23(TwoThreeNode *node, const std::string &v1, const std::string &v2, TwoThreeTree &resultTree) {
+        if (node == nullptr) {
+            return;
+        }
+
+        for (const std::string &value: node->values) {
+            if ((comparison(v1, value) || value == v1) && (comparison(value, v2) || value == v2)) {
+                resultTree.addElement(value);
+            }
+        }
+
+        for (size_t i = 0; i < node->children.size(); ++i) {
+            if (i < node->values.size() && (comparison(v1, node->values[i]) || v1 == node->values[i])) {
+                findInterval23(node->children[i], v1, v2, resultTree);
+            }
+        }
+
+        if (node->children.size() > node->values.size() &&
+            (comparison(node->values[node->values.size() - 1], v2) || v2 >= node->values[node->values.size() - 1])) {
+            findInterval23(node->children[node->children.size() - 1], v1, v2, resultTree);
+        }
+    }
+
+    TwoThreeNode *findClosestElement(TwoThreeNode *node, const std::string &value, bool isStart) {
+        TwoThreeNode *closest = nullptr;
+
+        while (node != nullptr) {
+            if (isStart) {
+                if (value <= node->values[0]) {
+                    closest = node;
+                    node = node->children[0];
+                } else if (node->values.size() == 1 || value <= node->values[1]) {
+                    closest = node;
+                    node = node->children[1];
+                } else {
+                    node = node->children[2];
+                }
+            } else {
+                if (value >= node->values[node->values.size() - 1]) {
+                    closest = node;
+                    node = node->children[node->children.size() - 1];
+                } else if (value >= node->values[0]) {
+                    closest = node;
+                    node = node->children[1];
+                } else {
+                    node = node->children[0];
+                }
+            }
+        }
+
+        return closest;
+    }
+
+    void mergeNodes(TwoThreeNode *parent, int index) {
+        if (index > 0) {
+            index--;
+            parent->children[index]->values.push_back(parent->values[index]);
+            parent->children[index]->values.push_back(parent->children[index + 1]->values[0]);
+            parent->children[index]->children.insert(parent->children[index]->children.end(),
+                                                     parent->children[index + 1]->children.begin(),
+                                                     parent->children[index + 1]->children.end());
+            parent->values.erase(parent->values.begin() + index);
+            parent->children.erase(parent->children.begin() + index + 1);
+        } else {
+            parent->children[index]->values.push_back(parent->values[index]);
+            parent->children[index]->values.push_back(parent->children[index + 1]->values[0]);
+            parent->children[index]->children.insert(parent->children[index]->children.end(),
+                                                     parent->children[index + 1]->children.begin(),
+                                                     parent->children[index + 1]->children.end());
+            parent->values.erase(parent->values.begin() + index);
+            parent->children.erase(parent->children.begin() + index + 1);
+        }
+    }
+
+    int findNum(const std::string &value) {
+        return findNumHelper(root, value);
+    }
+
+    int findNumHelper(TwoThreeNode *node, const std::string &value) {
+        if (!node) {
+            std::cout << "Sorry, there is no such element" << std::endl;
+            return 0;
+        }
+        int pos = 1;
+        TwoThreeNode *current = root;
+        while (current) {
+            if (std::find(current->values.begin(), current->values.end(), value) != current->values.end()) {
+                break;
+            } else if (value < current->values[0]) {
+                current = current->children[0];
+            } else if (current->values.size() == 1 || value < current->values[1]) {
+                pos += current->children[0] ? current->children[0]->values.size() + 1 : 1;
+                current = current->children[1];
+            } else {
+                pos += current->children[0] ? current->children[0]->values.size() + 1 : 1;
+                pos += current->children[1] ? current->children[1]->values.size() + 1 : 1;
+                current = current->children[2];
+            }
+        }
+        return pos;
+    }
+
+    TwoThreeNode *findElement(const std::string &value) {
+        return findElementHelper(root, value);
+    }
+
+    TwoThreeNode *findElementHelper(TwoThreeNode *node, const std::string &value) {
+        if (!node) {
+            std::cout << "Sorry, there is no such element" << std::endl;
+            return nullptr;
+        }
+        if (std::find(node->values.begin(), node->values.end(), value) != node->values.end()) {
+            return node;
+        }
+        if (value < node->values[0]) {
+            return findElementHelper(node->children[0], value);
+        } else if (node->values.size() == 1 || value < node->values[1]) {
+            return findElementHelper(node->children[1], value);
+        } else {
+            return findElementHelper(node->children[2], value);
+        }
+    }
+
+    void print() {
+        if (root == nullptr) {
+            std::cout << "Tree is empty" << std::endl;
+            return;
+        }
+        printSubtree(root);
+        std::cout << std::endl;
+    }
+
+    void printSubtree(TwoThreeNode* node) {
+        if (node== nullptr) return;
+
+        if (node->children[0]) printSubtree(node->children[0]);
+        std::cout << node->values[0] << " ";
+
+        if (node->children[1]) printSubtree(node->children[1]);
+
+        if (node->values.size() == 2) {
+            std::cout << node->values[1] << " ";
+            if (node->children[2]) printSubtree(node->children[2]);
+        }
+    }
+};*/
 template <typename ListType>
 void fillRandom(int n, ListType& list){
     std::random_device rd;
@@ -753,11 +1100,11 @@ void interactive(){
                  "2. Array list\n"
                  "3. Binary search tree\n"
                  "4. AVL tree\n"
-                 "5. 2-3 tree"
+                 //"5. 2-3 tree"
                  << std::endl;
     int type;
     std::cin >> type;
-    if (std::cin.fail() || type<1 || type>5){
+    if (std::cin.fail() || type<1 || type>4){
         std::cout << "Invalid value" << std::endl;
         return;
     }
@@ -773,9 +1120,85 @@ void interactive(){
     } else if(type==4){
         AVLTree list;
         interactiveChoose(list);
+    } /*else if(type==5){
+        TwoThreeTree list;
+        interactiveChoose(list);
+    } */else{
+        return;
     }
 }
+void demonstration(){
+    std::cout << "let's start with linked list form, add to it AB, CBD, AK, A and 11 random fields" << std::endl;
+    LinkedList linked;
+    linked.addElement("AB");
+    linked.addElement("CBD");
+    linked.addElement("AK");
+    linked.addElement("A");
+    fillRandom(11, linked);
+    linked.print();
+    std::cout << "delete AB" << std::endl;
+    linked.deleteElement("AB");
+    linked.print();
+    std::cout << "find number CBD in order" << std::endl << linked.findNum("CBD") << std::endl << "find elements from AAA to GGGGG" << std::endl;
+    linked.findInterval("AAA", "GGGGG").print();
+
+    std::cout << "array list form, add to it BC, CRRR, AK, A and 11 random fields" << std::endl;
+    ArrayList array;
+    array.addElement("BC");
+    array.addElement("CRRR");
+    array.addElement("AK");
+    array.addElement("A");
+    fillRandom(11, array);
+    array.print();
+    std::cout << "delete A" << std::endl;
+    array.deleteElement("A");
+    array.print();
+    std::cout << "find number BC in order" << std::endl << array.findNum("BC") << std::endl << "find elements from BB to GGGGG" << std::endl;
+    array.findInterval("BB", "GGGGG").print();
+
+    std::cout << "binary search tree list form, add to it BC, CRRR, BKK, BB and 11 random fields" << std::endl;
+    BinaryTree binary;
+    binary.addElement("BC");
+    binary.addElement("CRRR");
+    binary.addElement("BKK");
+    binary.addElement("BB");
+    fillRandom(11, binary);
+    binary.print();
+    std::cout << "delete BC" << std::endl;
+    binary.deleteElement("BC");
+    binary.print();
+    std::cout << "find number BB in order" << std::endl << binary.findNum("BB") << std::endl << "find elements from CCC to GGGK" << std::endl;
+    binary.findInterval("CCC", "GGGK").print();
+
+    std::cout << "AVL tree list form, add to it BCRK, GTLFN, BKK, BB and 11 random fields" << std::endl;
+    AVLTree avl;
+    avl.addElement("BCRK");
+    avl.addElement("GTLFN");
+    avl.addElement("BKK");
+    avl.addElement("BB");
+    fillRandom(11, avl);
+    avl.print();
+    std::cout << "delete BKK" << std::endl;
+    avl.deleteElement("BKK");
+    avl.print();
+    std::cout << "find number GTLFN in order" << std::endl << avl.findNum("GTLFN") << std::endl << "find elements from KK to LLLLL" << std::endl;
+    avl.findInterval("KK", "LLLLL").print();
+}
 int main() {
-    interactive();
+    int mode;
+    std::cout << "choose the mode: 1 - interactive; 2 - demonstration; 3 - benchmark" << std::endl;
+    std::cin >> mode;
+    if (std::cin.fail() || mode<1 || mode>3){
+        std::cout << "error";
+        return 0;
+    }
+    switch (mode) {
+        case 1:
+            interactive();
+            break;
+        case 2:
+            demonstration();
+            break;
+    }
     return 0;
 }
