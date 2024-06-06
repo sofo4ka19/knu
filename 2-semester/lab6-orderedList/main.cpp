@@ -435,6 +435,222 @@ struct BinaryTree{
         printSubtree(node->right);
     }
 };
+struct AVLTreeNode{
+    std::string value;
+    AVLTreeNode* left;
+    AVLTreeNode* right;
+    int height;
+
+    AVLTreeNode(const std::string& value)
+            : value(value), left(nullptr), right(nullptr), height(1) {}
+
+};
+struct AVLTree{
+    AVLTreeNode* root;
+
+    AVLTree(): root(nullptr) {}
+
+    int height(AVLTreeNode* node) {
+        return node!= nullptr ? node->height : 0;
+    }
+
+    int getBalance(AVLTreeNode* node) {
+        return node!= nullptr ? height(node->left) - height(node->right) : 0;
+    }
+
+    AVLTreeNode* rightRotate(AVLTreeNode* y) {
+        AVLTreeNode* x = y->left;
+        AVLTreeNode* T2 = x->right;
+        x->right = y;
+        y->left = T2;
+        y->height = std::max(height(y->left), height(y->right)) + 1;
+        x->height = std::max(height(x->left), height(x->right)) + 1;
+        return x;
+    }
+
+    AVLTreeNode* leftRotate(AVLTreeNode* x) {
+        AVLTreeNode* y = x->right;
+        AVLTreeNode* T2 = y->left;
+        y->left = x;
+        x->right = T2;
+        x->height = std::max(height(x->left), height(x->right)) + 1;
+        y->height = std::max(height(y->left), height(y->right)) + 1;
+        return y;
+    }
+
+    void addElement(const std::string& value){
+        root = addElement2(value, root);
+    }
+    AVLTreeNode* addElement2(const std::string& value, AVLTreeNode* node) {
+        if (node== nullptr) return new AVLTreeNode(value);
+        if (comparison(value,node->value)) node->left = addElement2(value, node->left);
+        else if (comparison(node->value,value)) node->right = addElement2(value, node->right);
+        else return node;
+
+        node->height = 1 + std::max(height(node->left), height(node->right));
+        int balance = getBalance(node);
+
+        if (balance > 1 && comparison(value,node->left->value)) return rightRotate(node);
+        if (balance < -1 && comparison(node->right->value, value)) return leftRotate(node);
+        if (balance > 1 && comparison(node->left->value, value)) {
+            node->left = leftRotate(node->left);
+            return rightRotate(node);
+        }
+        if (balance < -1 && comparison(value, node->right->value)) {
+            node->right = rightRotate(node->right);
+            return leftRotate(node);
+        }
+        return node;
+    }
+    void deleteElement(const std::string& value) {
+        root = deleteHelper(root, value);
+    }
+
+    AVLTreeNode* deleteHelper(AVLTreeNode* root, const std::string& value) {
+        if (!root) {
+            std::cout << "Sorry, there is no such element" << std::endl;
+            return root;
+        }
+        if (value < root->value) root->left = deleteHelper(root->left, value);
+        else if (value > root->value) root->right = deleteHelper(root->right, value);
+        else {
+            if (!root->left || !root->right) {
+                AVLTreeNode* temp = root->left ? root->left : root->right;
+                if (!temp) {
+                    temp = root;
+                    root = nullptr;
+                } else *root = *temp;
+                delete temp;
+            } else {
+                AVLTreeNode* temp = minValueNode(root->right);
+                root->value = temp->value;
+                root->right = deleteHelper(root->right, temp->value);
+            }
+        }
+        if (!root) return root;
+        root->height = 1 + std::max(height(root->left), height(root->right));
+        int balance = getBalance(root);
+        if (balance > 1 && getBalance(root->left) >= 0) return rightRotate(root);
+        if (balance > 1 && getBalance(root->left) < 0) {
+            root->left = leftRotate(root->left);
+            return rightRotate(root);
+        }
+        if (balance < -1 && getBalance(root->right) <= 0) return leftRotate(root);
+        if (balance < -1 && getBalance(root->right) > 0) {
+            root->right = rightRotate(root->right);
+            return leftRotate(root);
+        }
+        return root;
+    }
+    AVLTreeNode* minValueNode(AVLTreeNode* node) {
+        AVLTreeNode* current = node;
+        while (current->left != nullptr) current = current->left;
+        return current;
+    }
+    int countNodes(AVLTreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+        return 1 + countNodes(node->left) + countNodes(node->right);
+    }
+    int findNum(const std::string& data) {
+        if (findElement(data)!= nullptr){
+            return countNodes(findElement(data)->left)+1;
+        }
+        std::cout << "there is no such element" << std::endl;
+        return 0;
+    }
+
+    AVLTreeNode* findElement(const std::string& value) {
+        return findElementHelper(root, value);
+    }
+
+    AVLTreeNode* findElementHelper(AVLTreeNode* node, const std::string& value) {
+        if (!node) {
+            std::cout << "Sorry, there is no such element" << std::endl;
+            return nullptr;
+        }
+        if (value == node->value) return node;
+        if (comparison(value, node->value)) return findElementHelper(node->left, value);
+        return findElementHelper(node->right, value);
+    }
+    AVLTreeNode* findMax(AVLTreeNode* node) {
+        while (node->right != nullptr) {
+            node = node->right;
+        }
+        return node;
+    }
+    AVLTreeNode* findClosestElement(AVLTreeNode* node, const std::string& value, bool isStart) {
+        AVLTreeNode* closest = nullptr;
+        while (node != nullptr) {
+            if (isStart) {
+                if (node->value == value || comparison(value, node->value)) {
+                    closest = node;
+                    node = node->left;
+                } else {
+                    node = node->right;
+                }
+            } else {
+                if (node->value == value || comparison(node->value, value)) {
+                    closest = node;
+                    node = node->right;
+                } else {
+                    node = node->left;
+                }
+            }
+        }
+        return closest;
+    }
+    AVLTree findInterval(const std::string& v1, const std::string& v2) {
+        AVLTree result;
+        if (root == nullptr) {
+            std::cout << "Tree is empty" << std::endl;
+            return result;
+        }
+        if (comparison(v2, v1) || comparison(v2, minValueNode(root)->value) || comparison(findMax(root)->value, v1)) {
+            std::cout << "Invalid interval" << std::endl;
+            return result;
+        }
+        AVLTreeNode* start = findClosestElement(root, v1, true);
+        AVLTreeNode* end = findClosestElement(root, v2, false);
+        if (start == nullptr || end == nullptr || start->value > end->value) {
+            std::cout << "No elements in the given interval" << std::endl;
+            return result;
+        }
+        copyInterval(root, start->value, end->value, result);
+        return result;
+    }
+    void copyInterval(AVLTreeNode* node, const std::string& v1, const std::string& v2, AVLTree& result) {
+        if (node == nullptr) {
+            return;
+        }
+        if (comparison(v1, node->value)) {
+            copyInterval(node->left, v1, v2, result);
+        }
+        if ((node->value == v1 || comparison(v1, node->value)) && (node->value == v2 || comparison(node->value, v2))) {
+            result.addElement(node->value);
+        }
+        if (comparison(node->value, v2)) {
+            copyInterval(node->right, v1, v2, result);
+        }
+    }
+
+    void print() {
+        if (root== nullptr){
+            std::cout << "Tree is empty" << std::endl;
+            return;
+        }
+        printSubtree(root);
+        std::cout << std::endl;
+    }
+
+    void printSubtree(AVLTreeNode* node) {
+        if (!node) return;
+        printSubtree(node->left);
+        std::cout << node->value << " ";
+        printSubtree(node->right);
+    }
+};
 template <typename ListType>
 void fillRandom(int n, ListType& list){
     std::random_device rd;
@@ -553,6 +769,9 @@ void interactive(){
         interactiveChoose(list);
     } else if(type==3){
         BinaryTree list;
+        interactiveChoose(list);
+    } else if(type==4){
+        AVLTree list;
         interactiveChoose(list);
     }
 }
