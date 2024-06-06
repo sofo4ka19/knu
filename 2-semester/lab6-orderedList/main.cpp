@@ -2,6 +2,8 @@
 #include <iostream>
 #include <random>
 #include <algorithm>
+#include <chrono>
+#include "benchmark.h"
 
 bool comparison(const std::string& v1, const std::string& v2){
     if(v1.size()==v2.size()){
@@ -1184,6 +1186,153 @@ void demonstration(){
     std::cout << "find number GTLFN in order" << std::endl << avl.findNum("GTLFN") << std::endl << "find elements from KK to LLLLL" << std::endl;
     avl.findInterval("KK", "LLLLL").print();
 }
+void benchmark(){
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::mt19937 mersenne(rd());
+    using std::chrono::high_resolution_clock;
+    using std::chrono::duration_cast;
+    using std::chrono::duration;
+    using std::chrono::milliseconds;
+    std::uniform_int_distribution<> n(10, 100);
+    int num = n(gen);
+    std::cout << "ordered list which contains " << num << " elements:\nin form of linked list:" << std::endl;
+    auto t0 = high_resolution_clock::now();
+    LinkedList linked;
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        fillRandom(num-1, linked);
+    }
+    auto t1 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("adding an element");
+        linked.addElement("BJDA");
+    }
+    auto t2 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding an element");
+        linked.findNum("BJDA");
+    }
+    auto t3 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("deleting an element");
+        linked.deleteElement("BJDA");
+    }
+    auto t4 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        linked.print();
+    }
+    auto t5 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding interval");
+        linked.findInterval("AAA", "MMMMMMMM");
+    }
+    auto t6 = high_resolution_clock::now();
+    std::cout << "create random - " << (t1-t0).count() << "ms\nadd an element - " << (t2-t1).count() << "ms\nfind an element - " << (t3-t2).count() << "ms\ndelete an element - " << (t4-t3).count() << "ms\nprint - " << (t5-t4).count() << "ms\nfind interval - " << (t6-t5).count() << "ms\nat all - " << (t6-t0).count() << "ms\n" << std::endl;
+    std::cout << "in form of array list:" << std::endl;
+    t0 = high_resolution_clock::now();
+    ArrayList array;
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        fillRandom(num-1, array);
+    }
+    t1 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("adding an element");
+        array.addElement("BJDA");
+    }
+    t2 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding an element");
+        array.findNum("BJDA");
+    }
+    t3 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("deleting an element");
+        array.deleteElement("BJDA");
+    }
+    t4 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        array.print();
+    }
+    t5 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding interval");
+        array.findInterval("AAA", "MMMMM");
+    }
+    t6 = high_resolution_clock::now();
+    std::cout << "create random - " << (t1-t0).count() << "ms\nadd an element - " << (t2-t1).count() << "ms\nfind an element - " << (t3-t2).count() << "ms\ndelete an element - " << (t4-t3).count() << "ms\nprint - " << (t5-t4).count() << "ms\nfind interval - " << (t6-t5).count() << "ms\nat all - " << (t6-t0).count() << "ms" << std::endl;
+    std::cout << "in form of binary search tree:" << std::endl;
+    t0 = high_resolution_clock::now();
+    BinaryTree binary;
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        fillRandom(num-1, binary);
+    }
+    t1 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("adding an element");
+        binary.addElement("BJDA");
+    }
+    t2 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding an element");
+        binary.findNum("BJDA");
+    }
+    t3 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("deleting an element");
+        binary.deleteElement("BJDA");
+    }
+    t4 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        binary.print();
+    }
+    t5 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding interval");
+        binary.findInterval("AAA", "MMMMM");
+    }
+    t6 = high_resolution_clock::now();
+    std::cout << "create random - " << (t1-t0).count() << "ms\nadd an element - " << (t2-t1).count() << "ms\nfind an element - " << (t3-t2).count() << "ms\ndelete an element - " << (t4-t3).count() << "ms\nprint - " << (t5-t4).count() << "ms\nfind interval - " << (t6-t5).count() << "ms\nat all - " << (t6-t0).count() << "ms" << std::endl;
+    std::cout << "in form of AVL tree:" << std::endl;
+    t0 = high_resolution_clock::now();
+    AVLTree avl;
+    {
+        BenchmarkMax memoryBenchmark("creating random");
+        fillRandom(num-1, avl);
+    }
+    t1 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("adding an element");
+        avl.addElement("BJDA");
+    }
+    t2 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding an element");
+        avl.findNum("BJDA");
+    }
+    t3 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("deleting an element");
+        avl.deleteElement("BJDA");
+    }
+    t4 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("printing");
+        avl.print();
+    }
+    t5 = high_resolution_clock::now();
+    {
+        BenchmarkMax memoryBenchmark("finding interval");
+        avl.findInterval("AAA", "MMMMM");
+    }
+    t6 = high_resolution_clock::now();
+    std::cout << "create random - " << (t1-t0).count() << "ms\nadd an element - " << (t2-t1).count() << "ms\nfind an element - " << (t3-t2).count() << "ms\ndelete an element - " << (t4-t3).count() << "ms\nprint - " << (t5-t4).count() << "ms\nfind interval - " << (t6-t5).count() << "ms\nat all - " << (t6-t0).count() << "ms" << std::endl;
+}
 int main() {
     int mode;
     std::cout << "choose the mode: 1 - interactive; 2 - demonstration; 3 - benchmark" << std::endl;
@@ -1199,6 +1348,11 @@ int main() {
         case 2:
             demonstration();
             break;
+        case 3:
+            benchmark();
+            break;
+        default:
+            return 0;
     }
     return 0;
 }
