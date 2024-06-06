@@ -253,6 +253,188 @@ struct ArrayList{
         std::cout << std::endl;
     }
 };
+
+struct BinaryTreeNode{
+    std::string value;
+    BinaryTreeNode* left;
+    BinaryTreeNode* right;
+
+    BinaryTreeNode(const std::string& value): value{value}, left{nullptr}, right{nullptr} {}
+
+};
+struct BinaryTree{
+    BinaryTreeNode* root;
+
+    BinaryTree() : root(nullptr) {}
+
+    void addElement(const std::string& data){
+        if(root== nullptr){
+            root = new BinaryTreeNode(data);
+        }
+        else{
+            addElement2(data, root);
+        }
+    }
+    void addElement2(const std::string& data, BinaryTreeNode* node){
+        if (comparison(node->value, data)){
+            if (node->right== nullptr){
+                node->right = new BinaryTreeNode(data);
+            } else{
+                addElement2(data, node->right);
+            }
+        } else{
+            if (node->left== nullptr){
+                node->left= new BinaryTreeNode(data);
+            } else{
+                addElement2(data, node->left);
+            }
+        }
+    }
+
+    BinaryTreeNode* findElement(const std::string& data) {
+        return findElementHelper(root, data);
+    }
+
+    BinaryTreeNode* findElementHelper(BinaryTreeNode* node, const std::string& data) {
+        if (node == nullptr || node->value == data) {
+            return node;
+        }
+        if (comparison(node->value, data)) {
+            return findElementHelper(node->right, data);
+        }
+        return findElementHelper(node->left, data);
+    }
+
+    int countNodes(BinaryTreeNode* node) {
+        if (node == nullptr) {
+            return 0;
+        }
+        return 1 + countNodes(node->left) + countNodes(node->right);
+    }
+    int findNum(const std::string& data) {
+        if (findElement(data)!= nullptr){
+            return countNodes(findElement(data)->left)+1;
+        }
+        std::cout << "there is no such element" << std::endl;
+        return 0;
+    }
+
+
+    void deleteElement(const std::string& data) {
+        root = deleteElementHelper(root, data);
+    }
+
+    BinaryTreeNode* findMin(BinaryTreeNode* node) {
+        while (node->left != nullptr) {
+            node = node->left;
+        }
+        return node;
+    }
+
+    BinaryTreeNode* deleteElementHelper(BinaryTreeNode* node, const std::string& data) {
+        if (node == nullptr) {
+            std::cout << "Element " << data << " not found" << std::endl;
+            return node;
+        }
+        if(node->value==data){
+            if (node->left == nullptr) {
+                BinaryTreeNode* temp = node->right;
+                delete node;
+                return temp;
+            } else if (node->right == nullptr) {
+                BinaryTreeNode* temp = node->left;
+                delete node;
+                return temp;
+            }
+            BinaryTreeNode* temp = findMin(node->right);
+            node->value = temp->value;
+            node->right = deleteElementHelper(node->right, temp->value);
+        } else if (comparison(node->value, data)) {
+            node->right = deleteElementHelper(node->right, data);
+        } else {
+            node->left = deleteElementHelper(node->left, data);
+         }
+        return node;
+    }
+    BinaryTreeNode* findMax(BinaryTreeNode* node) {
+        while (node->right != nullptr) {
+            node = node->right;
+        }
+        return node;
+    }
+    BinaryTreeNode* findClosestElement(BinaryTreeNode* node, const std::string& value, bool isStart) {
+        BinaryTreeNode* closest = nullptr;
+        while (node != nullptr) {
+            if (isStart) {
+                if (node->value == value || comparison(value, node->value)) {
+                    closest = node;
+                    node = node->left;
+                } else {
+                    node = node->right;
+                }
+            } else {
+                if (node->value == value || comparison(node->value, value)) {
+                    closest = node;
+                    node = node->right;
+                } else {
+                    node = node->left;
+                }
+            }
+        }
+        return closest;
+    }
+    BinaryTree findInterval(const std::string& v1, const std::string& v2) {
+        BinaryTree result;
+        if (root == nullptr) {
+            std::cout << "Tree is empty" << std::endl;
+            return result;
+        }
+        if (comparison(v2, v1) || comparison(v2, findMin(root)->value) || comparison(findMax(root)->value, v1)) {
+            std::cout << "Invalid interval" << std::endl;
+            return result;
+        }
+        BinaryTreeNode* start = findClosestElement(root, v1, true);
+        BinaryTreeNode* end = findClosestElement(root, v2, false);
+        if (start == nullptr || end == nullptr || start->value > end->value) {
+            std::cout << "No elements in the given interval" << std::endl;
+            return result;
+        }
+        copyInterval(root, start->value, end->value, result);
+        return result;
+    }
+    void copyInterval(BinaryTreeNode* node, const std::string& v1, const std::string& v2, BinaryTree& result) {
+        if (node == nullptr) {
+            return;
+        }
+        if (comparison(v1, node->value)) {
+            copyInterval(node->left, v1, v2, result);
+        }
+        if ((node->value == v1 || comparison(v1, node->value)) && (node->value == v2 || comparison(node->value, v2))) {
+            result.addElement(node->value);
+        }
+        if (comparison(node->value, v2)) {
+            copyInterval(node->right, v1, v2, result);
+        }
+    }
+    void print() {
+        if (root!= nullptr){
+            printSubtree(root);
+            std::cout << std::endl;
+            return;
+        }
+        std::cout << "tree is empty" << std::endl;
+        return;
+    }
+
+    void printSubtree(BinaryTreeNode* node) {
+        if (node == nullptr) {
+            return;
+        }
+        printSubtree(node->left);
+        std::cout << node->value << " ";
+        printSubtree(node->right);
+    }
+};
 template <typename ListType>
 void fillRandom(int n, ListType& list){
     std::random_device rd;
@@ -368,6 +550,9 @@ void interactive(){
         interactiveChoose(list);
     } else if(type == 2){
         ArrayList list;
+        interactiveChoose(list);
+    } else if(type==3){
+        BinaryTree list;
         interactiveChoose(list);
     }
 }
