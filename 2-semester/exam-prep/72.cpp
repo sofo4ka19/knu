@@ -152,18 +152,7 @@ namespace var_72 {
         return nullptr;
     }
     //3---------------------------------------------------------------------------------------------------------
-    struct GraphMatrix{
-        int** graph;
-        int numVertices;
-
-        GraphMatrix(int numVertices): numVertices(numVertices) {
-            graph = new int*[numVertices];
-            for (int i = 0; i < numVertices; ++i) {
-                graph[i] = new int[numVertices];
-            }
-        }
-    };
-    struct GraphNode {
+        struct GraphNode {
         int vertex;
         GraphNode *next;
 
@@ -186,11 +175,12 @@ namespace var_72 {
             graph[v1]=edge;
         }
     };
-    Graph fromMatrixToStructure(GraphMatrix graph){
-        Graph result(graph.numVertices);
-        for (int i = 0; i < graph.numVertices; ++i) {
-            for (int j = 0; j < graph.numVertices; ++j) {
-                if (graph.graph[i][j]!=0){
+    template <size_t size>
+    Graph fromMatrixToStructure(bool graph[size][size]){
+        Graph result(size);
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                if (graph[i][j]){
                     result.addEdge(i,j);
                 }
             }
@@ -198,11 +188,11 @@ namespace var_72 {
         return result;
     }
     //-------------------------------------------------------------------------------------------------------
-    void fillRandomAndPrint(GraphMatrix& graph){
-        for (int i = 0; i < graph.numVertices; ++i) {
-            for (int j = 0; j < graph.numVertices; ++j) {
-                graph.graph[i][j]=rand()%2;
-                std::cout << graph.graph[i][j] << " ";
+    void fillRandomAndPrint(bool graph[12][12]){
+        for (int i = 0; i < 12; ++i) {
+            for (int j = 0; j < 12; ++j) {
+                graph[i][j]=rand()%2;
+                std::cout << graph[i][j] << " ";
             }
             std::cout<<std::endl;
         }
@@ -233,7 +223,7 @@ namespace var_72 {
         node->right->right = new TreeNode(7);
         std::cout << find(7,node)->value<< std::endl;
 
-        GraphMatrix matrix(12);
+        bool matrix[12][12]{false};
         fillRandomAndPrint(matrix);
         Graph graph = fromMatrixToStructure(matrix);
         printGraph(graph);
