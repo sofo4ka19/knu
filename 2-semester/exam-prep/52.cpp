@@ -138,6 +138,53 @@ namespace var_52{
         std::cout<<std::endl;
     }
     //3--------------------------------------------------------------------------------------------------------
+    struct QueueNode {
+        int value;
+        QueueNode *next;
+        QueueNode *prev;
+
+        QueueNode(int value) : value(value), next(nullptr), prev(nullptr) {}
+    };
+
+    struct Queue {
+        QueueNode *start;
+        QueueNode *end;
+
+        Queue() : start(nullptr), end(nullptr) {};
+
+        void add(int value) {
+            QueueNode *node = new QueueNode(value);
+            if (isEmpty()) {
+                start = end = node;
+                return;
+            }
+            node->prev = end;
+            end->next = node;
+            end = end->next;
+        }
+
+        void remove() {
+            if (isEmpty()) {
+                return;
+            } else if (start->next == nullptr) {
+                end = nullptr;
+                delete start;
+                start = nullptr;
+                return;
+            }
+            QueueNode *newStart = start->next;
+            newStart->prev = nullptr;
+            delete start;
+            start = newStart;
+        }
+
+        bool isEmpty() {
+            if (start == nullptr) {
+                return true;
+            }
+            return false;
+        }
+    };
     struct GraphNode{
         int vertex;
         GraphNode* next;
@@ -159,10 +206,40 @@ namespace var_52{
             edge->next=graph[v1];
             graph[v1]=edge;
         }
-        GraphNode* findAdj(int v1){
-            GraphNode* vertices;
-            for (int i = 0; i < ; ++i) {
+        void findAdj(int v1){
+            bool visited[numVertices];
+            for (int i = 0; i < numVertices; ++i) {
+                visited[i]= false;
+            }
+            Queue q;
+            q.add(v1);
+            visited[v1]=true;
+            while (!q.isEmpty()){
+                int current = q.start->value;
+                q.remove();
+                std::cout << current << " ";
 
+                GraphNode* cur = graph[current];
+                while (cur!= nullptr){
+                    if (!visited[cur->vertex]){
+                        q.add(cur->vertex);
+                        visited[cur->vertex]=true;
+                    }
+                    cur=cur->next;
+                }
+
+            }
+        }
+//------------------------------------------------------------------------------------------------------------
+        void print() {
+            for (int i = 0; i < numVertices; i++) {
+                std::cout << "Vertex " << i << " -> ";
+                GraphNode *current = graph[i];
+                while (current != nullptr) {
+                    std::cout << current->vertex << " ";
+                    current = current->next;
+                }
+                std::cout << std::endl;
             }
         }
     };
@@ -181,6 +258,13 @@ namespace var_52{
         root->right->left = new TreeNode(6);
         root->right->right = new TreeNode(7);
         reverse(root);
+
+        Graph graph(15);
+        for (int i = 0; i < 15; ++i) {
+            graph.addEdge(rand() % 15, rand() % 15);
+        }
+        graph.print();
+        graph.findAdj(2);
         return 0;
     }
 }
