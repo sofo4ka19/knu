@@ -61,17 +61,46 @@ namespace var_6{
         std::cout << std::endl;
     }
     //2--------------------------------------------------------------------------------------------------------
-    struct Sparce{
+    struct SparceMatrix{
         int value;
         int row;
         int column;
-        Sparce* nextRow;
-        Sparce* nextColumn;
+        SparceMatrix* nextRow;
+        SparceMatrix* nextColumn;
 
-        Sparce(int value, int row, int column): value(value), row(row), column(column), nextColumn(nullptr), nextRow(
+        SparceMatrix(int value, int row, int column): value(value), row(row), column(column), nextColumn(nullptr), nextRow(
                 nullptr) {}
     };
-    //?
+    void countB(SparceMatrix** rows, SparceMatrix** columns, int size){
+        int B[size][size];
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                B[i][j]=0;
+                SparceMatrix* el1 = rows[i];
+                SparceMatrix* el2 = columns[j];
+                while (el1!= nullptr && el2!= nullptr){
+                    if (el1->column==el2->row){
+                        B[i][j]+=el1->value*el2->value;
+                        std::cout <<el1->value << "*" << el2->value << "+";
+                        el1=el1->nextRow;
+                        el2 = el2->nextColumn;
+                    }
+                    else if(el1->column>el2->row){
+                        el2=el2->nextColumn;
+                    } else{
+                        el1=el1->nextRow;
+                    }
+                }
+                std::cout << "=" << B[i][j] << std::endl;
+            }
+        }
+        for (int i = 0; i < size; ++i) {
+            for (int j = 0; j < size; ++j) {
+                std::cout << B[i][j] << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
     //3--------------------------------------------------------------------------------------------------------
     struct TreeNode{
         int value;
@@ -105,7 +134,40 @@ namespace var_6{
         root->left->right = new TreeNode(5);
         root->right->left = new TreeNode(6);
         root->right->right = new TreeNode(7);
-        std::cout << countBigger(root,2);
+        std::cout << countBigger(root,2) << std::endl;
+
+        SparceMatrix* rows[4];
+        SparceMatrix* cols[4];
+
+        int matrix[4][4]={
+                {0, 1, 2, 0},
+                {0, 0, 0 ,1},
+                {2, 0, 1, 0},
+                {0, 4, 1,0}
+        };
+
+        auto* el1 = new SparceMatrix(1, 0, 1);
+        auto* el2 = new SparceMatrix(2, 0, 2);
+        rows[0] = el1;
+        cols[1]= el1;
+        cols[2]= el2;
+        el1->nextRow = el2;
+        auto* el3 = new SparceMatrix(1,1, 3);
+        auto* el4 = new SparceMatrix(2, 2, 0);
+        auto* el5 = new SparceMatrix(1, 2, 2);
+        rows[1] = el3;
+        rows[2]= el4;
+        cols[3] = el3;
+        cols[0] = el4;
+        el2->nextColumn = el5;
+        el4->nextRow = el5;
+        auto* el6 = new SparceMatrix(4, 3, 1);
+        auto* el7 = new SparceMatrix(1, 3, 2);
+        rows[3] = el6;
+        el1->nextColumn = el6;
+        el5->nextColumn = el7;
+        el6->nextRow= el7;
+        countB(rows, cols, 4);
         return 0;
     }
 }
