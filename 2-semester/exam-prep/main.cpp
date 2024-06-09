@@ -1,7 +1,7 @@
 //
 // Created by User on 07.06.2024.
 //
-#define current_ns var_6
+#define current_ns var_22
 
 namespace current_ns {
     int main();
