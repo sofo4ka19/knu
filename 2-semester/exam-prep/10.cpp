@@ -2,6 +2,7 @@
 // Created by User on 08.06.2024.
 //
 #include <iostream>
+#include <queue>
 
 namespace var_10{
     //1----------------------------------------------------------------------------------------------------------
@@ -97,6 +98,51 @@ namespace var_10{
         }
         std::cout << std::endl;
     }
+    //3--------------------------------------------------------------------------------------------------------
+    struct TreeNode{
+        int value;
+        int index;
+        TreeNode* left;
+        TreeNode* right;
+
+        TreeNode(int value): value(value), left(nullptr), right(nullptr) {}
+    };
+    void addElement(TreeNode*& root, const int value){
+        if (root== nullptr){
+            root = new TreeNode(value);
+            return;
+        }
+        if (value<root->value){
+            addElement(root->left, value);
+        } else{
+            addElement(root->right, value);
+        }
+    }
+    void numerating(TreeNode* root, int& n){
+        if(root== nullptr) return;
+        numerating(root->left, n);
+        root->index = n++;
+        numerating(root->right, n);
+    }
+    //--------------------------------------------------------------------------------------------------------
+    void printTree(TreeNode* root) {
+        if (root== nullptr) return;
+        std::queue<TreeNode*> q;
+        q.push(root);
+        while (!q.empty()){
+            int levelSize=q.size();
+
+            for (int i = 0; i < levelSize; ++i) {
+                TreeNode* current = q.front();
+                q.pop();
+                std::cout << current->value << "(" << current->index <<  ") ";
+
+                if (current->left!= nullptr) q.push(current->left);
+                if (current->right!= nullptr) q.push(current->right);
+            }
+            std::cout << std::endl;
+        }
+    }
     int main(){
         LinkedList list;
         for (int i = 0; i < 10; ++i) {
@@ -115,6 +161,15 @@ namespace var_10{
         std::cout<< std::endl;
         sort(array,35);
         print(array, 35);
+
+        TreeNode* root = nullptr;
+        int arr[] = {25,32,80,15,6,12,63,81,36,84,28,22};
+        for (int i = 0; i < 12; ++i) {
+            addElement(root, arr[i]);
+        }
+        int n=0;
+        numerating(root, n);
+        printTree(root);
         return 0;
     }
 }
