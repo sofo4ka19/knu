@@ -988,7 +988,6 @@ void benchmark() {
     using std::chrono::milliseconds;
     std::uniform_int_distribution<> vert(3, 30);
     int v = vert(gen);
-    bool isEnd;
     auto end = high_resolution_clock::now();
     std::uniform_int_distribution<> e(v / 2, v * v / 2 - 1);
     int numEdges = e(gen);

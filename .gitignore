@@ -34,3 +34,61 @@
 cmake-build-debug
 .idea
 CMakeLists.txt
+
+# Bytecode files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE/editor settings
+.vscode/
+.idea/
+*.swp
+
+# Test cache
+.pytest_cache/
+.tox/
+coverage/
+*.cover
+coverage.xml
+htmlcov/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Log and debug files
+*.log
+
+# Databases / App data
+*.sqlite3
+*.db
+*.json
+
+# Credentials / Keys (if used)
+*.key
+*.pem
+*.env
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Backup files
+*.bak
+*.tmp
+*.old
+
+# Profiling
+*.prof

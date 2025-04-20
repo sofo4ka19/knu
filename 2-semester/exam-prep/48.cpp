@@ -94,6 +94,17 @@ namespace var_48{
     void check_expression(std::string expression) {
         std::cout<<expression<<" => "<< infix_to_postfix(expression)<<std::endl;
     }
+    struct Node{
+        int index;
+        int value;
+        Node* next;
+    };
+    struct RowNode{
+        int index;
+        Node* element;
+        RowNode* next;
+    };
+    Node* row[4];
     int main(){
         return 0;
     }
