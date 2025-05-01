@@ -1,0 +1,19 @@
+@startuml
+class Library {
+  + books: List
+  + users: List
+  + borrowed_books: Dict
+  + add_book()
+  + remove_book()
+  + search_books()
+  + register_user()
+  + get_user()
+  + get_book()
+  + borrow_book()
+  + return_book()
+  + get_borrowed_books()
+  + generate_report()
+  + save_data()
+  + load_data()
+}
+@enduml
