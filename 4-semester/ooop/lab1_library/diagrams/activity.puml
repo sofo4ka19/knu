@@ -1,0 +1,80 @@
+@startuml Full_Library_Activity
+title Library Management System - Combined Activity Diagram
+
+start
+
+
+  :Choose the action;
+
+
+
+  if (Action == "Add Book") then (yes)
+    :Input book data;
+    :Serialize book data;
+    :Append to books list;
+    :Return book ID;
+
+  elseif (Action == "Search Book") then (yes)
+    :Input keyword;
+    :Initialize result list;
+    repeat
+      :Check book title, author, or genre;
+      if (Match?) then (yes)
+        :Add to results;
+      endif
+    repeat while (has not checked books?)
+    :Return results;
+
+  elseif (Action == "Register User") then (yes)
+    :Input user data;
+    :Serialize user data;
+    :Append to users list;
+    :Return user ID;
+
+  elseif (Action == "Borrow Book") then (yes)
+    :Input user ID and book ID;
+    :Fetch user and book;
+    if (Both exist?) then (yes)
+      if (Book available?) then (yes)
+        if (User in borrowed_books?) then (no)
+          :Initialize book list for user;
+        endif
+        :Add book to borrowed_books;
+        :Mark book as unavailable;
+        :Return True;
+      else
+        :Return False (book unavailable);
+      endif
+    else
+      :Return False (invalid IDs);
+    endif
+
+  elseif (Action == "Return Book") then (yes)
+    :Input user ID and book ID;
+    if (Record exists?) then (yes)
+      :Fetch book;
+      if (Book found?) then (yes)
+        :Remove book from borrowed_books;
+        :Mark book as available;
+        :Return True;
+      else
+        :Return False (book not found);
+      endif
+    else
+      :Return False (no such record);
+    endif
+
+  elseif (Action == "Generate Report") then (yes)
+    :Count total books;
+    :Count available books;
+    :Count borrowed books;
+    :Count total users;
+    :Count active borrowers;
+    :Build and return report;
+  else
+    :Invalid action;
+  endif
+
+
+stop
+@enduml
