@@ -1,0 +1,14 @@
+@startuml
+
+rectangle "Library System" {
+  Librarian --> (Add new book)
+  Librarian --> (Search for books by keywords)
+  Librarian --> (Register a user)
+  Librarian --> (Add info about borrowing)
+  Librarian --> (Add info about returning)
+  Librarian --> (View borrowed books)
+  Librarian --> (Generate report)
+  Librarian --> (Save data to file)
+  Librarian --> (Load data from file)
+}
+@enduml
