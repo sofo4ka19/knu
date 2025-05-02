@@ -158,6 +158,7 @@ if __name__ == "__main__":
         print("7. Generate report")
         print("8. Save data")
         print("9. Load data")
+        print("10. Delete book")
         print("0. Exit")
 
         choice = input("Enter your choice: ")
@@ -231,7 +232,9 @@ if __name__ == "__main__":
                 print("Data loaded successfully")
             else:
                 print("Failed to load data")
-
+        elif choice == '10':
+            book_id = int(input("Enter book ID: "))
+            print("deletion success") if library.remove_book(book_id) else print("invalid book id")
         elif choice == '0':
             print("Goodbye!")
             break
