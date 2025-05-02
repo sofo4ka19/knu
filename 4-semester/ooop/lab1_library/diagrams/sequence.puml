@@ -1,0 +1,20 @@
+@startuml
+actor Client as C
+participant Library as L
+
+C ->> L: borrow_book(user_id, book_id)
+L ->> L: get_user(user_id)
+L ->> L: get_book(book_id)
+
+alt User and Book exist
+    alt Book is available
+        L ->> L: Add book to borrowed_books
+        L ->> L: Set book['available'] = False
+        L -->> C: Return True
+    else Book not available
+        L -->> C: Return False
+    end
+else User or Book doesn't exist
+    L -->> C: Return False
+end
+@enduml
