@@ -1,0 +1,9 @@
+@startuml
+state "Book State" as BookState {
+    [*] --> Available : Add Book
+    Available --> Borrowed : Borrow Book
+    Borrowed --> Available : Return Book
+    Available --> [*] : Delete Book
+    Borrowed --> [*] : Delete Book
+}
+@enduml
