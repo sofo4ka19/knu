@@ -98,4 +98,5 @@ public abstract class Vegetable {
         validateCalories(caloriesPer100g);
         this.caloriesPer100g = caloriesPer100g;
     }
+
 }
