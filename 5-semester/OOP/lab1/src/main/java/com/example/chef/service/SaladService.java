@@ -225,6 +225,23 @@ public class SaladService {
                 })
                 .collect(Collectors.toList());
     }
+    /**
+     * Сортує інгредієнти за назваою.
+     */
+    public List<Ingredient> sortIngredientsByName(String saladName) {
+        Salad salad = getSalad(saladName);
+        if (salad == null) {
+            return new ArrayList<>();
+        }
+
+        return salad.getIngredients().stream()
+                .filter(i -> vegetableService.getVegetable(i.getVegetableName()) != null)
+                .sorted(Comparator.comparing(
+                        i -> vegetableService.getVegetable(i.getVegetableName()).getName(),
+                        String.CASE_INSENSITIVE_ORDER
+                ))
+                .collect(Collectors.toList());
+    }
 
     /**
      * Шукає інгредієнти за діапазоном калорійності.
@@ -245,6 +262,7 @@ public class SaladService {
                 })
                 .collect(Collectors.toList());
     }
+
     /**
      * Знаходить всі салати, що використовують вказаний овоч.
      */
