@@ -2,43 +2,20 @@ package com.example.chef.vegetables;
 
 import java.util.Objects;
 
-/**
- * Абстрактний базовий клас для всіх овочів.
- * Демонструє принципи інкапсуляції та абстракції.
- */
 public abstract class Vegetable {
     private String name;
-    private double weight; // у грамах
-    private double caloriesPer100g; // калорійність на 100г
+    private double caloriesPer100g;
 
-    /**
-     * Конструктор для створення овочу.
-     *
-     * @param name назва овочу
-     * @param weight вага в грамах
-     * @param caloriesPer100g калорійність на 100г
-     * @throws IllegalArgumentException якщо параметри некоректні
-     */
-    public Vegetable(String name, double weight, double caloriesPer100g) {
+    public Vegetable(String name, double caloriesPer100g) {
         validateName(name);
-        validateWeight(weight);
         validateCalories(caloriesPer100g);
-
         this.name = name;
-        this.weight = weight;
         this.caloriesPer100g = caloriesPer100g;
     }
 
     private void validateName(String name) {
         if (name == null || name.trim().isEmpty()) {
-            throw new IllegalArgumentException("Назва овочу не може бути порожньою");
-        }
-        //перевірка на число
-    }
-
-    private void validateWeight(double weight) {
-        if (weight <= 0) {
-            throw new IllegalArgumentException("Вага повинна бути більше 0");
+            throw new IllegalArgumentException("Назва не може бути порожньою");
         }
     }
 
@@ -48,50 +25,15 @@ public abstract class Vegetable {
         }
     }
 
-    /**
-     * Обчислює загальну калорійність овочу на основі його ваги.
-     *
-     * @return загальна калорійність
-     */
-    public double getTotalCalories() {
-        return (weight / 100.0) * caloriesPer100g;
-    }
-
-    /**
-     * Повертає тип овочу (визначається в підкласах).
-     * Демонструє поліморфізм.
-     *
-     * @return тип овочу
-     */
     public abstract String getType();
+    public abstract String toFileString(); // для збереження
 
-    /**
-     * Повертає детальний опис овочу.
-     * Може бути перевизначений у підкласах.
-     *
-     * @return опис овочу
-     */
-    public String getDescription() {
-        return String.format("%s (%s)", name, getType());
-    }
+    public String getName() { return name; }
+    public double getCaloriesPer100g() { return caloriesPer100g; }
 
-    // Геттери (інкапсуляція)
-    public String getName() {
-        return name;
-    }
-
-    public double getWeight() {
-        return weight;
-    }
-
-    public double getCaloriesPer100g() {
-        return caloriesPer100g;
-    }
-
-    // Сеттери з валідацією
-    public void setWeight(double weight) {
-        validateWeight(weight);
-        this.weight = weight;
+    public void setName(String name) {
+        validateName(name);
+        this.name = name;
     }
 
     public void setCaloriesPer100g(double caloriesPer100g) {
@@ -99,4 +41,21 @@ public abstract class Vegetable {
         this.caloriesPer100g = caloriesPer100g;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vegetable vegetable = (Vegetable) o;
+        return Objects.equals(name.toLowerCase(), vegetable.name.toLowerCase());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name.toLowerCase());
+    }
+
+    @Override
+    public String toString() {
+        return String.format("%s (%s) - %.1f ккал/100г", name, getType(), caloriesPer100g);
+    }
 }
