@@ -1,4 +1,4 @@
-package com.example.chef.salad;
+package com.example.chef.vegetables;
 
 public class FruitVegetable extends Vegetable {
     private String color;

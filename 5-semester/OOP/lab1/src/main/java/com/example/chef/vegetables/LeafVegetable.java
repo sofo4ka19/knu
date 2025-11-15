@@ -1,4 +1,4 @@
-package com.example.chef.salad;
+package com.example.chef.vegetables;
 
 public class LeafVegetable extends Vegetable{
     private String leafType;
