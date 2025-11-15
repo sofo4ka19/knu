@@ -1,6 +1,4 @@
-package com.example.chef.salad;
-
-import com.example.chef.vegetables.Vegetable;
+package com.example.chef.model;
 
 import java.util.ArrayList;
 import java.util.Collections;

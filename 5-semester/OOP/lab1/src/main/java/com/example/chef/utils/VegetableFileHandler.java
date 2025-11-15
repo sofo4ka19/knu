@@ -1,6 +1,6 @@
 package com.example.chef.utils;
 
-import com.example.chef.vegetables.*;
+import com.example.chef.model.*;
 
 import java.io.IOException;
 

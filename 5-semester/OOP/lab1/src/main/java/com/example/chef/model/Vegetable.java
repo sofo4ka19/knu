@@ -1,4 +1,4 @@
-package com.example.chef.vegetables;
+package com.example.chef.model;
 
 import java.util.Objects;
 
