@@ -245,6 +245,122 @@ public class SaladService {
                 })
                 .collect(Collectors.toList());
     }
+    /**
+     * Знаходить всі салати, що використовують вказаний овоч.
+     */
+    public List<String> findSaladsUsingVegetable(String vegetableName) {
+        List<String> result = new ArrayList<>();
+
+        for (Salad salad : salads.values()) {
+            if (salad.hasIngredient(vegetableName)) {
+                result.add(salad.getName());
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Оновлює назву овочу у всіх салатах.
+     */
+    public void updateVegetableNameInAllSalads(String oldName, String newName) {
+        for (Salad salad : salads.values()) {
+            for (Ingredient ingredient : salad.getIngredients()) {
+                if (ingredient.getVegetableName().equalsIgnoreCase(oldName)) {
+                    // Видаляємо старий
+                    salad.removeIngredient(oldName);
+                    // Додаємо з новою назвою
+                    salad.addIngredient(newName, ingredient.getWeight());
+                }
+            }
+        }
+    }
+
+    /**
+     * Видаляє інгредієнт з усіх салатів (при видаленні овочу).
+     */
+    public void removeVegetableFromAllSalads(String vegetableName) {
+        for (Salad salad : salads.values()) {
+            salad.removeIngredient(vegetableName);
+        }
+    }
+
+    /**
+     * Перевіряє всі салати на наявність неіснуючих овочів.
+     * Повертає Map: назва салату -> список відсутніх овочів.
+     */
+    public Map<String, List<String>> findOrphanedIngredients() {
+        Map<String, List<String>> orphaned = new HashMap<>();
+
+        for (Salad salad : salads.values()) {
+            List<String> missing = new ArrayList<>();
+
+            for (Ingredient ing : salad.getIngredients()) {
+                if (!vegetableService.exists(ing.getVegetableName())) {
+                    missing.add(ing.getVegetableName());
+                }
+            }
+
+            if (!missing.isEmpty()) {
+                orphaned.put(salad.getName(), missing);
+            }
+        }
+
+        return orphaned;
+    }
+
+    /**
+     * Видаляє всі "мертві" інгредієнти (овочі яких немає в реєстрі).
+     */
+    public int cleanupOrphanedIngredients() {
+        int removed = 0;
+
+        for (Salad salad : salads.values()) {
+            List<Ingredient> toRemove = new ArrayList<>();
+
+            for (Ingredient ing : salad.getIngredients()) {
+                if (!vegetableService.exists(ing.getVegetableName())) {
+                    toRemove.add(ing);
+                }
+            }
+
+            for (Ingredient ing : toRemove) {
+                salad.removeIngredient(ing.getVegetableName());
+                removed++;
+            }
+        }
+
+        return removed;
+    }
+
+    /**
+     * Отримує статистику використання овочів.
+     * Повертає Map: назва овочу -> кількість салатів де використовується.
+     */
+    public Map<String, Integer> getVegetableUsageStatistics() {
+        Map<String, Integer> stats = new HashMap<>();
+
+        for (Salad salad : salads.values()) {
+            for (Ingredient ing : salad.getIngredients()) {
+                String vegName = ing.getVegetableName();
+                stats.put(vegName, stats.getOrDefault(vegName, 0) + 1);
+            }
+        }
+
+        return stats;
+    }
+
+    /**
+     * Знаходить найпопулярніші овочі.
+     */
+    public List<Map.Entry<String, Integer>> getMostUsedVegetables(int limit) {
+        Map<String, Integer> stats = getVegetableUsageStatistics();
+
+        return stats.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue().reversed())
+                .limit(limit)
+                .collect(Collectors.toList());
+    }
 
     /**
      * Повертає детальну інформацію про салат.
@@ -280,3 +396,4 @@ public class SaladService {
         return sb.toString();
     }
 }
+

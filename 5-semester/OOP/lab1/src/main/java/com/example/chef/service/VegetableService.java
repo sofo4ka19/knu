@@ -8,6 +8,7 @@ import java.util.*;
 public class VegetableService {
     private Map<String, Vegetable> vegetables; // назва -> овоч
     private VegetableFileHandler fileHandler;
+    private SaladService saladService; // для перевірки використання
 
     public VegetableService() {
         this.vegetables = new LinkedHashMap<>();
@@ -17,6 +18,12 @@ public class VegetableService {
     public VegetableService(String filePath) {
         this.vegetables = new LinkedHashMap<>();
         this.fileHandler = new VegetableFileHandler(filePath);
+    }
+    /**
+     * Встановлює зв'язок з SaladService для перевірки використання овочів.
+     */
+    public void setSaladService(SaladService saladService) {
+        this.saladService = saladService;
     }
 
     /**
@@ -63,11 +70,30 @@ public class VegetableService {
     }
 
     /**
-     * Видаляє овоч за назвою.
+     * Видаляє овоч, але ТІЛЬКИ якщо він не використовується в салатах.
+     *
+     * @return true якщо видалено, false якщо використовується
+     * @throws IllegalStateException якщо овоч використовується
      */
     public boolean deleteVegetable(String name) {
+        if (!exists(name)) {
+            return false;
+        }
+
+        // Перевіряємо чи використовується овоч
+        if (saladService != null) {
+            List<String> usedIn = saladService.findSaladsUsingVegetable(name);
+            if (!usedIn.isEmpty()) {
+                throw new IllegalStateException(
+                        "Неможливо видалити овоч '" + name + "'. " +
+                                "Він використовується в салатах: " + String.join(", ", usedIn)
+                );
+            }
+        }
+
         return vegetables.remove(name.toLowerCase()) != null;
     }
+
 
     /**
      * Оновлює параметри овочу.
@@ -88,6 +114,54 @@ public class VegetableService {
         vegetables.remove(oldKey);
         vegetables.put(newKey, newVegetable);
         return true;
+    }
+    /**
+     * Оновлює назву овочу та автоматично оновлює всі салати.
+     */
+    public boolean updateVegetableName(String oldName, String newName) {
+        String oldKey = oldName.toLowerCase();
+        String newKey = newName.toLowerCase();
+
+        if (!vegetables.containsKey(oldKey)) {
+            return false;
+        }
+
+        if (!oldKey.equals(newKey) && vegetables.containsKey(newKey)) {
+            throw new IllegalArgumentException("Овоч з назвою '" + newName + "' вже існує");
+        }
+
+        Vegetable vegetable = vegetables.get(oldKey);
+        vegetable.setName(newName);
+
+        vegetables.remove(oldKey);
+        vegetables.put(newKey, vegetable);
+
+        // Оновлюємо всі салати
+        if (saladService != null && !oldName.equalsIgnoreCase(newName)) {
+            saladService.updateVegetableNameInAllSalads(oldName, newName);
+        }
+
+        return true;
+    }
+
+    /**
+     * Перевіряє чи використовується овоч у салатах.
+     */
+    public boolean isVegetableUsed(String name) {
+        if (saladService == null) {
+            return false;
+        }
+        return !saladService.findSaladsUsingVegetable(name).isEmpty();
+    }
+
+    /**
+     * Повертає список салатів, де використовується овоч.
+     */
+    public List<String> getUsageInfo(String name) {
+        if (saladService == null) {
+            return new ArrayList<>();
+        }
+        return saladService.findSaladsUsingVegetable(name);
     }
 
     /**
