@@ -34,12 +34,10 @@ public class ConsoleMenu {
                 case 3: manageIngredients(); break;
                 case 4: viewSaladInfo(); break;
                 case 5: sortAndSearch(); break;
-                case 6: systemTools(); break;
-                case 7: saveData(); break;
+                case 6: saveData(); break;
                 case 0:
                     saveBeforeExit();
                     running = false;
-                    System.out.println("\n👋 До побачення!");
                     break;
                 default:
                     System.out.println("❌ Невірний вибір!");
@@ -70,8 +68,7 @@ public class ConsoleMenu {
         System.out.println("║ 3. 🍅 Управління інгредієнтами    ║");
         System.out.println("║ 4. 📊 Інформація про салат        ║");
         System.out.println("║ 5. 🔍 Сортування та пошук         ║");
-        System.out.println("║ 6. 🛠️  Системні інструменти       ║");
-        System.out.println("║ 7. 💾 Зберегти все                ║");
+        System.out.println("║ 6. 💾 Зберегти все                ║");
         System.out.println("║ 0. 🚪 Вихід                       ║");
         System.out.println("╚════════════════════════════════════╝");
     }
@@ -496,6 +493,14 @@ public class ConsoleMenu {
             if (saladService.createSalad(salad)) {
                 currentSalad = salad;
                 System.out.println("✅ Салат '" + name + "' створено і активовано!");
+                do {
+                    addIngredient();
+                    System.out.print("\n📝 Введіть 0 якщо не бажаєте далі додавати інгредієнти: ");
+                    String exit = scanner.nextLine().trim();
+                    if (exit.equals("0")) {
+                        break;
+                    }
+                } while (true);
             } else {
                 System.out.println("❌ Помилка створення салату!");
             }
@@ -656,7 +661,6 @@ public class ConsoleMenu {
     private void showIngredients() {
         System.out.println("\n" + saladService.getSaladDetails(currentSalad.getName()));
     }
-
     private void addIngredient() {
         // Показуємо доступні овочі
         Collection<Vegetable> vegetables = vegetableService.getAllVegetables();
@@ -977,60 +981,6 @@ public class ConsoleMenu {
         }
     }
 
-    // ============================================
-    // 6. СИСТЕМНІ ІНСТРУМЕНТИ
-    // ============================================
-
-    private void systemTools() {
-        while (true) {
-            clearScreen();
-            System.out.println("\n┌─────────────────────────────────┐");
-            System.out.println("│   🛠️  СИСТЕМНІ ІНСТРУМЕНТИ     │");
-            System.out.println("├─────────────────────────────────┤");
-            System.out.println("│ 1. Перевірити цілісність даних  │");
-            System.out.println("│ 2. Очистити \"мертві\" інгредієнти│");
-            System.out.println("│ 3. Експорт звіту                │");
-            System.out.println("│ 4. Статистика системи           │");
-            System.out.println("│ 0. Назад                        │");
-            System.out.println("└─────────────────────────────────┘");
-
-            int choice = readIntInput("Вибір: ");
-
-            switch (choice) {
-                case 1: checkDataIntegrity(); break;
-                case 2: cleanupOrphanedIngredients(); break;
-                case 3: exportReport(); break;
-                case 4: showSystemStatistics(); break;
-                case 0: return;
-                default: System.out.println("❌ Невірний вибір!");
-            }
-        }
-    }
-
-    private void checkDataIntegrity() {
-        System.out.println("\n🔍 ПЕРЕВІРКА ЦІЛІСНОСТІ ДАНИХ");
-        System.out.println("═══════════════════════════════════════");
-
-        Map<String, List<String>> orphaned = saladService.findOrphanedIngredients();
-
-        if (orphaned.isEmpty()) {
-            System.out.println("✅ Всі дані в порядку!");
-            System.out.println("   Всі інгредієнти посилаються на існуючі овочі.");
-        } else {
-            System.out.println("⚠️  Знайдено проблеми:");
-            System.out.println();
-
-            for (Map.Entry<String, List<String>> entry : orphaned.entrySet()) {
-                System.out.printf("Салат '%s' містить відсутні овочі:%n", entry.getKey());
-                entry.getValue().forEach(v -> System.out.println("  - " + v));
-                System.out.println();
-            }
-
-            System.out.println("💡 Використайте 'Очистити мертві інгредієнти' для виправлення.");
-        }
-        System.out.println("═══════════════════════════════════════");
-    }
-
     private void cleanupOrphanedIngredients() {
         Map<String, List<String>> orphaned = saladService.findOrphanedIngredients();
 
@@ -1056,81 +1006,6 @@ public class ConsoleMenu {
             System.out.println("❌ Скасовано.");
         }
     }
-
-    private void exportReport() {
-        System.out.println("\n📄 ЕКСПОРТ ЗВІТУ");
-        System.out.println("═══════════════════════════════════════════════════");
-
-        System.out.println("\n=== РЕЄСТР ОВОЧІВ ===");
-        System.out.printf("Всього овочів: %d%n", vegetableService.getCount());
-
-        Map<String, Integer> usage = saladService.getVegetableUsageStatistics();
-        System.out.printf("Використовується: %d%n", usage.size());
-        System.out.printf("Не використовується: %d%n",
-                vegetableService.getCount() - usage.size());
-
-        System.out.println("\n=== САЛАТИ ===");
-        System.out.printf("Всього салатів: %d%n", saladService.getCount());
-
-        double totalWeight = 0;
-        double totalCalories = 0;
-        int totalIngredients = 0;
-
-        for (Salad salad : saladService.getAllSalads()) {
-            totalWeight += saladService.calculateWeight(salad.getName());
-            totalCalories += saladService.calculateCalories(salad.getName());
-            totalIngredients += salad.getIngredientCount();
-        }
-
-        System.out.printf("Всього інгредієнтів: %d%n", totalIngredients);
-        System.out.printf("Загальна вага всіх салатів: %.1f г%n", totalWeight);
-        System.out.printf("Загальна калорійність: %.1f ккал%n", totalCalories);
-
-        if (saladService.getCount() > 0) {
-            System.out.printf("Середня кількість інгредієнтів: %.1f%n",
-                    (double) totalIngredients / saladService.getCount());
-        }
-
-        System.out.println("\n=== ТОП-5 ПОПУЛЯРНИХ ОВОЧІВ ===");
-        List<Map.Entry<String, Integer>> top = saladService.getMostUsedVegetables(5);
-        for (int i = 0; i < top.size(); i++) {
-            System.out.printf("%d. %s - %d салатів%n",
-                    i + 1, top.get(i).getKey(), top.get(i).getValue());
-        }
-
-        System.out.println("═══════════════════════════════════════════════════");
-        System.out.println("💡 Звіт згенеровано: " + new java.util.Date());
-    }
-
-    private void showSystemStatistics() {
-        System.out.println("\n📊 СТАТИСТИКА СИСТЕМИ");
-        System.out.println("═══════════════════════════════════════════════════");
-
-        System.out.println("\n🥬 Овочі:");
-        System.out.printf("  Всього: %d%n", vegetableService.getCount());
-        System.out.printf("  ROOT:   %d%n", vegetableService.findByType("ROOT").size());
-        System.out.printf("  LEAF:   %d%n", vegetableService.findByType("LEAF").size());
-        System.out.printf("  FRUIT:  %d%n", vegetableService.findByType("FRUIT").size());
-
-        System.out.println("\n🥗 Салати:");
-        System.out.printf("  Всього: %d%n", saladService.getCount());
-        System.out.printf("  Порожніх: %d%n",
-                saladService.getAllSalads().stream().filter(Salad::isEmpty).count());
-
-        System.out.println("\n🔗 Використання:");
-        Map<String, Integer> usage = saladService.getVegetableUsageStatistics();
-        System.out.printf("  Овочів використовується: %d з %d%n",
-                usage.size(), vegetableService.getCount());
-
-        Map<String, List<String>> orphaned = saladService.findOrphanedIngredients();
-        if (!orphaned.isEmpty()) {
-            System.out.printf("  ⚠️  \"Мертві\" інгредієнти: %d%n",
-                    orphaned.values().stream().mapToInt(List::size).sum());
-        }
-
-        System.out.println("═══════════════════════════════════════════════════");
-    }
-
     // ============================================
     // ДОПОМІЖНІ МЕТОДИ
     // ============================================
