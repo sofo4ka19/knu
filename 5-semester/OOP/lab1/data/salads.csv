@@ -1,0 +1,40 @@
+SALAD;Грецький салат
+INGREDIENT;Помідор черрі;150,00
+INGREDIENT;Перець болгарський;80,00
+INGREDIENT;Салат Романо;60,00
+INGREDIENT;Цибуля ріпчаста;30,00
+
+SALAD;Овочевий мікс
+INGREDIENT;Помідор звичайний;150,00
+INGREDIENT;Перець червоний;90,00
+INGREDIENT;Цибуля зелена;40,00
+INGREDIENT;Редис;50,00
+INGREDIENT;Салат Айсберг;80,00
+INGREDIENT;Морква;70,00
+
+SALAD;Вітамінний
+INGREDIENT;Морква;100,00
+INGREDIENT;Буряк;90,00
+INGREDIENT;Пекінська капуста;120,00
+INGREDIENT;Цибуля ріпчаста;30,00
+INGREDIENT;Петрушка;15,00
+
+SALAD;Середземноморський
+INGREDIENT;Помідор звичайний;200,00
+INGREDIENT;Баклажан;100,00
+INGREDIENT;Цукіні;100,00
+INGREDIENT;Перець болгарський;80,00
+INGREDIENT;Руккола;50,00
+INGREDIENT;Базилік;30,00
+
+SALAD;Легкий салат
+INGREDIENT;Салат Айсберг;100,00
+INGREDIENT;Редис;40,00
+INGREDIENT;Цибуля зелена;20,00
+
+SALAD;Літній салат
+INGREDIENT;Редис;60,00
+INGREDIENT;Цибуля зелена;40,00
+INGREDIENT;Шпинат;70,00
+INGREDIENT;Базилік;20,00
+
