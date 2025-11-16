@@ -77,7 +77,7 @@ public class SaladFileHandler {
                     String[] parts = line.substring(11).split(";");
                     if (parts.length >= 2) {
                         String vegName = parts[0].trim();
-                        double weight = Double.parseDouble(parts[1].trim());
+                        double weight = Double.parseDouble(parts[1].trim().replace(",", "."));
                         currentSalad.addIngredient(vegName, weight);
                     }
                 }

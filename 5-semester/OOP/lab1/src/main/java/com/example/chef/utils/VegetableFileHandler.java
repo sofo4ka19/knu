@@ -39,7 +39,7 @@ public class VegetableFileHandler extends FileManager<Vegetable> {
 
         String type = parts[0].trim().toUpperCase();
         String name = parts[1].trim();
-        double calories = Double.parseDouble(parts[2].trim());
+        double calories = Double.parseDouble(parts[2].trim().replace(",", "."));
         String param1 = parts[3].trim();
 
         switch (type) {
