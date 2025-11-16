@@ -44,10 +44,6 @@ public class ConsoleMenu {
                 default:
                     System.out.println("❌ Невірний вибір!");
             }
-
-            if (running && choice != 0) {
-                waitForEnter();
-            }
         }
 
         scanner.close();
@@ -113,7 +109,6 @@ public class ConsoleMenu {
                 default: System.out.println("❌ Невірний вибір!");
             }
 
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -449,7 +444,6 @@ public class ConsoleMenu {
                 default: System.out.println("❌ Невірний вибір!");
             }
 
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -656,8 +650,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -812,8 +804,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -922,8 +912,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -1016,8 +1004,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
-            if (choice != 0) waitForEnter();
         }
     }
 
@@ -1228,10 +1214,5 @@ public class ConsoleMenu {
     private boolean readBooleanInput() {
         String input = scanner.nextLine().trim().toLowerCase();
         return input.equals("true") || input.equals("так") || input.equals("yes") || input.equals("y");
-    }
-
-    private void waitForEnter() {
-        System.out.print("\n⏎ Натисніть Enter...");
-        scanner.nextLine();
     }
 }

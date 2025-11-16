@@ -33,7 +33,7 @@ public class VegetableFileHandler extends FileManager<Vegetable> {
     protected Vegetable parseLine(String line) throws Exception {
         String[] parts = line.split(";");
 
-        if (parts.length < 5) {
+        if (parts.length < 4) {
             throw new IllegalArgumentException("Недостатньо параметрів");
         }
 
@@ -41,18 +41,28 @@ public class VegetableFileHandler extends FileManager<Vegetable> {
         String name = parts[1].trim();
         double calories = Double.parseDouble(parts[2].trim());
         String param1 = parts[3].trim();
-        String param2 = parts[4].trim();
 
         switch (type) {
             case "ROOT":
-                return new RootVegetable(name, calories, param2);
+                // ROOT;Морква;41.00;оранжевий
+                return new RootVegetable(name, calories, param1);
 
             case "LEAF":
+                // LEAF;Салат;14.00;зелене листя;true
+                if (parts.length < 5) {
+                    throw new IllegalArgumentException("Недостатньо параметрів для LEAF");
+                }
+                String param2 = parts[4].trim();
                 boolean isCrispy = Boolean.parseBoolean(param2);
                 return new LeafVegetable(name, calories, param1, isCrispy);
 
             case "FRUIT":
-                boolean hasSeed = Boolean.parseBoolean(param2);
+                // FRUIT;Помідор;20.00;червоний;true
+                if (parts.length < 5) {
+                    throw new IllegalArgumentException("Недостатньо параметрів для FRUIT");
+                }
+                String param2Fruit = parts[4].trim();
+                boolean hasSeed = Boolean.parseBoolean(param2Fruit);
                 return new FruitVegetable(name, calories, param1, hasSeed);
 
             default:
