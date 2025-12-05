@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://example.com/medicine"
+           xmlns="http://example.com/medicine"
+           elementFormDefault="qualified">
+
+    <xs:element name="Medicine">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="Medicament" type="MedicamentType" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:complexType name="MedicamentType">
+        <xs:sequence>
+            <xs:element name="Name" type="xs:string"/>
+            <xs:element name="Pharm" type="xs:string"/>
+            <xs:element name="Group" type="GroupType"/>
+            <xs:element name="Analogs" type="AnalogsType" minOccurs="0"/>
+            <xs:element name="Versions" type="VersionsType"/>
+        </xs:sequence>
+        <xs:attribute name="id" type="xs:ID" use="required"/>
+        <xs:attribute name="prescription" type="xs:boolean" default="false"/>
+    </xs:complexType>
+
+    <xs:simpleType name="GroupType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="ANTIBIOTICS"/>
+            <xs:enumeration value="PAINKILLERS"/>
+            <xs:enumeration value="VITAMINS"/>
+            <xs:enumeration value="SEDATIVES"/>
+            <xs:enumeration value="ANTIVIRAL"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:complexType name="AnalogsType">
+        <xs:sequence>
+            <xs:element name="Analog" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VersionsType">
+        <xs:sequence>
+            <xs:element name="Version" type="VersionType" minOccurs="1" maxOccurs="unbounded"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="VersionType">
+        <xs:sequence>
+            <xs:element name="Type" type="xs:string"/> <xs:element name="Certificate" type="CertificateType"/>
+            <xs:element name="Package" type="PackageType"/>
+            <xs:element name="Dosage" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="CertificateType">
+        <xs:sequence>
+            <xs:element name="Number">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:pattern value="[A-Z]{2}-\d{6}"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+            <xs:element name="IssueDate" type="xs:date"/>
+            <xs:element name="ExpirationDate" type="xs:date"/>
+            <xs:element name="RegisteringOrganization" type="xs:string"/>
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="PackageType">
+        <xs:sequence>
+            <xs:element name="Type" type="xs:string"/> <xs:element name="Quantity" type="xs:positiveInteger"/>
+            <xs:element name="Price">
+                <xs:simpleType>
+                    <xs:restriction base="xs:decimal">
+                        <xs:minInclusive value="0.01"/>
+                        <xs:fractionDigits value="2"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:element>
+        </xs:sequence>
+    </xs:complexType>
+
+</xs:schema>
