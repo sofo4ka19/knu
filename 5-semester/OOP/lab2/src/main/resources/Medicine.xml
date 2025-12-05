@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Medicine xmlns="http://example.com/medicine"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://example.com/medicine Medicine.xsd">
+
+    <Medicament id="med01" prescription="true">
+        <Name>Amoxicillin</Name>
+        <Pharm>Darnitsa</Pharm>
+        <Group>ANTIBIOTICS</Group>
+        <Analogs>
+            <Analog>Flemoxin</Analog>
+            <Analog>Ospamox</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Tablets</Type>
+                <Certificate>
+                    <Number>UA-555001</Number>
+                    <IssueDate>2023-01-15</IssueDate>
+                    <ExpirationDate>2026-01-15</ExpirationDate>
+                    <RegisteringOrganization>MOZ Ukraine</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Box</Type>
+                    <Quantity>20</Quantity>
+                    <Price>145.50</Price>
+                </Package>
+                <Dosage>500 mg, 3 times a day</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+    <Medicament id="med02" prescription="false">
+        <Name>Ibuprofen</Name>
+        <Pharm>Farmak</Pharm>
+        <Group>PAINKILLERS</Group>
+        <Analogs>
+            <Analog>Nurofen</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Capsules</Type>
+                <Certificate>
+                    <Number>EU-100999</Number>
+                    <IssueDate>2022-05-20</IssueDate>
+                    <ExpirationDate>2025-05-20</ExpirationDate>
+                    <RegisteringOrganization>EMA</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Bottle</Type>
+                    <Quantity>50</Quantity>
+                    <Price>210.00</Price>
+                </Package>
+                <Dosage>400 mg, after meal</Dosage>
+            </Version>
+            <Version>
+                <Type>Gel</Type>
+                <Certificate>
+                    <Number>UA-222333</Number>
+                    <IssueDate>2021-08-10</IssueDate>
+                    <ExpirationDate>2024-08-10</ExpirationDate>
+                    <RegisteringOrganization>MOZ Ukraine</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Tube</Type>
+                    <Quantity>1</Quantity>
+                    <Price>95.00</Price>
+                </Package>
+                <Dosage>Apply to skin twice a day</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+    <Medicament id="med03" prescription="false">
+        <Name>Ascorbic Acid</Name>
+        <Pharm>KyivVitamin</Pharm>
+        <Group>VITAMINS</Group>
+        <Analogs>
+            <Analog>Vitamin C</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Dragee</Type>
+                <Certificate>
+                    <Number>UA-777888</Number>
+                    <IssueDate>2023-03-01</IssueDate>
+                    <ExpirationDate>2028-03-01</ExpirationDate>
+                    <RegisteringOrganization>MOZ Ukraine</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Jar</Type>
+                    <Quantity>100</Quantity>
+                    <Price>45.00</Price>
+                </Package>
+                <Dosage>1-2 dragees per day</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+    <Medicament id="med04" prescription="false">
+        <Name>Valerian Extract</Name>
+        <Pharm>Arterium</Pharm>
+        <Group>SEDATIVES</Group>
+        <Analogs>
+            <Analog>Relaxil</Analog>
+            <Analog>Persen</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Tablets</Type>
+                <Certificate>
+                    <Number>UA-123123</Number>
+                    <IssueDate>2022-11-15</IssueDate>
+                    <ExpirationDate>2027-11-15</ExpirationDate>
+                    <RegisteringOrganization>MOZ Ukraine</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Blister</Type>
+                    <Quantity>50</Quantity>
+                    <Price>35.50</Price>
+                </Package>
+                <Dosage>1 tablet before sleep</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+    <Medicament id="med05" prescription="true">
+        <Name>Novirin</Name>
+        <Pharm>Kyivmedpreparat</Pharm>
+        <Group>ANTIVIRAL</Group>
+        <Analogs>
+            <Analog>Groprinosin</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Tablets</Type>
+                <Certificate>
+                    <Number>PL-999000</Number>
+                    <IssueDate>2023-09-01</IssueDate>
+                    <ExpirationDate>2026-09-01</ExpirationDate>
+                    <RegisteringOrganization>Polish Health Agency</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Box</Type>
+                    <Quantity>40</Quantity>
+                    <Price>250.00</Price>
+                </Package>
+                <Dosage>2 tablets 3 times a day</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+    <Medicament id="med06" prescription="true">
+        <Name>Analgin</Name>
+        <Pharm>Darnitsa</Pharm>
+        <Group>PAINKILLERS</Group>
+        <Analogs>
+            <Analog>Metamizole</Analog>
+        </Analogs>
+        <Versions>
+            <Version>
+                <Type>Ampoules</Type>
+                <Certificate>
+                    <Number>UA-456456</Number>
+                    <IssueDate>2020-02-20</IssueDate>
+                    <ExpirationDate>2025-02-20</ExpirationDate>
+                    <RegisteringOrganization>MOZ Ukraine</RegisteringOrganization>
+                </Certificate>
+                <Package>
+                    <Type>Box</Type>
+                    <Quantity>10</Quantity>
+                    <Price>85.20</Price>
+                </Package>
+                <Dosage>Intramuscular injection</Dosage>
+            </Version>
+        </Versions>
+    </Medicament>
+
+</Medicine>
