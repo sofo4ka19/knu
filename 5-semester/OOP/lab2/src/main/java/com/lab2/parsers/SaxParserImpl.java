@@ -2,8 +2,7 @@ package com.lab2.parsers;
 
 import com.lab2.model.*;
 import com.lab2.model.Package;
-import com.model.*;
-import lab2.model.*;
+import com.lab2.model.*;
 import org.xml.sax.Attributes;
 import org.xml.sax.helpers.DefaultHandler;
 

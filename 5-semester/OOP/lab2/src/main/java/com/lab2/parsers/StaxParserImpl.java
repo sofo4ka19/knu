@@ -4,7 +4,7 @@ import com.lab2.model.Certificate;
 import com.lab2.model.GroupType;
 import com.lab2.model.Medicament;
 import com.lab2.model.Version;
-import com.model.*;
+import com.lab2.model.*;
 import com.lab2.model.Package;
 
 import javax.xml.namespace.QName;
