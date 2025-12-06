@@ -89,7 +89,6 @@ public class ConsoleMenu {
             System.out.println("│ 3. Редагувати овоч              │");
             System.out.println("│ 4. Видалити овоч                │");
             System.out.println("│ 5. Пошук овочів                 │");
-            System.out.println("│ 6. Статистика використання      │");
             System.out.println("│ 0. Назад                        │");
             System.out.println("└─────────────────────────────────┘");
 
@@ -101,7 +100,6 @@ public class ConsoleMenu {
                 case 3: editVegetable(); break;
                 case 4: deleteVegetable(); break;
                 case 5: searchVegetables(); break;
-                case 6: showVegetableStatistics(); break;
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
@@ -367,31 +365,6 @@ public class ConsoleMenu {
         }
     }
 
-    private void showVegetableStatistics() {
-        System.out.println("\n📊 СТАТИСТИКА ВИКОРИСТАННЯ ОВОЧІВ");
-        System.out.println("═══════════════════════════════════════════════════");
-
-        Map<String, Integer> stats = saladService.getVegetableUsageStatistics();
-
-        if (stats.isEmpty()) {
-            System.out.println("⚠️  Немає даних для відображення.");
-            return;
-        }
-
-        List<Map.Entry<String, Integer>> sorted = saladService.getMostUsedVegetables(100);
-
-        System.out.printf("%-30s %-15s%n", "Овоч", "Салатів");
-        System.out.println("───────────────────────────────────────────────────");
-
-        for (Map.Entry<String, Integer> entry : sorted) {
-            System.out.printf("%-30s %-15d%n",
-                    truncate(entry.getKey(), 30),
-                    entry.getValue());
-        }
-
-        System.out.println("═══════════════════════════════════════════════════");
-        System.out.printf("Всього унікальних овочів використано: %d%n", stats.size());
-    }
 
     private void displayVegetableList(List<Vegetable> vegetables) {
         if (vegetables.isEmpty()) {
@@ -424,7 +397,6 @@ public class ConsoleMenu {
             System.out.println("│ 3. Вибрати активний салат       │");
             System.out.println("│ 4. Перейменувати салат          │");
             System.out.println("│ 5. Видалити салат               │");
-            System.out.println("│ 6. Клонувати салат              │");
             System.out.println("│ 0. Назад                        │");
             System.out.println("└─────────────────────────────────┘");
 
@@ -436,7 +408,6 @@ public class ConsoleMenu {
                 case 3: selectSalad(); break;
                 case 4: renameSalad(); break;
                 case 5: deleteSalad(); break;
-                case 6: cloneSalad(); break;
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
@@ -586,40 +557,6 @@ public class ConsoleMenu {
             }
         } else {
             System.out.println("❌ Скасовано.");
-        }
-    }
-
-    private void cloneSalad() {
-        showAllSalads();
-
-        System.out.print("\n📋 Назва салату для клонування: ");
-        String sourceName = scanner.nextLine().trim();
-
-        Salad source = saladService.getSalad(sourceName);
-        if (source == null) {
-            System.out.println("❌ Салат не знайдено!");
-            return;
-        }
-
-        System.out.print("Назва нової копії: ");
-        String newName = scanner.nextLine().trim();
-
-        if (saladService.exists(newName)) {
-            System.out.println("❌ Салат з такою назвою вже існує!");
-            return;
-        }
-
-        try {
-            Salad clone = new Salad(newName);
-            for (Ingredient ing : source.getIngredients()) {
-                clone.addIngredient(ing.getVegetableName(), ing.getWeight());
-            }
-
-            if (saladService.createSalad(clone)) {
-                System.out.println("✅ Салат клоновано!");
-            }
-        } catch (Exception e) {
-            System.out.println("❌ " + e.getMessage());
         }
     }
 
@@ -978,32 +915,6 @@ public class ConsoleMenu {
                         i + 1, veg.getName(), ing.getWeight(),
                         veg.getCaloriesPer100g(), totalCal);
             }
-        }
-    }
-
-    private void cleanupOrphanedIngredients() {
-        Map<String, List<String>> orphaned = saladService.findOrphanedIngredients();
-
-        if (orphaned.isEmpty()) {
-            System.out.println("\n✅ Немає \"мертвих\" інгредієнтів!");
-            return;
-        }
-
-        System.out.println("\n⚠️  ЗНАЙДЕНО \"МЕРТВІ\" ІНГРЕДІЄНТИ:");
-        for (Map.Entry<String, List<String>> entry : orphaned.entrySet()) {
-            System.out.printf("Салат '%s': %s%n",
-                    entry.getKey(),
-                    String.join(", ", entry.getValue()));
-        }
-
-        System.out.print("\n🗑️  Видалити всі \"мертві\" інгредієнти? (так/ні): ");
-        String confirm = scanner.nextLine().trim().toLowerCase();
-
-        if (confirm.equals("так") || confirm.equals("yes") || confirm.equals("y")) {
-            int removed = saladService.cleanupOrphanedIngredients();
-            System.out.printf("✅ Видалено %d інгредієнтів!%n", removed);
-        } else {
-            System.out.println("❌ Скасовано.");
         }
     }
     // ============================================
