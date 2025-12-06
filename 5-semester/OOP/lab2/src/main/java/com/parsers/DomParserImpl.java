@@ -51,6 +51,77 @@ public class DomParserImpl implements XmlParser {
     }
 
     private Medicament parseMedicament(Element element) {
-        return new Medicament();
+        Medicament medicament = new Medicament();
+
+        medicament.setId(element.getAttribute("id"));
+        if (element.hasAttribute("prescription")) {
+            medicament.setPrescription(Boolean.parseBoolean(element.getAttribute("prescription")));
+        }
+
+        medicament.setName(getElementTextContent(element, "Name"));
+        medicament.setPharm(getElementTextContent(element, "Pharm"));
+
+        String groupStr = getElementTextContent(element, "Group");
+        medicament.setGroup(GroupType.valueOf(groupStr));
+
+        NodeList analogsNode = element.getElementsByTagName("Analog");
+        List<String> analogsList = new ArrayList<>();
+        for (int i = 0; i < analogsNode.getLength(); i++) {
+            analogsList.add(analogsNode.item(i).getTextContent());
+        }
+        medicament.setAnalogs(analogsList);
+
+        medicament.setVersions(parseVersions(element));
+
+        return medicament;
+    }
+
+    private List<Version> parseVersions(Element parentElement) {
+        List<Version> versions = new ArrayList<>();
+        NodeList versionsNodes = parentElement.getElementsByTagName("Version");
+
+        for (int i = 0; i < versionsNodes.getLength(); i++) {
+            Node node = versionsNodes.item(i);
+            if (node.getNodeType() == Node.ELEMENT_NODE) {
+                Element versionElement = (Element) node;
+                Version version = new Version();
+
+                version.setType(getElementTextContent(versionElement, "Type"));
+                version.setDosage(getElementTextContent(versionElement, "Dosage"));
+                version.setCertificate(parseCertificate(versionElement));
+                version.setPack(parsePackage(versionElement));
+
+                versions.add(version);
+            }
+        }
+        return versions;
+    }
+
+    private Certificate parseCertificate(Element versionElement) {
+        Certificate cert = new Certificate();
+        Element certElement = (Element) versionElement.getElementsByTagName("Certificate").item(0);
+
+        cert.setNumber(getElementTextContent(certElement, "Number"));
+        cert.setRegisteringOrganization(getElementTextContent(certElement, "RegisteringOrganization"));
+
+        cert.setIssueDate(LocalDate.parse(getElementTextContent(certElement, "IssueDate")));
+        cert.setExpirationDate(LocalDate.parse(getElementTextContent(certElement, "ExpirationDate")));
+
+        return cert;
+    }
+
+    private com.model.Package parsePackage(Element versionElement) {
+        com.model.Package pack = new com.model.Package();
+        Element packElement = (Element) versionElement.getElementsByTagName("Package").item(0);
+
+        pack.setType(getElementTextContent(packElement, "Type"));
+
+        String qty = getElementTextContent(packElement, "Quantity");
+        pack.setQuantity(Integer.parseInt(qty));
+
+        String price = getElementTextContent(packElement, "Price");
+        pack.setPrice(new BigDecimal(price));
+
+        return pack;
     }
 }
