@@ -32,9 +32,7 @@ public class ConsoleMenu {
                 case 1: manageVegetables(); break;
                 case 2: manageSalads(); break;
                 case 3: manageIngredients(); break;
-                case 4: viewSaladInfo(); break;
-                case 5: sortAndSearch(); break;
-                case 6: saveData(); break;
+                case 4: sortAndSearch(); break;
                 case 0:
                     saveBeforeExit();
                     running = false;
@@ -66,9 +64,7 @@ public class ConsoleMenu {
         System.out.println("║ 1. 🥬 Реєстр овочів               ║");
         System.out.println("║ 2. 🥗 Управління салатами         ║");
         System.out.println("║ 3. 🍅 Управління інгредієнтами    ║");
-        System.out.println("║ 4. 📊 Інформація про салат        ║");
-        System.out.println("║ 5. 🔍 Сортування та пошук         ║");
-        System.out.println("║ 6. 💾 Зберегти все                ║");
+        System.out.println("║ 4. 🔍 Сортування та пошук         ║");
         System.out.println("║ 0. 🚪 Вихід                       ║");
         System.out.println("╚════════════════════════════════════╝");
     }
@@ -103,7 +99,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
         }
     }
 
@@ -162,8 +157,6 @@ public class ConsoleMenu {
                 case 1: // ROOT
                     System.out.print("Колір: ");
                     String color1 = scanner.nextLine().trim();
-                    System.out.print("Потребує очищення (true/false): ");
-                    boolean peeling = readBooleanInput();
                     vegetable = new RootVegetable(name, calories, color1);
                     break;
 
@@ -200,14 +193,26 @@ public class ConsoleMenu {
     }
 
     private void editVegetable() {
-        System.out.print("\n✏️  Введіть назву овочу для редагування: ");
-        String oldName = scanner.nextLine().trim();
+        Collection<Vegetable> vegetables = vegetableService.getAllVegetables();
 
-        Vegetable oldVeg = vegetableService.getVegetable(oldName);
+        if (vegetables.isEmpty()) {
+            System.out.println("\n⚠️  Реєстр овочів порожній!");
+            return;
+        }
+
+        showAllVegetables();
+
+        System.out.print("\n✏️  Введіть номер або назву овочу: ");
+        String input = scanner.nextLine().trim();
+
+        Vegetable oldVeg = selectVegetableByNumberOrName(input);
+
         if (oldVeg == null) {
             System.out.println("❌ Овоч не знайдено!");
             return;
         }
+
+        String oldName = oldVeg.getName();
 
         System.out.println("\nПоточні дані:");
         System.out.println(oldVeg);
@@ -294,13 +299,26 @@ public class ConsoleMenu {
     }
 
     private void deleteVegetable() {
-        System.out.print("\n🗑️  Введіть назву овочу для видалення: ");
-        String name = scanner.nextLine().trim();
+        Collection<Vegetable> vegetables = vegetableService.getAllVegetables();
 
-        if (!vegetableService.exists(name)) {
+        if (vegetables.isEmpty()) {
+            System.out.println("\n⚠️  Реєстр овочів порожній!");
+            return;
+        }
+
+        showAllVegetables();
+
+        System.out.print("\n🗑️  Введіть номер або назву овочу: ");
+        String input = scanner.nextLine().trim();
+
+        Vegetable vegetable = selectVegetableByNumberOrName(input);
+
+        if (vegetable == null) {
             System.out.println("❌ Овоч не знайдено!");
             return;
         }
+
+        String name = vegetable.getName();
 
         // Перевіряємо використання
         List<String> usedIn = vegetableService.getUsageInfo(name);
@@ -365,7 +383,6 @@ public class ConsoleMenu {
         }
     }
 
-
     private void displayVegetableList(List<Vegetable> vegetables) {
         if (vegetables.isEmpty()) {
             System.out.println("\n⚠️  Нічого не знайдено.");
@@ -411,7 +428,6 @@ public class ConsoleMenu {
                 case 0: return;
                 default: System.out.println("❌ Невірний вибір!");
             }
-
         }
     }
 
@@ -464,14 +480,7 @@ public class ConsoleMenu {
             if (saladService.createSalad(salad)) {
                 currentSalad = salad;
                 System.out.println("✅ Салат '" + name + "' створено і активовано!");
-                do {
-                    addIngredient();
-                    System.out.print("\n📝 Введіть 0 якщо не бажаєте далі додавати інгредієнти: ");
-                    String exit = scanner.nextLine().trim();
-                    if (exit.equals("0")) {
-                        break;
-                    }
-                } while (true);
+                System.out.println("\n💡 Перейдіть до 'Управління інгредієнтами' для додавання овочів");
             } else {
                 System.out.println("❌ Помилка створення салату!");
             }
@@ -481,34 +490,49 @@ public class ConsoleMenu {
     }
 
     private void selectSalad() {
-        showAllSalads();
+        Collection<Salad> salads = saladService.getAllSalads();
 
-        if (saladService.getCount() == 0) {
+        if (salads.isEmpty()) {
+            System.out.println("\n⚠️  Салати відсутні.");
             return;
         }
 
-        System.out.print("\n🎯 Введіть назву салату: ");
-        String name = scanner.nextLine().trim();
+        showAllSalads();
 
-        Salad salad = saladService.getSalad(name);
+        System.out.print("\n🎯 Введіть номер або назву салату: ");
+        String input = scanner.nextLine().trim();
+
+        Salad salad = selectSaladByNumberOrName(input);
+
         if (salad != null) {
             currentSalad = salad;
-            System.out.println("✅ Активовано: " + name);
+            System.out.println("✅ Активовано: " + salad.getName());
         } else {
             System.out.println("❌ Салат не знайдено!");
         }
     }
 
     private void renameSalad() {
+        Collection<Salad> salads = saladService.getAllSalads();
+
+        if (salads.isEmpty()) {
+            System.out.println("\n⚠️  Салати відсутні.");
+            return;
+        }
+
         showAllSalads();
 
-        System.out.print("\n✏️  Стара назва: ");
-        String oldName = scanner.nextLine().trim();
+        System.out.print("\n✏️  Введіть номер або назву салату: ");
+        String input = scanner.nextLine().trim();
 
-        if (!saladService.exists(oldName)) {
+        Salad salad = selectSaladByNumberOrName(input);
+
+        if (salad == null) {
             System.out.println("❌ Салат не знайдено!");
             return;
         }
+
+        String oldName = salad.getName();
 
         System.out.print("Нова назва: ");
         String newName = scanner.nextLine().trim();
@@ -533,15 +557,26 @@ public class ConsoleMenu {
     }
 
     private void deleteSalad() {
+        Collection<Salad> salads = saladService.getAllSalads();
+
+        if (salads.isEmpty()) {
+            System.out.println("\n⚠️  Салати відсутні.");
+            return;
+        }
+
         showAllSalads();
 
-        System.out.print("\n🗑️  Назва салату для видалення: ");
-        String name = scanner.nextLine().trim();
+        System.out.print("\n🗑️  Введіть номер або назву салату: ");
+        String input = scanner.nextLine().trim();
 
-        if (!saladService.exists(name)) {
+        Salad salad = selectSaladByNumberOrName(input);
+
+        if (salad == null) {
             System.out.println("❌ Салат не знайдено!");
             return;
         }
+
+        String name = salad.getName();
 
         System.out.print("⚠️  Ви впевнені? (так/ні): ");
         String confirm = scanner.nextLine().trim().toLowerCase();
@@ -596,8 +631,38 @@ public class ConsoleMenu {
     }
 
     private void showIngredients() {
-        System.out.println("\n" + saladService.getSaladDetails(currentSalad.getName()));
+        if (currentSalad.isEmpty()) {
+            System.out.println("\n⚠️  Салат порожній!");
+            return;
+        }
+
+        double totalWeight = saladService.calculateWeight(currentSalad.getName());
+        double totalCalories = saladService.calculateCalories(currentSalad.getName());
+        double caloriesPer100g = totalWeight > 0 ? (totalCalories / totalWeight) * 100 : 0;
+
+        System.out.println("\n═══════════════════════════════════════");
+        System.out.printf("  Салат '%s'%n", currentSalad.getName());
+        System.out.println("═══════════════════════════════════════");
+        System.out.println("Інгредієнти:");
+
+        int index = 1;
+        for (Ingredient ing : currentSalad.getIngredients()) {
+            Vegetable veg = vegetableService.getVegetable(ing.getVegetableName());
+            if (veg != null) {
+                double totalCal = (ing.getWeight() / 100.0) * veg.getCaloriesPer100g();
+                System.out.printf("  %d. %s (%s): %.1f г, %.1f ккал/100г, загалом: %.1f ккал%n",
+                        index++, veg.getName(), veg.getType(),
+                        ing.getWeight(), veg.getCaloriesPer100g(), totalCal);
+            }
+        }
+
+        System.out.println("───────────────────────────────────────");
+        System.out.printf("Загальна вага:         %.1f г%n", totalWeight);
+        System.out.printf("Загальна калорійність: %.1f ккал%n", totalCalories);
+        System.out.printf("Калорійність на 100г:  %.1f ккал%n", caloriesPer100g);
+        System.out.println("═══════════════════════════════════════");
     }
+
     private void addIngredient() {
         // Показуємо доступні овочі
         Collection<Vegetable> vegetables = vegetableService.getAllVegetables();
@@ -620,16 +685,7 @@ public class ConsoleMenu {
         System.out.print("\nВиберіть овоч (номер або назва): ");
         String input = scanner.nextLine().trim();
 
-        Vegetable vegetable = null;
-
-        try {
-            int num = Integer.parseInt(input);
-            if (num > 0 && num <= vegList.size()) {
-                vegetable = vegList.get(num - 1);
-            }
-        } catch (NumberFormatException e) {
-            vegetable = vegetableService.getVegetable(input);
-        }
+        Vegetable vegetable = selectVegetableByNumberOrName(input);
 
         if (vegetable == null) {
             System.out.println("❌ Овоч не знайдено!");
@@ -715,117 +771,8 @@ public class ConsoleMenu {
             System.out.println("❌ Скасовано.");
         }
     }
-
     // ============================================
-    // 4. ІНФОРМАЦІЯ ПРО САЛАТ
-    // ============================================
-
-    private void viewSaladInfo() {
-        if (!checkActiveSalad()) return;
-
-        while (true) {
-            clearScreen();
-            System.out.println("\n┌─────────────────────────────────┐");
-            System.out.println("│   📊 ІНФОРМАЦІЯ ПРО САЛАТ      │");
-            System.out.println("├─────────────────────────────────┤");
-            System.out.println("│ 1. Детальна інформація          │");
-            System.out.println("│ 2. Калорійність                 │");
-            System.out.println("│ 3. Список інгредієнтів          │");
-            System.out.println("│ 4. Статистика                   │");
-            System.out.println("│ 0. Назад                        │");
-            System.out.println("└─────────────────────────────────┘");
-
-            int choice = readIntInput("Вибір: ");
-
-            switch (choice) {
-                case 1: showDetailedInfo(); break;
-                case 2: showCaloriesInfo(); break;
-                case 3: showIngredients(); break;
-                case 4: showSaladStatistics(); break;
-                case 0: return;
-                default: System.out.println("❌ Невірний вибір!");
-            }
-        }
-    }
-
-    private void showDetailedInfo() {
-        System.out.println("\n" + saladService.getSaladDetails(currentSalad.getName()));
-    }
-
-    private void showCaloriesInfo() {
-        double calories = saladService.calculateCalories(currentSalad.getName());
-        double weight = saladService.calculateWeight(currentSalad.getName());
-
-        System.out.println("\n╔════════════════════════════════════╗");
-        System.out.println("║   КАЛОРІЙНІСТЬ САЛАТУ             ║");
-        System.out.println("╚════════════════════════════════════╝");
-        System.out.printf("Назва:                %s%n", currentSalad.getName());
-        System.out.printf("Кількість інгредієнтів: %d%n", currentSalad.getIngredientCount());
-        System.out.printf("Загальна вага:        %.1f г%n", weight);
-        System.out.printf("Загальна калорійність: %.1f ккал%n", calories);
-
-        if (weight > 0) {
-            System.out.printf("Калорійність на 100г: %.1f ккал%n", (calories / weight) * 100);
-        }
-    }
-
-    private void showSaladStatistics() {
-        if (currentSalad.isEmpty()) {
-            System.out.println("\n⚠️  Салат порожній!");
-            return;
-        }
-
-        System.out.println("\n📊 СТАТИСТИКА САЛАТУ");
-        System.out.println("═══════════════════════════════════════");
-
-        // Найкалорійніший інгредієнт
-        Ingredient maxCal = null;
-        double maxCalories = 0;
-
-        for (Ingredient ing : currentSalad.getIngredients()) {
-            Vegetable veg = vegetableService.getVegetable(ing.getVegetableName());
-            if (veg != null) {
-                double cal = (ing.getWeight() / 100.0) * veg.getCaloriesPer100g();
-                if (cal > maxCalories) {
-                    maxCalories = cal;
-                    maxCal = ing;
-                }
-            }
-        }
-
-        if (maxCal != null) {
-            System.out.printf("Найкалорійніший: %s (%.1f ккал)%n",
-                    maxCal.getVegetableName(), maxCalories);
-        }
-
-        // Найважчий інгредієнт
-        Ingredient maxWeight = currentSalad.getIngredients().stream()
-                .max(Comparator.comparingDouble(Ingredient::getWeight))
-                .orElse(null);
-
-        if (maxWeight != null) {
-            System.out.printf("Найважчий: %s (%.1f г)%n",
-                    maxWeight.getVegetableName(), maxWeight.getWeight());
-        }
-
-        // Розподіл за типами
-        Map<String, Integer> typeCount = new HashMap<>();
-        for (Ingredient ing : currentSalad.getIngredients()) {
-            Vegetable veg = vegetableService.getVegetable(ing.getVegetableName());
-            if (veg != null) {
-                typeCount.put(veg.getType(), typeCount.getOrDefault(veg.getType(), 0) + 1);
-            }
-        }
-
-        System.out.println("\nРозподіл за типами:");
-        typeCount.forEach((type, count) ->
-                System.out.printf("  %s: %d%n", type, count));
-
-        System.out.println("═══════════════════════════════════════");
-    }
-
-    // ============================================
-    // 5. СОРТУВАННЯ ТА ПОШУК
+    // 4. СОРТУВАННЯ ТА ПОШУК
     // ============================================
 
     private void sortAndSearch() {
@@ -917,8 +864,47 @@ public class ConsoleMenu {
             }
         }
     }
+
     // ============================================
-    // ДОПОМІЖНІ МЕТОДИ
+    // ДОПОМІЖНІ МЕТОДИ ВИБОРУ
+    // ============================================
+
+    /**
+     * Вибір овочу за номером або назвою
+     */
+    private Vegetable selectVegetableByNumberOrName(String input) {
+        try {
+            int number = Integer.parseInt(input);
+            List<Vegetable> vegList = new ArrayList<>(vegetableService.getAllVegetables());
+            if (number > 0 && number <= vegList.size()) {
+                return vegList.get(number - 1);
+            }
+        } catch (NumberFormatException e) {
+            // Пробуємо як назву
+            return vegetableService.getVegetable(input);
+        }
+        return null;
+    }
+
+    /**
+     * Вибір салату за номером або назвою
+     */
+    private Salad selectSaladByNumberOrName(String input) {
+        try {
+            int number = Integer.parseInt(input);
+            List<Salad> saladList = new ArrayList<>(saladService.getAllSalads());
+            if (number > 0 && number <= saladList.size()) {
+                return saladList.get(number - 1);
+            }
+        } catch (NumberFormatException e) {
+            // Пробуємо як назву
+            return saladService.getSalad(input);
+        }
+        return null;
+    }
+
+    // ============================================
+    // ІНШІ ДОПОМІЖНІ МЕТОДИ
     // ============================================
 
     private boolean checkActiveSalad() {
