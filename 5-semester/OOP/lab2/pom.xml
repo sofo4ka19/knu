@@ -75,7 +75,7 @@
                     <artifactId>exec-maven-plugin</artifactId>
                     <version>3.1.0</version>
                     <configuration>
-                        <mainClass>com.Main</mainClass>
+                        <mainClass>com.lab2.Main</mainClass>
                     </configuration>
                 </plugin>
             </plugins>

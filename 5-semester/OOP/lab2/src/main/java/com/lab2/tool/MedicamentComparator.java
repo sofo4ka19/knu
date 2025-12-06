@@ -1,6 +1,7 @@
-package com.tool;
+package com.lab2.tool;
 
-import com.model.Medicament;
+import com.lab2.model.Medicament;
+
 import java.util.Comparator;
 
 public class MedicamentComparator {

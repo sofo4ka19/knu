@@ -1,14 +1,17 @@
-package com.parsers;
+package com.lab2.parsers;
 
+import com.lab2.model.Certificate;
+import com.lab2.model.GroupType;
+import com.lab2.model.Medicament;
+import com.lab2.model.Version;
 import com.model.*;
-import com.model.Package;
+import com.lab2.model.Package;
 
 import javax.xml.namespace.QName;
 import javax.xml.stream.XMLEventReader;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.Attribute;
-import javax.xml.stream.events.EndElement;
 import javax.xml.stream.events.StartElement;
 import javax.xml.stream.events.XMLEvent;
 import java.io.File;

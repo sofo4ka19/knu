@@ -1,6 +1,6 @@
-package com.parsers;
+package com.lab2.parsers;
 
-import com.model.Medicament;
+import com.lab2.model.Medicament;
 import java.io.File;
 import java.util.List;
 

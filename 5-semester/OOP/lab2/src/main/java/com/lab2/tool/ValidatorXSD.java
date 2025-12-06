@@ -1,4 +1,4 @@
-package com.tool;
+package com.lab2.tool;
 
 import org.xml.sax.SAXException;
 
@@ -12,7 +12,7 @@ import java.io.IOException;
 
 public class ValidatorXSD {
 
-    public boolean isValid(File xmlFile, File xsdFile) {
+    public static boolean isValid(File xmlFile, File xsdFile) {
         if (xmlFile == null || xsdFile == null || !xmlFile.exists() || !xsdFile.exists()) {
             System.err.println("Validation Error: Files do not exist or arguments are null.");
             return false;

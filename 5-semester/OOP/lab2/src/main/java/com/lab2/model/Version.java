@@ -1,4 +1,4 @@
-package com.model;
+package com.lab2.model;
 
 public class Version {
     private String type;

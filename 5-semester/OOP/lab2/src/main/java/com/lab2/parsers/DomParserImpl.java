@@ -1,6 +1,10 @@
-package com.parsers;
+package com.lab2.parsers;
 
-import com.model.*;
+import com.lab2.model.Package;
+import com.lab2.model.Certificate;
+import com.lab2.model.GroupType;
+import com.lab2.model.Medicament;
+import com.lab2.model.Version;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -110,8 +114,8 @@ public class DomParserImpl implements XmlParser {
         return cert;
     }
 
-    private com.model.Package parsePackage(Element versionElement) {
-        com.model.Package pack = new com.model.Package();
+    private Package parsePackage(Element versionElement) {
+        Package pack = new Package();
         Element packElement = (Element) versionElement.getElementsByTagName("Package").item(0);
 
         pack.setType(getElementTextContent(packElement, "Type"));

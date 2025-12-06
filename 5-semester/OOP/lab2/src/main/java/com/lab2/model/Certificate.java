@@ -1,4 +1,4 @@
-package com.model;
+package com.lab2.model;
 
 import java.time.LocalDate; // Сучасний API для дат (Java 8+)
 
