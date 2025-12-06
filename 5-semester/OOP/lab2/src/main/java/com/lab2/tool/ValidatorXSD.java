@@ -13,11 +13,11 @@ import java.io.IOException;
 public class ValidatorXSD {
 
     public static boolean isValid(File xmlFile, File xsdFile) {
-        if (xmlFile == null || xsdFile == null || !xmlFile.exists() || !xsdFile.exists()) {
-            System.err.println("Validation Error: Files do not exist or arguments are null.");
-            return false;
-        }
         try {
+            if (xmlFile == null || xsdFile == null || !xmlFile.exists() || !xsdFile.exists()) {
+                System.err.println("Validation Error: Files do not exist or arguments are null.");
+                return false;
+            }
             SchemaFactory factory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
 
             Schema schema = factory.newSchema(xsdFile);
