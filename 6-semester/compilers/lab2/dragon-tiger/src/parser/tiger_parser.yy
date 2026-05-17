@@ -91,7 +91,7 @@ using utils::nl;
 %type <Decl *> decl funcDecl varDecl;
 %type <std::vector<Decl *>> decls;
 %type <Expr *> expr stringExpr intExpr seqExpr callExpr opExpr negExpr
-            assignExpr whileExpr forExpr breakExpr letExpr var;
+            assignExpr whileExpr forExpr breakExpr letExpr var ifExpr;
 
 %type <std::vector<Expr *>> exprs nonemptyexprs;
 %type <std::vector<Expr *>> arguments nonemptyarguments;
@@ -105,6 +105,11 @@ using utils::nl;
 // Declare precedence rules
 
 %nonassoc FUNCTION VAR TYPE DO OF ASSIGN;
+%nonassoc THEN;
+%nonassoc ELSE;
+%left OR;
+%left AND;
+%nonassoc EQ NEQ LT LE GT GE;
 %left PLUS MINUS;
 %left TIMES DIVIDE;
 %left UMINUS;
@@ -132,6 +137,7 @@ expr: stringExpr { $$ = $1; }
    | forExpr { $$ = $1; }
    | breakExpr { $$ = $1; }
    | letExpr { $$ = $1; }
+   | ifExpr { $$ = $1; }
 ;
 
 varDecl: VAR ID typeannotation ASSIGN expr
@@ -206,6 +212,11 @@ breakExpr: BREAK { $$ = new Break(@1); }
 
 letExpr: LET decls IN exprs END
   { $$ = new Let(@1, $2, new Sequence(nl, $4)); }
+;
+
+ifExpr: IF expr THEN expr ELSE expr
+  { $$ = new IfThenElse(@1, $2, $4, $6);}
+  | IF expr THEN expr { $$ = new IfThenElse(@1, $2, $4, new Sequence(nl, {})); }
 ;
 
 seqExpr : LPAREN exprs RPAREN { $$ = new Sequence(@1, $2); }
