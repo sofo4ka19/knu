@@ -1,0 +1,6 @@
+# Copy this file as db.properties and fill with your own values
+db.url=jdbc:postgresql://localhost:5432/car_rental
+db.username=postgres
+db.password=YOUR_PASSWORD_HERE
+db.driver=org.postgresql.Driver
+db.pool.size=10
