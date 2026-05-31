@@ -19,8 +19,18 @@ import java.util.List;
 public class OrderService {
 
     private static final Logger log = LogManager.getLogger(OrderService.class);
-    private final OrderDao orderDao = new OrderDao();
-    private final CarDao   carDao   = new CarDao();
+    private final OrderDao orderDao;
+    private final CarDao carDao;
+
+    public OrderService() {
+        this.orderDao = new OrderDao();
+        this.carDao = new CarDao();
+    }
+
+    public OrderService(OrderDao orderDao, CarDao carDao) {
+        this.orderDao = orderDao;
+        this.carDao = carDao;
+    }
 
     public Order createOrder(OrderRequestDto dto, User currentUser) {
         Car car = carDao.findById(dto.getCarId())

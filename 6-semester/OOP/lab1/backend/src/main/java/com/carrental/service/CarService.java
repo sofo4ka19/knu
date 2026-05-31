@@ -11,7 +11,15 @@ import java.util.List;
 public class CarService {
 
     private static final Logger log = LogManager.getLogger(CarService.class);
-    private final CarDao carDao = new CarDao();
+    private final CarDao carDao;
+
+    public CarService() {
+        this.carDao = new CarDao();
+    }
+
+    public CarService(CarDao carDao) {
+        this.carDao = carDao;
+    }
 
     public List<Car> getAvailableCars() {
         log.debug("Fetching available cars");

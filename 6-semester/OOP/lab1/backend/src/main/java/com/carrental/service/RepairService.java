@@ -16,9 +16,23 @@ import java.time.LocalDateTime;
 public class RepairService {
 
     private static final Logger log = LogManager.getLogger(RepairService.class);
-    private final RepairInvoiceDao repairDao = new RepairInvoiceDao();
-    private final OrderDao         orderDao  = new OrderDao();
-    private final CarDao           carDao    = new CarDao();
+    private final RepairInvoiceDao repairDao;
+    private final OrderDao         orderDao;
+    private final CarDao           carDao;
+
+    public RepairService() {
+        this.repairDao = new RepairInvoiceDao();
+        this.orderDao = new OrderDao();
+        this.carDao = new CarDao();
+    }
+
+    public RepairService(RepairInvoiceDao repairDao,
+                         OrderDao orderDao,
+                         CarDao carDao) {
+        this.repairDao = repairDao;
+        this.orderDao = orderDao;
+        this.carDao = carDao;
+    }
 
     public RepairInvoice createInvoice(Long orderId, RepairInvoiceDto dto) {
         Order order = orderDao.findById(orderId)
