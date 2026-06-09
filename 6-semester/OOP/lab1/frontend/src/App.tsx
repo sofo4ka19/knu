@@ -25,8 +25,6 @@ export default function App() {
         }
     }, [isAuthenticated])
 
-    if (isLoading) return <div>Завантаження...</div>
-
     return (
         <>
             <Navbar />

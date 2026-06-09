@@ -6,5 +6,7 @@ public enum OrderStatus {
     ACTIVE,
     RETURNED,
     DAMAGED,
+    AWAITING_PAYMENT,
+    CLOSED,
     REJECTED
 }

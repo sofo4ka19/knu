@@ -35,6 +35,12 @@ export default function AdminDashboard() {
         }
     }
 
+    const complete = (id: number) =>
+        api.post(`/admin/orders/${id}/complete`).then(refresh)
+
+    const restoreCar = (id: number) =>
+        api.post(`/admin/orders/${id}/restore`).then(refresh)
+
     return (
         <div>
             <h1>Панель адміністратора</h1>
@@ -55,7 +61,17 @@ export default function AdminDashboard() {
                         <td className="actions">
                             {o.status === 'PAID'     && <button onClick={() => activate(o.id)}>Видати</button>}
                             {o.status === 'ACTIVE'   && <button onClick={() => returnCar(o.id)}>Повернення</button>}
+                            {o.status === 'RETURNED' && <button onClick={() => complete(o.id)}>Завершити</button>}
                             {o.status === 'RETURNED' && <button onClick={() => addDamage(o.id)}>Пошкодження</button>}
+                            {o.status === 'DAMAGED' && (
+                                <>
+                                    <span>{o.repairInvoice?.paid ? '✅ Оплачено' : '⏳ Не оплачено'}</span>
+                                    <button onClick={() => restoreCar(o.id)}>Відновити авто</button>
+                                </>
+                            )}
+                            {o.status === 'AWAITING_PAYMENT' && (
+                                <span>{o.repairInvoice?.paid ? '✅ Оплачено' : '⏳ Очікує оплати клієнтом'}</span>
+                            )}
                             {(o.status === 'PENDING' || o.status === 'PAID') && <button onClick={() => reject(o.id)}>Відхилити</button>}
                         </td>
                     </tr>

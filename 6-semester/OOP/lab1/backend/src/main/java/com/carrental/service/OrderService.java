@@ -124,6 +124,31 @@ public class OrderService {
         return order;
     }
 
+    // ADMIN: complete order without damage
+    public Order completeOrder(Long orderId) {
+        Order order = getOrderOrThrow(orderId);
+        if (order.getStatus() != OrderStatus.RETURNED) {
+            throw new IllegalStateException("Only RETURNED orders can be completed");
+        }
+        orderDao.updateStatus(orderId, OrderStatus.CLOSED, null);
+        order.setStatus(OrderStatus.CLOSED);
+        log.info("Order {} completed without damage", orderId);
+        return order;
+    }
+
+    // ADMIN: restore car to available after repair (regardless of invoice payment)
+    public Order restoreCarAfterRepair(Long orderId) {
+        Order order = getOrderOrThrow(orderId);
+        if (order.getStatus() != OrderStatus.DAMAGED) {
+            throw new IllegalStateException("Only DAMAGED orders can be restored");
+        }
+        carDao.updateStatus(order.getCar().getId(), CarStatus.AVAILABLE);
+        orderDao.updateStatus(orderId, OrderStatus.AWAITING_PAYMENT, null);
+        order.setStatus(OrderStatus.AWAITING_PAYMENT);
+        log.info("Car {} restored to AVAILABLE after repair for order {}", order.getCar().getId(), orderId);
+        return order;
+    }
+
     public List<Order> getMyOrders(Long userId) {
         return orderDao.findByUserId(userId);
     }
@@ -136,6 +161,10 @@ public class OrderService {
         return orderDao.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Order not found: " + orderId));
+    }
+
+    public void verifyOwnerPublic(Long orderId, Long userId) {
+        verifyOwner(getOrderOrThrow(orderId), userId);
     }
 
     private void verifyOwner(Order order, Long userId) {

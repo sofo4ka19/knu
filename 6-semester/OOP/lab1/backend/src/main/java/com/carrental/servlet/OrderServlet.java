@@ -4,6 +4,7 @@ import com.carrental.dto.OrderRequestDto;
 import com.carrental.mapper.OrderMapper;
 import com.carrental.model.User;
 import com.carrental.service.OrderService;
+import com.carrental.service.RepairService;
 import com.carrental.util.JsonUtil;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 public class OrderServlet extends HttpServlet {
 
     private final OrderService orderService = new OrderService();
+    private final RepairService repairService = new RepairService();
     private static final Logger log = LogManager.getLogger(OrderServlet.class);
 
     @Override
@@ -26,14 +28,19 @@ public class OrderServlet extends HttpServlet {
 
         User currentUser = (User) req.getAttribute("currentUser");
         log.debug("Getting orders for userId: {}", currentUser.getId());
-        if ("/my".equals(pathInfo)) {
-            var orders = orderService.getMyOrders(currentUser.getId())
-                    .stream()
-                    .map(OrderMapper.INSTANCE::toDto)
-                    .collect(Collectors.toList());
-            JsonUtil.writeJson(resp, orders);
-        } else {
-            JsonUtil.writeError(resp, 404, "Not found");
+        try {
+            if ("/my".equals(pathInfo)) {
+                var orders = orderService.getMyOrders(currentUser.getId())
+                        .stream()
+                        .map(OrderMapper.INSTANCE::toDto)
+                        .collect(Collectors.toList());
+                JsonUtil.writeJson(resp, orders);
+            } else {
+                JsonUtil.writeError(resp, 404, "Not found");
+            }
+        } catch (Exception e) {
+            log.error("Error loading orders for user {}: {}", currentUser.getId(), e.getMessage(), e);
+            JsonUtil.writeError(resp, 500, e.getMessage());
         }
     }
 
@@ -53,10 +60,15 @@ public class OrderServlet extends HttpServlet {
                 JsonUtil.writeJson(resp, OrderMapper.INSTANCE.toDto(order));
 
             } else if (pathInfo.matches("/\\d+/pay")) {
-                // POST /api/orders/42/pay — pay
                 Long orderId = extractId(pathInfo);
                 var order = orderService.payOrder(orderId, currentUser.getId());
                 JsonUtil.writeJson(resp, OrderMapper.INSTANCE.toDto(order));
+
+            } else if (pathInfo.matches("/\\d+/pay-repair")) {
+                Long orderId = extractId(pathInfo);
+                orderService.verifyOwnerPublic(orderId, currentUser.getId());
+                repairService.payRepair(orderId);
+                JsonUtil.writeJson(resp, java.util.Map.of("success", true));
 
             } else {
                 JsonUtil.writeError(resp, 404, "Not found");

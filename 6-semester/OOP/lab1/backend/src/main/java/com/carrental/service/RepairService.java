@@ -59,4 +59,16 @@ public class RepairService {
                 orderId, dto.getRepairCost());
         return saved;
     }
+
+    public void payRepair(Long orderId) {
+        RepairInvoice invoice = repairDao.findByOrderId(orderId)
+                .orElseThrow(() -> new IllegalArgumentException(
+                        "No repair invoice for order: " + orderId));
+        if (invoice.isPaid()) {
+            throw new IllegalStateException("Repair invoice already paid");
+        }
+        repairDao.markAsPaid(invoice.getId());
+        orderDao.updateStatus(orderId, OrderStatus.CLOSED, null);
+        log.info("Repair invoice paid for order {}, order closed", orderId);
+    }
 }

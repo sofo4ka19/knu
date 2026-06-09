@@ -20,11 +20,14 @@ public class AdminServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse resp) throws IOException {
-        // GET /api/admin/orders — all orders
-        var orders = orderService.getAllOrders().stream()
-                .map(OrderMapper.INSTANCE::toDto)
-                .collect(Collectors.toList());
-        JsonUtil.writeJson(resp, orders);
+        try {
+            var orders = orderService.getAllOrders().stream()
+                    .map(OrderMapper.INSTANCE::toDto)
+                    .collect(Collectors.toList());
+            JsonUtil.writeJson(resp, orders);
+        } catch (Exception e) {
+            JsonUtil.writeError(resp, 500, e.getMessage());
+        }
     }
 
     @Override
@@ -50,6 +53,16 @@ public class AdminServlet extends HttpServlet {
                 JsonUtil.writeJson(resp,
                         OrderMapper.INSTANCE.toDto(
                                 orderService.rejectOrder(id, body.get("reason"))));
+
+            } else if (pathInfo.matches("/orders/\\d+/complete")) {
+                Long id = extractOrderId(pathInfo);
+                JsonUtil.writeJson(resp,
+                        OrderMapper.INSTANCE.toDto(orderService.completeOrder(id)));
+
+            } else if (pathInfo.matches("/orders/\\d+/restore")) {
+                Long id = extractOrderId(pathInfo);
+                JsonUtil.writeJson(resp,
+                        OrderMapper.INSTANCE.toDto(orderService.restoreCarAfterRepair(id)));
 
             } else if (pathInfo.matches("/orders/\\d+/damage")) {
                 Long id = extractOrderId(pathInfo);

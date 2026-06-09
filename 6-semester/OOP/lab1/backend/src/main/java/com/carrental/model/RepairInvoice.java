@@ -14,5 +14,6 @@ public class RepairInvoice {
     private Long orderId;
     private String damageDescription;
     private BigDecimal repairCost;
+    private boolean paid;
     private LocalDateTime createdAt;
 }

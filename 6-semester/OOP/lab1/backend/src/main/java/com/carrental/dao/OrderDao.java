@@ -18,13 +18,15 @@ public class OrderDao {
     private final DatabaseConfig db = DatabaseConfig.getInstance();
     private final CarDao carDao = new CarDao();
     private final UserDao userDao = new UserDao();
+    private final RepairInvoiceDao repairInvoiceDao = new RepairInvoiceDao();
 
     private Order mapRow(ResultSet rs) throws SQLException {
-        Long carId  = rs.getLong("car_id");
-        Long userId = rs.getLong("user_id");
+        long orderId = rs.getLong("id");
+        Long carId   = rs.getLong("car_id");
+        Long userId  = rs.getLong("user_id");
 
         return Order.builder()
-                .id(rs.getLong("id"))
+                .id(orderId)
                 .car(carDao.findById(carId).orElse(null))
                 .user(userDao.findById(userId).orElse(null))
                 .passportData(rs.getString("passport_data"))
@@ -34,6 +36,7 @@ public class OrderDao {
                 .status(OrderStatus.valueOf(rs.getString("status")))
                 .rejectionReason(rs.getString("rejection_reason"))
                 .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
+                .repairInvoice(repairInvoiceDao.findByOrderId(orderId).orElse(null))
                 .build();
     }
 

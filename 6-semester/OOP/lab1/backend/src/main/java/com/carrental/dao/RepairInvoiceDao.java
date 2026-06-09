@@ -50,6 +50,7 @@ public class RepairInvoiceDao {
                             .orderId(rs.getLong("order_id"))
                             .damageDescription(rs.getString("damage_description"))
                             .repairCost(rs.getBigDecimal("repair_cost"))
+                            .paid(rs.getBoolean("paid"))
                             .createdAt(rs.getTimestamp("created_at").toLocalDateTime())
                             .build());
                 }
@@ -60,5 +61,18 @@ public class RepairInvoiceDao {
             db.releaseConnection(conn);
         }
         return Optional.empty();
+    }
+
+    public void markAsPaid(Long invoiceId) {
+        String sql = "UPDATE repair_invoices SET paid = TRUE WHERE id = ?";
+        Connection conn = db.getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1, invoiceId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            db.releaseConnection(conn);
+        }
     }
 }

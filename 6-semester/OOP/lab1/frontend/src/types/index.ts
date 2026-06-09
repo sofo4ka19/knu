@@ -1,5 +1,5 @@
 export type CarStatus   = 'AVAILABLE' | 'UNAVAILABLE'
-export type OrderStatus = 'PENDING' | 'PAID' | 'ACTIVE' | 'RETURNED' | 'DAMAGED' | 'REJECTED'
+export type OrderStatus = 'PENDING' | 'PAID' | 'ACTIVE' | 'RETURNED' | 'DAMAGED' | 'AWAITING_PAYMENT' | 'CLOSED' | 'REJECTED'
 
 export interface Car {
     id: number
@@ -31,4 +31,5 @@ export interface RepairInvoice {
     id: number
     damageDescription: string
     repairCost: number
+    paid: boolean
 }

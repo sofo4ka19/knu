@@ -8,4 +8,5 @@ public class RepairInvoiceDto {
     private Long id;
     private String damageDescription;
     private BigDecimal repairCost;
+    private boolean paid;
 }
