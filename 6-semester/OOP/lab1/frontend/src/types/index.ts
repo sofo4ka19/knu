@@ -1,4 +1,4 @@
-export type CarStatus   = 'AVAILABLE' | 'RENTED' | 'UNAVAILABLE'
+export type CarStatus   = 'AVAILABLE' | 'UNAVAILABLE'
 export type OrderStatus = 'PENDING' | 'PAID' | 'ACTIVE' | 'RETURNED' | 'DAMAGED' | 'REJECTED'
 
 export interface Car {

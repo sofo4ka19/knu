@@ -7,6 +7,9 @@ import com.carrental.service.OrderService;
 import com.carrental.util.JsonUtil;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.IOException;
 import java.util.stream.Collectors;
 
@@ -14,16 +17,24 @@ import java.util.stream.Collectors;
 public class OrderServlet extends HttpServlet {
 
     private final OrderService orderService = new OrderService();
+    private static final Logger log = LogManager.getLogger(OrderServlet.class);
 
     @Override
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse resp) throws IOException {
-        // GET /api/orders/my — current user's order
+        String pathInfo = req.getPathInfo(); // "/my"
+
         User currentUser = (User) req.getAttribute("currentUser");
-        var orders = orderService.getMyOrders(currentUser.getId()).stream()
-                .map(OrderMapper.INSTANCE::toDto)
-                .collect(Collectors.toList());
-        JsonUtil.writeJson(resp, orders);
+        log.debug("Getting orders for userId: {}", currentUser.getId());
+        if ("/my".equals(pathInfo)) {
+            var orders = orderService.getMyOrders(currentUser.getId())
+                    .stream()
+                    .map(OrderMapper.INSTANCE::toDto)
+                    .collect(Collectors.toList());
+            JsonUtil.writeJson(resp, orders);
+        } else {
+            JsonUtil.writeError(resp, 404, "Not found");
+        }
     }
 
     @Override

@@ -37,18 +37,23 @@ public class OrderService {
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Car not found: " + dto.getCarId()));
 
-        if (car.getStatus() != CarStatus.AVAILABLE) {
+        if (car.getStatus() == CarStatus.UNAVAILABLE) {
             throw new IllegalStateException("Car is not available for rent");
         }
 
-        long days = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate());
-        if (days <= 0) {
-            throw new IllegalArgumentException("End date must be after start date");
+        if (dto.getEndDate().isBefore(dto.getStartDate())) {
+            throw new IllegalArgumentException("End date must be on or after start date");
         }
+
+        long days = ChronoUnit.DAYS.between(dto.getStartDate(), dto.getEndDate()) + 1;
+
+        if (orderDao.hasConflict(car.getId(), dto.getStartDate(), dto.getEndDate())) {
+            throw new IllegalStateException("Car is already booked for the selected dates");
+        }
+
         BigDecimal totalPrice = car.getPricePerDay()
                 .multiply(BigDecimal.valueOf(days));
 
-        // Builder Pattern — readable creation of the object
         Order order = Order.builder()
                 .car(car)
                 .user(currentUser)
@@ -59,9 +64,6 @@ public class OrderService {
                 .status(OrderStatus.PENDING)
                 .createdAt(LocalDateTime.now())
                 .build();
-
-        // Set auto reservation - other user will be unable to reserve it too
-        carDao.updateStatus(car.getId(), CarStatus.RENTED);
 
         Order saved = orderDao.save(order);
         log.info("Order {} created by user {}", saved.getId(), currentUser.getId());
@@ -101,8 +103,6 @@ public class OrderService {
             throw new IllegalStateException("Only ACTIVE orders can be returned");
         }
         orderDao.updateStatus(orderId, OrderStatus.RETURNED, null);
-        // Авто знову доступне
-        carDao.updateStatus(order.getCar().getId(), CarStatus.AVAILABLE);
         order.setStatus(OrderStatus.RETURNED);
         log.info("Car {} returned from order {}", order.getCar().getId(), orderId);
         return order;
@@ -115,8 +115,6 @@ public class OrderService {
         }
         Order order = getOrderOrThrow(orderId);
         orderDao.updateStatus(orderId, OrderStatus.REJECTED, reason);
-        // Повертаємо авто у доступні
-        carDao.updateStatus(order.getCar().getId(), CarStatus.AVAILABLE);
         order.setStatus(OrderStatus.REJECTED);
         order.setRejectionReason(reason);
         return order;

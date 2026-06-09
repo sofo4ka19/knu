@@ -29,11 +29,39 @@ export default function CarListPage() {
             <div className="cars-grid">
                 {cars.map(car => (
                     <div key={car.id} className="car-card">
-                        {car.imageUrl && <img src={car.imageUrl} alt={car.brand} />}
+                        {car.imageUrl ? (
+                            <img src={car.imageUrl} alt={car.brand}
+                                 onError={(e) => e.currentTarget.style.display = 'none'}
+                                 style={{width: '100%', height: '200px', objectFit: 'cover'}}
+                            />
+                        ) : (
+                            <div style={{
+                                width: '100%', height: '200px',
+                                backgroundColor: '#e2e8f0',
+                                display: 'flex', alignItems: 'center',
+                                justifyContent: 'center', fontSize: '48px'
+                            }}>🚗</div>
+                        )}
                         <h3>{car.brand} {car.model} ({car.year})</h3>
                         <p><strong>{car.pricePerDay} грн/день</strong></p>
-                        <button onClick={() => handleRent(car.id)}>
-                            {isAuthenticated ? 'Орендувати' : 'Увійти та орендувати'}
+
+                        {/* Показуємо статус */}
+                        <p style={{
+                            color: car.status === 'AVAILABLE' ? 'green' : 'red',
+                            fontWeight: 'bold'
+                        }}>
+                            {car.status === 'AVAILABLE' ? '✅ Доступний' : '🔧 Недоступний'}
+                        </p>
+
+                        <button
+                            onClick={() => handleRent(car.id)}
+                            disabled={car.status !== 'AVAILABLE'}
+                            style={{
+                                opacity: car.status !== 'AVAILABLE' ? 0.5 : 1,
+                                cursor: car.status !== 'AVAILABLE' ? 'not-allowed' : 'pointer'
+                            }}
+                        >
+                            {car.status === 'AVAILABLE' ? 'Орендувати' : 'Недоступно'}
                         </button>
                     </div>
                 ))}

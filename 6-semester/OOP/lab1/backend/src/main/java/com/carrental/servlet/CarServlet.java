@@ -16,16 +16,14 @@ public class CarServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest req,
                          HttpServletResponse resp) throws IOException {
-        String pathInfo = req.getPathInfo(); // null або "/42"
+        String pathInfo = req.getPathInfo();
 
         if (pathInfo == null || pathInfo.equals("/")) {
-            // GET /api/cars — список доступних авто
-            var cars = carService.getAvailableCars().stream()
+            var cars = carService.getAllCars().stream()
                     .map(CarMapper.INSTANCE::toDto)
                     .collect(Collectors.toList());
             JsonUtil.writeJson(resp, cars);
         } else {
-            // GET /api/cars/42 — конкретне авто
             try {
                 Long id = Long.parseLong(pathInfo.substring(1));
                 var car = CarMapper.INSTANCE.toDto(carService.getCarById(id));

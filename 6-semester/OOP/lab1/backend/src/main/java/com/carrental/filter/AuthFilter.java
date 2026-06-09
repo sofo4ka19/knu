@@ -46,15 +46,30 @@ public class AuthFilter implements Filter {
         }
 
         String token = authHeader.substring(7);
-
+        String[] parts = token.split("\\.");
+        if (parts.length >= 2) {
+            String payload = new String(java.util.Base64.getUrlDecoder().decode(parts[1]));
+            log.debug("Token payload: {}", payload);
+        }
         try {
             Claims claims = jwtUtil.validateAndGetClaims(token);
             String auth0Id = claims.getSubject();
-            String email   = claims.get("email", String.class);
-            String name    = claims.get("name", String.class);
+
+// email може бути відсутній в access token
+// використовуємо sub як запасний варіант
+            String email    = claims.get("email", String.class);
+            String name     = claims.get("name", String.class);
+
+// Якщо email null — підставляємо заглушку
+            if (email == null) {
+                email = auth0Id + "@placeholder.com";
+            }
+            if (name == null) {
+                name = auth0Id;
+            }
 
             User user = userDao.saveIfNotExists(auth0Id, email, name);
-
+            log.debug("Current user id: {}, auth0Id: {}", user.getId(), user.getAuth0Id());
             request.setAttribute("currentUser",   user);
             request.setAttribute("jwtClaims",     claims);
             request.setAttribute("isAdmin",

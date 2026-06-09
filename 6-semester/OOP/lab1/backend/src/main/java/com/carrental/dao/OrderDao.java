@@ -7,6 +7,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -123,6 +124,30 @@ public class OrderDao {
             db.releaseConnection(conn);
         }
         return orders;
+    }
+
+    // Two date ranges overlap when: existing.start_date <= newEnd AND existing.end_date >= newStart
+    public boolean hasConflict(Long carId, LocalDate startDate, LocalDate endDate) {
+        String sql = """
+                SELECT COUNT(*) FROM orders
+                WHERE car_id = ?
+                  AND status IN ('PENDING', 'PAID', 'ACTIVE')
+                  AND start_date <= ?
+                  AND end_date   >= ?
+                """;
+        Connection conn = db.getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setLong(1,  carId);
+            ps.setDate(2,  Date.valueOf(endDate));
+            ps.setDate(3,  Date.valueOf(startDate));
+            try (ResultSet rs = ps.executeQuery()) {
+                return rs.next() && rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            db.releaseConnection(conn);
+        }
     }
 
     public List<Order> findAll() {

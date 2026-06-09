@@ -7,7 +7,7 @@ import type { Car } from '../types'
 export default function OrderFormPage() {
     const { id } = useParams<{ id: string }>()
     const navigate = useNavigate()
-    const { getAccessTokenSilently } = useAuth0()
+    const { getAccessTokenSilently, loginWithRedirect } = useAuth0()
 
     const [car, setCar] = useState<Car | null>(null)
     const [form, setForm] = useState({
@@ -22,13 +22,22 @@ export default function OrderFormPage() {
         publicApi.get<Car>(`/cars/${id}`).then(res => setCar(res.data))
     }, [id])
 
+    // Restore form data saved before the Auth0 consent redirect
+    useEffect(() => {
+        const saved = sessionStorage.getItem(`orderForm_${id}`)
+        if (saved) {
+            sessionStorage.removeItem(`orderForm_${id}`)
+            setForm(JSON.parse(saved))
+        }
+    }, [id])
+
     // Розраховуємо ціну на льоту при зміні дат
     useEffect(() => {
         if (car && form.startDate && form.endDate) {
             const days = Math.ceil(
                 (new Date(form.endDate).getTime() - new Date(form.startDate).getTime())
                 / (1000 * 60 * 60 * 24)
-            )
+            ) + 1  // ← додаємо 1
             if (days > 0) setTotalPrice(days * car.pricePerDay)
             else setTotalPrice(null)
         }
@@ -37,10 +46,37 @@ export default function OrderFormPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
+
+        if (form.endDate < form.startDate) {
+            setError('Дата закінчення не може бути раніше дати початку')
+            return
+        }
+
         try {
-            const api = createAuthApi(() => getAccessTokenSilently())
-            await api.post('/orders', { carId: Number(id), ...form })
+            let token: string
+
+            try {
+                token = await getAccessTokenSilently()
+            } catch (tokenError: any) {
+                if (tokenError.error === 'consent_required' ||
+                    tokenError.message === 'Consent required') {
+                    sessionStorage.setItem('returnTo', `/order/${id}`)
+                    sessionStorage.setItem(`orderForm_${id}`, JSON.stringify(form))
+                    await loginWithRedirect({
+                        authorizationParams: { prompt: "consent" }
+                    })
+                    return
+                }
+                throw tokenError
+            }
+
+            const api = createAuthApi(() => Promise.resolve(token))
+            await api.post('/orders', {
+                carId: Number(id),
+                ...form
+            })
             navigate('/my-orders')
+
         } catch (err: any) {
             setError(err.message)
         }
@@ -63,12 +99,19 @@ export default function OrderFormPage() {
                 <label>Дата початку
                     <input type="date" value={form.startDate}
                            min={new Date().toISOString().split('T')[0]}
-                           onChange={e => setForm({...form, startDate: e.target.value})}
+                           onChange={e => {
+                               const newStart = e.target.value
+                               setForm(prev => ({
+                                   ...prev,
+                                   startDate: newStart,
+                                   endDate: prev.endDate && prev.endDate < newStart ? newStart : prev.endDate,
+                               }))
+                           }}
                            required />
                 </label>
                 <label>Дата закінчення
                     <input type="date" value={form.endDate}
-                           min={form.startDate}
+                           min={form.startDate || new Date().toISOString().split('T')[0]}
                            onChange={e => setForm({...form, endDate: e.target.value})}
                            required />
                 </label>
