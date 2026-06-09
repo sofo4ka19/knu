@@ -114,6 +114,10 @@ public class OrderService {
             throw new IllegalArgumentException("Rejection reason is required");
         }
         Order order = getOrderOrThrow(orderId);
+        if (order.getStatus() != OrderStatus.PENDING && order.getStatus() != OrderStatus.PAID) {
+            throw new IllegalStateException(
+                    "Only PENDING or PAID orders can be rejected. Current: " + order.getStatus());
+        }
         orderDao.updateStatus(orderId, OrderStatus.REJECTED, reason);
         order.setStatus(OrderStatus.REJECTED);
         order.setRejectionReason(reason);

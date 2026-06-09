@@ -56,33 +56,26 @@ public class UserDao {
         return Optional.empty();
     }
 
-    // During the first login using Auth0 — automatically create new row in DB
+    // Upsert: create on first login, update email/name on every subsequent login
     public User saveIfNotExists(String auth0Id, String email, String fullName) {
-        return findByAuth0Id(auth0Id).orElseGet(() -> {
-            String sql = """
-                    INSERT INTO users (auth0_id, email, full_name, role, created_at)
-                    VALUES (?, ?, ?, 'CLIENT', NOW())
-                    """;
-            Connection conn = db.getConnection();
-            try (PreparedStatement ps = conn.prepareStatement(
-                    sql, Statement.RETURN_GENERATED_KEYS)) {
-                ps.setString(1, auth0Id);
-                ps.setString(2, email);
-                ps.setString(3, fullName);
-                ps.executeUpdate();
-                try (ResultSet keys = ps.getGeneratedKeys()) {
-                    if (keys.next()) {
-                        long newId = keys.getLong(1);
-                        log.info("New user created: {}, id={}", email, newId);
-                        return findById(newId).orElseThrow();
-                    }
-                }
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            } finally {
-                db.releaseConnection(conn);
-            }
-            throw new RuntimeException("Failed to create user");
-        });
+        String sql = """
+                INSERT INTO users (auth0_id, email, full_name, role, created_at)
+                VALUES (?, ?, ?, 'CLIENT', NOW())
+                ON CONFLICT (auth0_id) DO UPDATE
+                    SET email     = EXCLUDED.email,
+                        full_name = EXCLUDED.full_name
+                """;
+        Connection conn = db.getConnection();
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, auth0Id);
+            ps.setString(2, email);
+            ps.setString(3, fullName);
+            ps.executeUpdate();
+            return findByAuth0Id(auth0Id).orElseThrow();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            db.releaseConnection(conn);
+        }
     }
 }

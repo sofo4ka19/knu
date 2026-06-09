@@ -11,9 +11,9 @@ public interface OrderMapper {
 
     OrderMapper INSTANCE = Mappers.getMapper(OrderMapper.class);
 
-    @Mapping(source = "car.id",    target = "carId")
-    @Mapping(source = "car.brand", target = "carBrand")
-    @Mapping(source = "car.model", target = "carModel")
+    @Mapping(source = "car.id",       target = "carId")
+    @Mapping(source = "car.brand",    target = "carBrand")
+    @Mapping(source = "car.model",    target = "carModel")
     @Mapping(source = "user.fullName", target = "clientName")
     OrderResponseDto toDto(Order order);
 }

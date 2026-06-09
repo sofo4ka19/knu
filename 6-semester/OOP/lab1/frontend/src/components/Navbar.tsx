@@ -10,20 +10,18 @@ export default function Navbar() {
     return (
         <nav style={styles.nav}>
             <div style={styles.left}>
-                <Link to="/" style={styles.logo}>
+                <Link to={isAdmin ? '/admin' : '/'} style={styles.logo}>
                     🚗 CarRental
                 </Link>
             </div>
 
             <div style={styles.right}>
-                {/* Посилання доступні всім авторизованим */}
-                {isAuthenticated && (
+                {isAuthenticated && !isAdmin && (
                     <Link to="/my-orders" style={styles.link}>
                         Мої замовлення
                     </Link>
                 )}
 
-                {/* Посилання тільки для адміна */}
                 {isAuthenticated && isAdmin && (
                     <Link to="/admin" style={styles.link}>
                         Адмін панель

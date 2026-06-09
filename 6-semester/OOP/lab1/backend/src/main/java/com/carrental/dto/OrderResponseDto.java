@@ -13,6 +13,7 @@ public class OrderResponseDto {
     private String carBrand;
     private String carModel;
     private String clientName;
+    private String passportData;
     private LocalDate startDate;
     private LocalDate endDate;
     private BigDecimal totalPrice;

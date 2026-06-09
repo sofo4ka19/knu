@@ -41,24 +41,22 @@ export default function AdminDashboard() {
             <table className="admin-table">
                 <thead>
                 <tr>
-                    <th>#</th><th>Клієнт</th><th>Авто</th>
-                    <th>Дати</th><th>Сума</th><th>Статус</th><th>Дії</th>
+                    <th>Паспорт</th><th>Авто</th>
+                    <th>Період</th><th>Статус</th><th>Дії</th>
                 </tr>
                 </thead>
                 <tbody>
                 {orders.map(o => (
                     <tr key={o.id}>
-                        <td>{o.id}</td>
-                        <td>{o.clientName}</td>
+                        <td>{o.passportData}</td>
                         <td>{o.carBrand} {o.carModel}</td>
                         <td>{o.startDate} — {o.endDate}</td>
-                        <td>{o.totalPrice} грн</td>
                         <td>{o.status}</td>
                         <td className="actions">
                             {o.status === 'PAID'     && <button onClick={() => activate(o.id)}>Видати</button>}
                             {o.status === 'ACTIVE'   && <button onClick={() => returnCar(o.id)}>Повернення</button>}
                             {o.status === 'RETURNED' && <button onClick={() => addDamage(o.id)}>Пошкодження</button>}
-                            {o.status === 'PENDING'  && <button onClick={() => reject(o.id)}>Відхилити</button>}
+                            {(o.status === 'PENDING' || o.status === 'PAID') && <button onClick={() => reject(o.id)}>Відхилити</button>}
                         </td>
                     </tr>
                 ))}

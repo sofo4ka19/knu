@@ -1,5 +1,6 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useNavigate, Navigate } from 'react-router-dom'
 import { useAuth0 } from '@auth0/auth0-react'
+import { useEffect } from 'react'
 import Navbar from './components/Navbar'
 import CarListPage from './pages/CarListPage'
 import OrderFormPage from './pages/OrderFormPage'
@@ -8,26 +9,45 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
-  const { isLoading } = useAuth0()
-  if (isLoading) return <div className="loading">Завантаження...</div>
+    const { isLoading, isAuthenticated, user } = useAuth0()
+    const navigate = useNavigate()
 
-  return (
-      <>
-        <Navbar />
-        <main className="container">
-          <Routes>
-            <Route path="/"           element={<CarListPage />} />
-            <Route path="/order/:id"  element={
-              <ProtectedRoute><OrderFormPage /></ProtectedRoute>
-            } />
-            <Route path="/my-orders"  element={
-              <ProtectedRoute><MyOrdersPage /></ProtectedRoute>
-            } />
-            <Route path="/admin"      element={
-              <ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>
-            } />
-          </Routes>
-        </main>
-      </>
-  )
+    const isAdmin = isAuthenticated &&
+        ((user?.['https://car-rental-api/roles'] as string[]) ?? []).includes('admin')
+
+    useEffect(() => {
+        if (isAuthenticated) {
+            const returnTo = sessionStorage.getItem('returnTo')
+            if (returnTo) {
+                sessionStorage.removeItem('returnTo')
+                navigate(returnTo)
+            }
+        }
+    }, [isAuthenticated])
+
+    if (isLoading) return <div>Завантаження...</div>
+
+    return (
+        <>
+            <Navbar />
+            <main className="container">
+                <Routes>
+                    <Route path="/" element={
+                        isAdmin ? <Navigate to="/admin" replace /> : <CarListPage />
+                    } />
+                    <Route path="/order/:id" element={
+                        isAdmin ? <Navigate to="/admin" replace /> :
+                        <ProtectedRoute><OrderFormPage /></ProtectedRoute>
+                    } />
+                    <Route path="/my-orders" element={
+                        isAdmin ? <Navigate to="/admin" replace /> :
+                        <ProtectedRoute><MyOrdersPage /></ProtectedRoute>
+                    } />
+                    <Route path="/admin" element={
+                        <ProtectedRoute adminOnly><AdminDashboard /></ProtectedRoute>
+                    } />
+                </Routes>
+            </main>
+        </>
+    )
 }
