@@ -8,43 +8,33 @@ export default function Navbar() {
     const isAdmin = roles.includes('admin')
 
     return (
-        <nav style={styles.nav}>
-            <div style={styles.left}>
-                <Link to={isAdmin ? '/admin' : '/'} style={styles.logo}>
-                    🚗 CarRental
-                </Link>
-            </div>
+        <nav className="navbar">
+            <Link to={isAdmin ? '/admin' : '/'} className="navbar-logo">
+                🚗 CarRental
+            </Link>
 
-            <div style={styles.right}>
+            <div className="navbar-right">
                 {isAuthenticated && !isAdmin && (
-                    <Link to="/my-orders" style={styles.link}>
+                    <Link to="/my-orders" className="navbar-link">
                         Мої замовлення
                     </Link>
                 )}
-
                 {isAuthenticated && isAdmin && (
-                    <Link to="/admin" style={styles.link}>
+                    <Link to="/admin" className="navbar-link">
                         Адмін панель
                     </Link>
                 )}
 
                 {!isAuthenticated ? (
-                    <button
-                        style={styles.button}
-                        onClick={() => loginWithRedirect()}
-                    >
+                    <button className="btn-nav btn-nav-login" onClick={() => loginWithRedirect()}>
                         Увійти
                     </button>
                 ) : (
-                    <div style={styles.userBlock}>
-            <span style={styles.email}>
-              {user?.name ?? user?.email}
-            </span>
+                    <div className="navbar-user">
+                        <span className="navbar-username">{user?.name ?? user?.email}</span>
                         <button
-                            style={{...styles.button, ...styles.logoutButton}}
-                            onClick={() => logout({
-                                logoutParams: { returnTo: window.location.origin }
-                            })}
+                            className="btn-nav btn-nav-logout"
+                            onClick={() => logout({ logoutParams: { returnTo: window.location.origin } })}
                         >
                             Вийти
                         </button>
@@ -53,59 +43,4 @@ export default function Navbar() {
             </div>
         </nav>
     )
-}
-
-const styles: Record<string, React.CSSProperties> = {
-    nav: {
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        padding: '12px 24px',
-        backgroundColor: '#1a1a2e',
-        color: 'white',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
-    },
-    left: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '24px',
-    },
-    right: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-    },
-    logo: {
-        color: 'white',
-        textDecoration: 'none',
-        fontSize: '20px',
-        fontWeight: 'bold',
-    },
-    link: {
-        color: '#a0aec0',
-        textDecoration: 'none',
-        fontSize: '15px',
-        transition: 'color 0.2s',
-    },
-    button: {
-        padding: '8px 16px',
-        backgroundColor: '#4a90e2',
-        color: 'white',
-        border: 'none',
-        borderRadius: '6px',
-        cursor: 'pointer',
-        fontSize: '14px',
-    },
-    logoutButton: {
-        backgroundColor: '#e53e3e',
-    },
-    userBlock: {
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-    },
-    email: {
-        color: '#a0aec0',
-        fontSize: '14px',
-    },
 }

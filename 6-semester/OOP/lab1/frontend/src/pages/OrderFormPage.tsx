@@ -10,11 +10,7 @@ export default function OrderFormPage() {
     const { getAccessTokenSilently, loginWithRedirect } = useAuth0()
 
     const [car, setCar] = useState<Car | null>(null)
-    const [form, setForm] = useState({
-        passportData: '',
-        startDate: '',
-        endDate: '',
-    })
+    const [form, setForm] = useState({ passportData: '', startDate: '', endDate: '' })
     const [error, setError] = useState('')
     const [totalPrice, setTotalPrice] = useState<number | null>(null)
 
@@ -22,7 +18,6 @@ export default function OrderFormPage() {
         publicApi.get<Car>(`/cars/${id}`).then(res => setCar(res.data))
     }, [id])
 
-    // Restore form data saved before the Auth0 consent redirect
     useEffect(() => {
         const saved = sessionStorage.getItem(`orderForm_${id}`)
         if (saved) {
@@ -31,15 +26,13 @@ export default function OrderFormPage() {
         }
     }, [id])
 
-    // Розраховуємо ціну на льоту при зміні дат
     useEffect(() => {
         if (car && form.startDate && form.endDate) {
             const days = Math.ceil(
                 (new Date(form.endDate).getTime() - new Date(form.startDate).getTime())
                 / (1000 * 60 * 60 * 24)
-            ) + 1  // ← додаємо 1
-            if (days > 0) setTotalPrice(days * car.pricePerDay)
-            else setTotalPrice(null)
+            ) + 1
+            setTotalPrice(days > 0 ? days * car.pricePerDay : null)
         }
     }, [form.startDate, form.endDate, car])
 
@@ -61,17 +54,13 @@ export default function OrderFormPage() {
 
         try {
             let token: string
-
             try {
                 token = await getAccessTokenSilently()
             } catch (tokenError: any) {
-                if (tokenError.error === 'consent_required' ||
-                    tokenError.message === 'Consent required') {
+                if (tokenError.error === 'consent_required' || tokenError.message === 'Consent required') {
                     sessionStorage.setItem('returnTo', `/order/${id}`)
                     sessionStorage.setItem(`orderForm_${id}`, JSON.stringify(form))
-                    await loginWithRedirect({
-                        authorizationParams: { prompt: "consent" }
-                    })
+                    await loginWithRedirect({ authorizationParams: { prompt: 'consent' } })
                     return
                 }
                 throw tokenError
@@ -84,54 +73,67 @@ export default function OrderFormPage() {
                 passportData: form.passportData.trim().toUpperCase(),
             })
             navigate('/my-orders')
-
         } catch (err: any) {
             setError(err.message)
         }
     }
 
-    if (!car) return <div>Завантаження...</div>
+    if (!car) return <div className="loading">Завантаження...</div>
 
     return (
-        <div className="order-form">
-            <h2>Оренда: {car.brand} {car.model}</h2>
-            <p>Ціна: {car.pricePerDay} грн/день</p>
+        <div className="order-form-wrap">
+            <div className="order-form">
+                <h2>Оренда автомобіля</h2>
+                <p className="order-form-subtitle">{car.brand} {car.model} · {car.pricePerDay} грн/день</p>
 
-            {error && <div className="error">{error}</div>}
+                {error && <div className="error">{error}</div>}
 
-            <form onSubmit={handleSubmit}>
-                <label>Паспортні дані
-                    <input placeholder="АБ123456 · FF123456 · 123456789"
-                           value={form.passportData}
-                           onChange={e => setForm({...form, passportData: e.target.value})}
-                           required />
-                </label>
-                <label>Дата початку
-                    <input type="date" value={form.startDate}
-                           min={new Date().toISOString().split('T')[0]}
-                           onChange={e => {
-                               const newStart = e.target.value
-                               setForm(prev => ({
-                                   ...prev,
-                                   startDate: newStart,
-                                   endDate: prev.endDate && prev.endDate < newStart ? newStart : prev.endDate,
-                               }))
-                           }}
-                           required />
-                </label>
-                <label>Дата закінчення
-                    <input type="date" value={form.endDate}
-                           min={form.startDate || new Date().toISOString().split('T')[0]}
-                           onChange={e => setForm({...form, endDate: e.target.value})}
-                           required />
-                </label>
+                <form onSubmit={handleSubmit}>
+                    <label>
+                        Паспортні дані
+                        <input
+                            placeholder="АБ123456 · FF123456 · 123456789"
+                            value={form.passportData}
+                            onChange={e => setForm({ ...form, passportData: e.target.value })}
+                            required
+                        />
+                    </label>
 
-                {totalPrice && (
-                    <p className="total">Разом: <strong>{totalPrice} грн</strong></p>
-                )}
+                    <label>
+                        Дата початку
+                        <input type="date" value={form.startDate}
+                               min={new Date().toISOString().split('T')[0]}
+                               onChange={e => {
+                                   const newStart = e.target.value
+                                   setForm(prev => ({
+                                       ...prev,
+                                       startDate: newStart,
+                                       endDate: prev.endDate && prev.endDate < newStart ? newStart : prev.endDate,
+                                   }))
+                               }}
+                               required />
+                    </label>
 
-                <button type="submit">Підтвердити замовлення</button>
-            </form>
+                    <label>
+                        Дата закінчення
+                        <input type="date" value={form.endDate}
+                               min={form.startDate || new Date().toISOString().split('T')[0]}
+                               onChange={e => setForm({ ...form, endDate: e.target.value })}
+                               required />
+                    </label>
+
+                    {totalPrice !== null && (
+                        <div className="order-total">
+                            <span>Загальна вартість</span>
+                            <strong>{totalPrice} грн</strong>
+                        </div>
+                    )}
+
+                    <button type="submit" className="btn btn-primary btn-block">
+                        Підтвердити замовлення
+                    </button>
+                </form>
+            </div>
         </div>
     )
 }

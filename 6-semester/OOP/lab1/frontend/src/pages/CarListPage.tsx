@@ -21,51 +21,43 @@ export default function CarListPage() {
         else navigate(`/order/${carId}`)
     }
 
-    if (loading) return <div>Завантаження авто...</div>
+    if (loading) return <div className="loading">Завантаження автомобілів...</div>
 
     return (
         <div>
             <h1>Доступні автомобілі</h1>
-            <div className="cars-grid">
-                {cars.map(car => (
-                    <div key={car.id} className="car-card">
-                        {car.imageUrl ? (
-                            <img src={car.imageUrl} alt={car.brand}
-                                 onError={(e) => e.currentTarget.style.display = 'none'}
-                                 style={{width: '100%', height: '200px', objectFit: 'cover'}}
-                            />
-                        ) : (
-                            <div style={{
-                                width: '100%', height: '200px',
-                                backgroundColor: '#e2e8f0',
-                                display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', fontSize: '48px'
-                            }}>🚗</div>
-                        )}
-                        <h3>{car.brand} {car.model} ({car.year})</h3>
-                        <p><strong>{car.pricePerDay} грн/день</strong></p>
-
-                        {/* Показуємо статус */}
-                        <p style={{
-                            color: car.status === 'AVAILABLE' ? 'green' : 'red',
-                            fontWeight: 'bold'
-                        }}>
-                            {car.status === 'AVAILABLE' ? '✅ Доступний' : '🔧 Недоступний'}
-                        </p>
-
-                        <button
-                            onClick={() => handleRent(car.id)}
-                            disabled={car.status !== 'AVAILABLE'}
-                            style={{
-                                opacity: car.status !== 'AVAILABLE' ? 0.5 : 1,
-                                cursor: car.status !== 'AVAILABLE' ? 'not-allowed' : 'pointer'
-                            }}
-                        >
-                            {car.status === 'AVAILABLE' ? 'Орендувати' : 'Недоступно'}
-                        </button>
-                    </div>
-                ))}
-            </div>
+            {cars.length === 0 ? (
+                <div className="empty-state">
+                    <div className="empty-state-icon">🚗</div>
+                    <p>Автомобілі відсутні</p>
+                </div>
+            ) : (
+                <div className="cars-grid">
+                    {cars.map(car => (
+                        <div key={car.id} className="car-card">
+                            {car.imageUrl
+                                ? <img src={car.imageUrl} alt={`${car.brand} ${car.model}`}
+                                       onError={e => e.currentTarget.style.display = 'none'} />
+                                : <div className="car-card-placeholder">🚗</div>
+                            }
+                            <div className="car-card-body">
+                                <div className="car-card-title">{car.brand} {car.model} ({car.year})</div>
+                                <div className="car-card-price">{car.pricePerDay} грн/день</div>
+                                <div className={`car-card-status ${car.status === 'AVAILABLE' ? 'available' : 'unavailable'}`}>
+                                    {car.status === 'AVAILABLE' ? '✓ Доступний' : '✗ Недоступний'}
+                                </div>
+                                <button
+                                    className="btn btn-primary btn-block"
+                                    onClick={() => handleRent(car.id)}
+                                    disabled={car.status !== 'AVAILABLE'}
+                                >
+                                    {car.status === 'AVAILABLE' ? 'Орендувати' : 'Недоступно'}
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     )
 }

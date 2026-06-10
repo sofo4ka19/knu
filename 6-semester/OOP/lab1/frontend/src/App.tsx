@@ -9,7 +9,7 @@ import AdminDashboard from './pages/admin/AdminDashboard'
 import ProtectedRoute from './components/ProtectedRoute'
 
 export default function App() {
-    const { isLoading, isAuthenticated, user } = useAuth0()
+    const { isAuthenticated, user } = useAuth0()
     const navigate = useNavigate()
 
     const isAdmin = isAuthenticated &&

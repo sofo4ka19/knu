@@ -9,7 +9,7 @@ interface Props {
 export default function ProtectedRoute({ children, adminOnly }: Props) {
     const { isAuthenticated, isLoading, user } = useAuth0()
 
-    if (isLoading) return <div>Завантаження...</div>
+    if (isLoading) return <div className="loading">Завантаження...</div>
     if (!isAuthenticated) return <Navigate to="/" replace />
 
     if (adminOnly) {
