@@ -43,9 +43,16 @@ export default function OrderFormPage() {
         }
     }, [form.startDate, form.endDate, car])
 
+    const PASSPORT_RE = /^([А-ЯІЇЄ]{2}\d{6}|[A-Z]{2}\d{6}|\d{9})$/
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
         setError('')
+
+        if (!PASSPORT_RE.test(form.passportData.trim().toUpperCase())) {
+            setError('Невірний формат паспорта. Приклади: АБ123456 · FF123456 · 123456789')
+            return
+        }
 
         if (form.endDate < form.startDate) {
             setError('Дата закінчення не може бути раніше дати початку')
@@ -73,7 +80,8 @@ export default function OrderFormPage() {
             const api = createAuthApi(() => Promise.resolve(token))
             await api.post('/orders', {
                 carId: Number(id),
-                ...form
+                ...form,
+                passportData: form.passportData.trim().toUpperCase(),
             })
             navigate('/my-orders')
 
@@ -92,10 +100,12 @@ export default function OrderFormPage() {
             {error && <div className="error">{error}</div>}
 
             <form onSubmit={handleSubmit}>
-                <input placeholder="Паспортні дані (серія та номер)"
-                       value={form.passportData}
-                       onChange={e => setForm({...form, passportData: e.target.value})}
-                       required />
+                <label>Паспортні дані
+                    <input placeholder="АБ123456 · FF123456 · 123456789"
+                           value={form.passportData}
+                           onChange={e => setForm({...form, passportData: e.target.value})}
+                           required />
+                </label>
                 <label>Дата початку
                     <input type="date" value={form.startDate}
                            min={new Date().toISOString().split('T')[0]}

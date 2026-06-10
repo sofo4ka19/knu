@@ -15,10 +15,13 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public class OrderService {
 
     private static final Logger log = LogManager.getLogger(OrderService.class);
+    private static final Pattern PASSPORT_RE =
+            Pattern.compile("^([А-ЯІЇЄ]{2}\\d{6}|[A-Z]{2}\\d{6}|\\d{9})$");
     private final OrderDao orderDao;
     private final CarDao carDao;
 
@@ -36,6 +39,12 @@ public class OrderService {
         Car car = carDao.findById(dto.getCarId())
                 .orElseThrow(() -> new IllegalArgumentException(
                         "Car not found: " + dto.getCarId()));
+
+        if (dto.getPassportData() == null ||
+                !PASSPORT_RE.matcher(dto.getPassportData().trim().toUpperCase()).matches()) {
+            throw new IllegalArgumentException(
+                    "Invalid passport format. Expected: АБ123456, FF123456, or 123456789");
+        }
 
         if (car.getStatus() == CarStatus.UNAVAILABLE) {
             throw new IllegalStateException("Car is not available for rent");
