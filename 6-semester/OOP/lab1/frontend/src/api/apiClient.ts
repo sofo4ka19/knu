@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { translateError } from '../utils/errorTranslations'
 
 const BASE_URL = 'http://localhost:8080/api'
 
@@ -16,8 +17,8 @@ export const createAuthApi = (getToken: () => Promise<string>) => {
     api.interceptors.response.use(
         res => res,
         err => {
-            const msg = err.response?.data?.error || 'Помилка сервера'
-            return Promise.reject(new Error(msg))
+            const raw = err.response?.data?.error || 'Помилка сервера'
+            return Promise.reject(new Error(translateError(raw)))
         }
     )
 
