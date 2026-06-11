@@ -1,0 +1,34 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/car_rental_lab2
+    username: postgres
+    password: database
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      # Hibernate checks the schema matches entities but never modifies it.
+      # Liquibase owns all DDL changes instead.
+      ddl-auto: validate
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  liquibase:
+    change-log: classpath:db/changelog-master.xml
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Spring Security fetches /.well-known/openid-configuration on startup,
+          # discovers the JWKS endpoint, and validates tokens automatically.
+          # This replaces the entire JwtUtil.java from lab1.
+          issuer-uri: https://dev-378024ihuz3ym3fa.us.auth0.com/
+          # Audience check — same value as AUDIENCE constant in lab1's JwtUtil
+          audiences: https://car-rental-api
+
+server:
+  port: 8080
