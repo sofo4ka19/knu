@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="001-create-cars" author="carrental">
+        <createTable tableName="cars">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="brand" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="model" type="VARCHAR(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="year" type="INT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="plate_number" type="VARCHAR(20)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="price_per_day" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="status" type="VARCHAR(30)" defaultValue="AVAILABLE">
+                <constraints nullable="false"/>
+            </column>
+            <column name="image_url" type="VARCHAR(500)"/>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <!-- Test data — same three cars as lab1's 001_create_cars.sql -->
+    <changeSet id="001-insert-test-cars" author="carrental">
+        <insert tableName="cars">
+            <column name="brand" value="Toyota"/>
+            <column name="model" value="Camry"/>
+            <column name="year" valueNumeric="2021"/>
+            <column name="plate_number" value="AA1234BB"/>
+            <column name="price_per_day" valueNumeric="1200.00"/>
+            <column name="image_url" value="https://example.com/camry.jpg"/>
+        </insert>
+        <insert tableName="cars">
+            <column name="brand" value="BMW"/>
+            <column name="model" value="3 Series"/>
+            <column name="year" valueNumeric="2022"/>
+            <column name="plate_number" value="BB5678CC"/>
+            <column name="price_per_day" valueNumeric="2500.00"/>
+            <column name="image_url" value="https://example.com/bmw3.jpg"/>
+        </insert>
+        <insert tableName="cars">
+            <column name="brand" value="Renault"/>
+            <column name="model" value="Clio"/>
+            <column name="year" valueNumeric="2020"/>
+            <column name="plate_number" value="CC9999DD"/>
+            <column name="price_per_day" valueNumeric="800.00"/>
+            <column name="image_url" value="https://example.com/clio.jpg"/>
+        </insert>
+    </changeSet>
+
+</databaseChangeLog>

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+            https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.20.xsd">
+
+    <changeSet id="004-create-repair-invoices" author="carrental">
+        <createTable tableName="repair_invoices">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <!-- UNIQUE ensures one invoice per order -->
+            <column name="order_id" type="BIGINT">
+                <constraints nullable="false"
+                             unique="true"
+                             foreignKeyName="fk_repair_invoices_order"
+                             references="orders(id)"/>
+            </column>
+            <column name="damage_description" type="TEXT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="repair_cost" type="DECIMAL(10,2)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
