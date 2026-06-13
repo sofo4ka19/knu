@@ -63,9 +63,14 @@ public class RepairService {
         repairInvoiceRepository.save(invoice);
 
         Order order = invoice.getOrder();
-        order.setStatus(OrderStatus.CLOSED);
-        orderRepository.save(order);
-
-        log.info("Repair invoice paid for order {}, order closed", orderId);
+        // Flow 2: admin already restored the car → close the order now
+        // Flow 1: admin hasn't restored yet → keep DAMAGED, admin will close on restore
+        if (order.getStatus() == OrderStatus.AWAITING_PAYMENT) {
+            order.setStatus(OrderStatus.CLOSED);
+            orderRepository.save(order);
+            log.info("Repair invoice paid for order {}, order closed", orderId);
+        } else {
+            log.info("Repair invoice paid for order {}, awaiting admin restoration", orderId);
+        }
     }
 }

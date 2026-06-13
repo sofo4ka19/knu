@@ -35,11 +35,11 @@ export default function MyOrdersPage() {
 
     const handlePayRepair = async (orderId: number) => {
         await api.post(`/orders/${orderId}/pay-repair`)
-        setOrders(prev => prev.map(o =>
-            o.id === orderId && o.repairInvoice
-                ? { ...o, repairInvoice: { ...o.repairInvoice, paid: true } }
-                : o
-        ))
+        setOrders(prev => prev.map(o => {
+            if (o.id !== orderId || !o.repairInvoice) return o
+            const newStatus = o.status === 'AWAITING_PAYMENT' ? 'CLOSED' : o.status
+            return { ...o, status: newStatus, repairInvoice: { ...o.repairInvoice, paid: true } }
+        }))
     }
 
     if (loading) return <div className="loading">Завантаження замовлень...</div>

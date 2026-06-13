@@ -142,8 +142,11 @@ public class OrderService {
         car.setStatus(CarStatus.AVAILABLE);
         carRepository.save(car);
 
-        order.setStatus(OrderStatus.AWAITING_PAYMENT);
-        log.info("Car {} restored to AVAILABLE after repair for order {}", car.getId(), orderId);
+        // Flow 1: user already paid → close immediately
+        // Flow 2: user hasn't paid yet → wait for payment
+        boolean invoicePaid = order.getRepairInvoice() != null && order.getRepairInvoice().isPaid();
+        order.setStatus(invoicePaid ? OrderStatus.CLOSED : OrderStatus.AWAITING_PAYMENT);
+        log.info("Car {} restored for order {}, invoice paid: {}", car.getId(), orderId, invoicePaid);
         return orderRepository.save(order);
     }
 
