@@ -20,7 +20,7 @@ public class AdminController {
     private final RepairService repairService;
     private final OrderMapper orderMapper;
 
-    @GetMapping
+    @GetMapping("/orders")
     public List<OrderResponseDto> getAllOrders() {
         return orderService.getAllOrders().stream()
                 .map(orderMapper::toDto)
