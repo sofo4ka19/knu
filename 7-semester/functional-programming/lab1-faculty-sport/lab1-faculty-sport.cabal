@@ -35,6 +35,11 @@ library
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , io-streams
+    , mysql-haskell
+    , text
+    , time
   default-language: Haskell2010
 
 executable lab1-faculty-sport-exe
@@ -48,7 +53,12 @@ executable lab1-faculty-sport-exe
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , io-streams
     , lab1-faculty-sport
+    , mysql-haskell
+    , text
+    , time
   default-language: Haskell2010
 
 test-suite lab1-faculty-sport-test
@@ -63,5 +73,10 @@ test-suite lab1-faculty-sport-test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
       base >=4.7 && <5
+    , bytestring
+    , io-streams
     , lab1-faculty-sport
+    , mysql-haskell
+    , text
+    , time
   default-language: Haskell2010
