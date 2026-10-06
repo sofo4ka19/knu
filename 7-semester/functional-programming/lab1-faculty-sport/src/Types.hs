@@ -13,14 +13,12 @@ data Coach = Coach
   { coachId     :: Int
   , coachName   :: String
   , coachPhone  :: String
-  , coachSpec   :: String
   } deriving Show
 
 data Section = Section
   { secId       :: Int
   , secName     :: String
   , secCoachId  :: Int
-  , secDesc     :: String
   } deriving Show
 
 data SectionMember = SectionMember

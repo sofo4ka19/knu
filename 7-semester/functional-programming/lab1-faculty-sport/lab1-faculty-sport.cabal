@@ -25,7 +25,10 @@ source-repository head
 
 library
   exposed-modules:
+      Entity
       Lib
+      MySQLTypes
+      Types
   other-modules:
       Paths_lab1_faculty_sport
   autogen-modules:
