@@ -64,3 +64,34 @@ getById conn i = do
   case rows of
     []      -> return Nothing
     (r : _) -> return (Just (fromRow r))
+
+getStudentsInSection :: MySQLConn -> Int -> IO [Student]
+getStudentsInSection conn sectionId = do
+  let sql = "SELECT s.id, s.full_name, s.group_name, s.phone \
+            \FROM students s \
+            \JOIN section_members sm ON s.id = sm.stud_id \
+            \WHERE sm.sec_id = ?"
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt sectionId]
+  rows <- Streams.toList inputStream
+  return (map fromRow rows)
+
+getScheduleForSection :: MySQLConn -> Int -> IO [Schedule]
+getScheduleForSection conn sectionId = do
+  let sql = "SELECT * FROM schedule WHERE sec_id = ?"
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt sectionId]
+  rows <- Streams.toList inputStream
+  return (map fromRow rows)
+
+getSectionsByCoach :: MySQLConn -> Int -> IO [Section]
+getSectionsByCoach conn coachId = do
+  let sql = "SELECT * FROM sections WHERE coach_id = ?"
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt coachId]
+  rows <- Streams.toList inputStream
+  return (map fromRow rows)
+
+getCompetitionResults :: MySQLConn -> Int -> IO [CompetitionMember]
+getCompetitionResults conn compId = do
+  let sql = "SELECT * FROM competition_members WHERE comp_id = ?"
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt compId]
+  rows <- Streams.toList inputStream
+  return (map fromRow rows)
