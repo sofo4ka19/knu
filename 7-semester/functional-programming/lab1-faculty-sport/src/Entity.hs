@@ -4,15 +4,18 @@ import Types
 import Database.MySQL.Base (MySQLValue)
 import MySQLTypes
 import Data.Time(DayOfWeek)
+import Data.Proxy (Proxy(..))
 
 class Entity a where
-  tableName    :: a -> String
+  tableName    :: Proxy a -> String
+  columnNames :: Proxy a -> [String]
   toRow        :: a -> [MySQLValue]
   fromRow      :: [MySQLValue] -> a
   entityId     :: a -> Int
 
 instance Entity Student where
   tableName _ = "students"
+  columnNames _ = ["full_name", "group_name", "phone"]
 
   fromRow [i, name, group, phone] = Student
     { studId    = fromMySQLInt i
@@ -32,6 +35,7 @@ instance Entity Student where
 
 instance Entity Coach where
   tableName _ = "coaches"
+  columnNames _ = ["full_name", "phone"]
 
   fromRow [i, name, phone] = Coach
     { coachId    = fromMySQLInt i
@@ -49,6 +53,7 @@ instance Entity Coach where
 
 instance Entity Section where
   tableName _ = "sections"
+  columnNames _ = ["name", "coach_id"]
 
   fromRow [i, name, coachid] = Section
     { secId      = fromMySQLInt i
@@ -66,6 +71,7 @@ instance Entity Section where
 
 instance Entity SectionMember where
   tableName _ = "section_members"
+  columnNames _ = ["stud_id", "sec_id"]
 
   fromRow [i, studentId, sectionId] = SectionMember
     { secMemId     = fromMySQLInt i
@@ -83,6 +89,7 @@ instance Entity SectionMember where
 
 instance Entity Schedule where
   tableName _ = "schedule"
+  columnNames _ = ["sec_id", "day_of_week", "start_time", "end_time", "place"]
 
   fromRow [i, sectionId, day, start, end, place] = Schedule
     { schedId    = fromMySQLInt i
@@ -106,6 +113,7 @@ instance Entity Schedule where
 
 instance Entity Competition where
   tableName _ = "competitions"
+  columnNames _ = ["name", "date", "place", "sec_id"]
 
   fromRow [i, name, date, place, sectionId] = Competition
     { compId    = fromMySQLInt i
@@ -127,6 +135,7 @@ instance Entity Competition where
 
 instance Entity CompetitionMember where
   tableName _ = "competition_members"
+  columnNames _ = ["stud_id", "comp_id", "result"]
   fromRow [i, studentId, competitionId, result] = CompetitionMember
     { compMemId     = fromMySQLInt i
     , compMemStudId = fromMySQLInt studentId
