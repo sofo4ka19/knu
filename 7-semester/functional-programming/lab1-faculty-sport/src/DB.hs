@@ -45,10 +45,10 @@ getAll conn = do
   rows <- Streams.toList inputStream
   return (map fromRow rows)
 
-deleteEntity :: forall a. Entity a => MySQLConn -> a -> IO OK
-deleteEntity conn item = do
+deleteById :: forall a. Entity a => Proxy a -> MySQLConn -> Int -> IO OK
+deleteById _ conn i = do
   let sql = "DELETE FROM " ++ tableName (Proxy :: Proxy a) ++ " WHERE id = ?"
-  execute conn (fromString sql) [toMySQLInt (entityId item)]
+  execute conn (fromString sql) [toMySQLInt i]
 
 updateEntity :: forall a. Entity a => MySQLConn -> a -> IO OK
 updateEntity conn item = do
@@ -97,3 +97,17 @@ getCompetitionResults conn cmpId = do
   (_, inputStream) <- query conn (fromString sql) [toMySQLInt cmpId]
   rows <- Streams.toList inputStream
   return (map fromRow rows)
+
+searchByName :: forall a. Searchable a => MySQLConn -> String -> IO [a]
+searchByName conn namePart = do
+  let col   = nameColumn (Proxy :: Proxy a)
+      table = tableName (Proxy :: Proxy a)
+      sql   = "SELECT * FROM " ++ table ++ " WHERE " ++ col ++ " LIKE ?"
+  (_, inputStream) <- query conn (fromString sql) [toMySQLString ("%" ++ namePart ++ "%")]
+  rows <- Streams.toList inputStream
+  return (map fromRow rows)
+
+removeStudentFromSection :: MySQLConn -> Int -> Int -> IO OK
+removeStudentFromSection conn sid secid = 
+  execute conn "DELETE FROM section_members WHERE stud_id = ? AND sec_id = ?" 
+    [toMySQLInt sid, toMySQLInt secid]

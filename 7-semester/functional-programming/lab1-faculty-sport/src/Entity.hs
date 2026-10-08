@@ -149,3 +149,18 @@ instance Entity CompetitionMember where
     , toMySQLInt (compMemCompId cm)
     , toMySQLString (compMemResult cm)
     ]
+
+class Entity a => Searchable a where
+  nameColumn :: Proxy a -> String
+
+instance Searchable Student where
+  nameColumn _ = "full_name"
+
+instance Searchable Coach where
+  nameColumn _ = "full_name"
+
+instance Searchable Section where
+  nameColumn _ = "name"
+
+instance Searchable Competition where
+  nameColumn _ = "name"
