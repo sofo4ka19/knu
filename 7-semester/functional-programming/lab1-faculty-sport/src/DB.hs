@@ -4,6 +4,7 @@
 module DB where
 
 import Database.MySQL.Base
+import Configuration.Dotenv (loadFile, defaultConfig)
 import qualified System.IO.Streams as Streams
 import System.Environment (lookupEnv)
 import Data.String (fromString)
@@ -16,6 +17,7 @@ import MySQLTypes
 
 connectDB :: IO MySQLConn
 connectDB = do
+  loadFile defaultConfig
   maybePassword <- lookupEnv "DB_PASSWORD"
   password <- case maybePassword of
     Just p  -> return p
@@ -83,15 +85,15 @@ getScheduleForSection conn sectionId = do
   return (map fromRow rows)
 
 getSectionsByCoach :: MySQLConn -> Int -> IO [Section]
-getSectionsByCoach conn coachId = do
+getSectionsByCoach conn cId = do
   let sql = "SELECT * FROM sections WHERE coach_id = ?"
-  (_, inputStream) <- query conn (fromString sql) [toMySQLInt coachId]
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt cId]
   rows <- Streams.toList inputStream
   return (map fromRow rows)
 
 getCompetitionResults :: MySQLConn -> Int -> IO [CompetitionMember]
-getCompetitionResults conn compId = do
+getCompetitionResults conn cmpId = do
   let sql = "SELECT * FROM competition_members WHERE comp_id = ?"
-  (_, inputStream) <- query conn (fromString sql) [toMySQLInt compId]
+  (_, inputStream) <- query conn (fromString sql) [toMySQLInt cmpId]
   rows <- Streams.toList inputStream
   return (map fromRow rows)

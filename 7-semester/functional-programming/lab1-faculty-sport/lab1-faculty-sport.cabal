@@ -40,6 +40,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , dotenv
     , io-streams
     , mysql-haskell
     , text
@@ -58,6 +59,7 @@ executable lab1-faculty-sport-exe
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , dotenv
     , io-streams
     , lab1-faculty-sport
     , mysql-haskell
@@ -78,6 +80,7 @@ test-suite lab1-faculty-sport-test
   build-depends:
       base >=4.7 && <5
     , bytestring
+    , dotenv
     , io-streams
     , lab1-faculty-sport
     , mysql-haskell

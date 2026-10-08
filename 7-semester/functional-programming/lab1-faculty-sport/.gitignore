@@ -1,5 +1,5 @@
 .stack-work/
 *~
 *.cabal
-.env.ps1
+.env
 dist-newstyle/
