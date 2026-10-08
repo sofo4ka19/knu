@@ -111,3 +111,68 @@ removeStudentFromSection :: MySQLConn -> Int -> Int -> IO OK
 removeStudentFromSection conn sid secid = 
   execute conn "DELETE FROM section_members WHERE stud_id = ? AND sec_id = ?" 
     [toMySQLInt sid, toMySQLInt secid]
+
+getSectionsWithCoachNames :: MySQLConn -> IO [(Int, String, String)]
+getSectionsWithCoachNames conn = do
+  let sql = "SELECT se.id, se.name, c.full_name \
+            \FROM sections se JOIN coaches c ON se.coach_id = c.id"
+  (_, is) <- query_ conn (fromString sql)
+  rows <- Streams.toList is
+  return (map toTriple rows)
+  where
+    toTriple [i, n, cn] = (fromMySQLInt i, fromMySQLString n, fromMySQLString cn)
+    toTriple r = error ("Unexpected row: " ++ show r)
+
+getScheduleById :: MySQLConn -> Int -> IO (Maybe Schedule)
+getScheduleById conn i = do
+  let sql = "SELECT * FROM schedule WHERE id = ?"
+  (_, is) <- query conn (fromString sql) [toMySQLInt i]
+  rows <- Streams.toList is
+  case rows of
+    []      -> return Nothing
+    (r : _) -> return (Just (fromRow r))
+
+getSectionsForStudent :: MySQLConn -> Int -> IO [Section]
+getSectionsForStudent conn sid = do
+  let sql = "SELECT se.* FROM sections se \
+            \JOIN section_members sm ON se.id = sm.sec_id \
+            \WHERE sm.stud_id = ?"
+  (_, is) <- query conn (fromString sql) [toMySQLInt sid]
+  rows <- Streams.toList is
+  return (map fromRow rows)
+
+updateCompetitionResult :: MySQLConn -> Int -> Int -> String -> IO OK
+updateCompetitionResult conn sid cid newResult = do
+  let sql = "UPDATE competition_members SET result = ? WHERE stud_id = ? AND comp_id = ?"
+  execute conn (fromString sql) [toMySQLString newResult, toMySQLInt sid, toMySQLInt cid]
+
+getCompetitionResultsWithNames :: MySQLConn -> Int -> IO [(Int, String, String)]
+getCompetitionResultsWithNames conn cid = do
+  let sql = "SELECT s.id, s.full_name, cm.result \
+            \FROM competition_members cm \
+            \JOIN students s ON cm.stud_id = s.id \
+            \WHERE cm.comp_id = ?"
+  (_, is) <- query conn (fromString sql) [toMySQLInt cid]
+  rows <- Streams.toList is
+  return (map toTriple rows)
+  where
+    toTriple [i, n, r] = (fromMySQLInt i, fromMySQLString n, fromMySQLString r)
+    toTriple r = error ("Unexpected row: " ++ show r)
+
+isStudentInSection :: MySQLConn -> Int -> Int -> IO Bool
+isStudentInSection conn sid secid = do
+  let sql = "SELECT COUNT(*) FROM section_members WHERE stud_id = ? AND sec_id = ?"
+  (_, is) <- query conn (fromString sql) [toMySQLInt sid, toMySQLInt secid]
+  rows <- Streams.toList is
+  case rows of
+    [[count]] -> return (fromMySQLInt count > 0)
+    _         -> return False
+
+isStudentInCompetition :: MySQLConn -> Int -> Int -> IO Bool
+isStudentInCompetition conn sid cid = do
+  let sql = "SELECT COUNT(*) FROM competition_members WHERE stud_id = ? AND comp_id = ?"
+  (_, is) <- query conn (fromString sql) [toMySQLInt sid, toMySQLInt cid]
+  rows <- Streams.toList is
+  case rows of
+    [[count]] -> return (fromMySQLInt count > 0)
+    _         -> return False

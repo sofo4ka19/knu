@@ -27,9 +27,9 @@ library
   exposed-modules:
       DB
       Entity
-      Lib
       MySQLTypes
       Types
+      UI
   other-modules:
       Paths_lab1_faculty_sport
   autogen-modules:
