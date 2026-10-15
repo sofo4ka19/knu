@@ -1,16 +1,25 @@
+"""generator.py: writes a MIDI file from a list of notes.
+
+The file has two tracks:
+    track 0: the melody (channel 0), with a constant tempo
+    track 1: the bass (channel 1), one note per chord from theory.py
+"""
 import mido
 
-from harmony import TICKS_PER_BEAT, bass_plan
-from mapping import Note
+from mapping import CADENCE_NOTES
+from harmony import TICKS_PER_BEAT
 
-# --- Constants ---
 MELODY_CHANNEL = 0
 BASS_CHANNEL = 1
-GATE = 0.9              # a note sounds for 90% of its slot, the rest is a tiny gap
+GATE = 0.9                      # a note sounds for 90% of its length, then a short pause
 BASS_VELOCITY = 70
-PAN_CC = 10             # MIDI controller number for panning
-DEFAULT_TEMPO_BPM = 100
+BASS_PROGRAM = 32               # acoustic bass
+PAN_CONTROLLER = 10             # MIDI controller number for pan
 
+DEFAULT_TEMPO_BPM = 100
+TEMPO_RANGE = (50, 180)         # tempos accepted by the window and the command line
+
+# General MIDI instrument numbers
 INSTRUMENTS = {
     "Piano": 0,
     "Vibraphone": 11,
@@ -18,66 +27,59 @@ INSTRUMENTS = {
     "Flute": 73,
     "Strings": 48,
 }
-DEFAULT_MELODY = "Piano"
-BASS_PROGRAM = 32
+DEFAULT_INSTRUMENT = "Piano"
 
 
-def generate_midi(notes: list[Note], path: str, scale_name: str = "Pentatonic",
-                  melody_instrument: str = DEFAULT_MELODY,
-                  tempo_bpm: int = DEFAULT_TEMPO_BPM) -> float:
-    """Write a MIDI file and return its length in seconds."""
-    if not notes:
-        raise ValueError("The note list is empty.")
-    if melody_instrument not in INSTRUMENTS:
-        raise ValueError(f"Unknown instrument: {melody_instrument}")
+def generate_midi(notes, path, scale, instrument=DEFAULT_INSTRUMENT, tempo=DEFAULT_TEMPO_BPM):
+    """Save the notes as a MIDI file and return its length in seconds."""
+    midi = mido.MidiFile(type=1, ticks_per_beat=TICKS_PER_BEAT)
+    melody_track, total_ticks = make_melody_track(notes, INSTRUMENTS[instrument], tempo)
 
-    mid = mido.MidiFile(type=1, ticks_per_beat=TICKS_PER_BEAT)
-    melody_track, total_ticks = _build_melody(
-        notes, INSTRUMENTS[melody_instrument], tempo_bpm)
     final_start = total_ticks - notes[-1].duration
-    mid.tracks.append(melody_track)
-    mid.tracks.append(_build_bass(final_start, total_ticks, scale_name))
-    mid.save(path)
-    return mid.length
+    approach_start = sum(note.duration for note in notes[:-CADENCE_NOTES])
+    plan = scale.bass_plan(final_start, total_ticks, approach_start)
+
+    midi.tracks.append(melody_track)
+    midi.tracks.append(make_bass_track(plan))
+    midi.save(path)
+    return midi.length
 
 
-def _build_melody(notes: list[Note], program: int, tempo_bpm: int):
-    """Return the melody track and its total length in ticks."""
+def make_melody_track(notes, program, tempo):
+    """Return the melody track and its length in ticks."""
     track = mido.MidiTrack()
     track.append(mido.MetaMessage("track_name", name="Melody", time=0))
-    track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(tempo_bpm), time=0))
+    track.append(mido.MetaMessage("set_tempo", tempo=mido.bpm2tempo(tempo), time=0))
     track.append(mido.Message("program_change", channel=MELODY_CHANNEL,
                               program=program, time=0))
 
-    carry = 0                # ticks of silence before the next event
-    total = 0
+    pause = 0                   # silence (in ticks) before the next note
+    total_ticks = 0
     for i, note in enumerate(notes):
         track.append(mido.Message("control_change", channel=MELODY_CHANNEL,
-                                  control=PAN_CC, value=note.pan, time=carry))
+                                  control=PAN_CONTROLLER, value=note.pan, time=pause))
         track.append(mido.Message("note_on", channel=MELODY_CHANNEL,
                                   note=note.pitch, velocity=note.velocity, time=0))
-        is_last = i == len(notes) - 1
-        # The final note rings for its full length, without a gap
-        sounding = note.duration if is_last else int(note.duration * GATE)
+        if i == len(notes) - 1:
+            sounding = note.duration            # the last note rings to the end
+        else:
+            sounding = int(note.duration * GATE)
         track.append(mido.Message("note_off", channel=MELODY_CHANNEL,
                                   note=note.pitch, velocity=0, time=sounding))
-        carry = note.duration - sounding
-        total += note.duration
-
-    track.append(mido.MetaMessage("end_of_track", time=carry))
-    return track, total
+        pause = note.duration - sounding
+        total_ticks += note.duration
+    return track, total_ticks
 
 
-def _build_bass(final_start: int, total_ticks: int, scale_name: str) -> mido.MidiTrack:
-    """Bass: one root note per bar following harmony.bass_plan()."""
+def make_bass_track(plan):
+    """Bass track: one long note for every item of the bass plan."""
     track = mido.MidiTrack()
     track.append(mido.MetaMessage("track_name", name="Bass", time=0))
     track.append(mido.Message("program_change", channel=BASS_CHANNEL,
                               program=BASS_PROGRAM, time=0))
-    for root, duration in bass_plan(final_start, total_ticks, scale_name):
+    for bass_note, length in plan:
         track.append(mido.Message("note_on", channel=BASS_CHANNEL,
-                                  note=root, velocity=BASS_VELOCITY, time=0))
+                                  note=bass_note, velocity=BASS_VELOCITY, time=0))
         track.append(mido.Message("note_off", channel=BASS_CHANNEL,
-                                  note=root, velocity=0, time=duration))
-    track.append(mido.MetaMessage("end_of_track", time=0))
+                                  note=bass_note, velocity=0, time=length))
     return track
