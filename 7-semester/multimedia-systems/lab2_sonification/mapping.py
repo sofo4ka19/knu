@@ -1,301 +1,288 @@
-"""mapping.py: rules that turn data values into MIDI parameters.
+"""mapping.py: the rules that turn the prepared data into notes.
 
-Fixed mapping by column order (the first four numeric columns are used):
+The first four columns of the table are used:
+    column 1  -> pitch (a high value gives a high note); a big change between
+                 two points gives a rhythmic figure; the way the data end
+                 decides how the melody ends; the slow trend changes the loudness
+    column 2  -> length of the notes (and the loudness, if there is no column 3)
+    column 3  -> loudness (velocity)
+    column 4  -> pan (left / right)
 
-    column 1  change between neighbouring values -> melody movement:
-                  direction of change -> direction of the melody (up/down)
-                  size of change      -> interval size (1..max step in the scale)
-                  very large change   -> a rhythmic figure (triplet / fast run)
-              trend -> dynamics (slow crescendo / decrescendo over the piece)
-    column 2  -> duration (smoothed, then 3 levels: long / medium / short)
-              -> velocity (higher value = louder note)
-    column 3  -> velocity (replaces column 2 for velocity, if present)
-    column 4  -> pan, MIDI CC10 (left/right position)
-
-With only two columns, every column still affects at least one MIDI
-parameter, as required by the lab assignment. Tempo is a constant
-performance setting, it does not change during the piece.
-
-Musical rules (independent of the data):
-    * the melody starts on the tonic and ends with the cadence E - D - C
-      and a long tonic note lasting one full bar;
-    * on strong beats (1 and 3) the melody snaps to a tone of the current
-      chord, so it fits the bass harmony;
-    * after a large leap the melody calms down with a one-step move;
-    * rhythm is aligned to the beat: short notes come in pairs and long notes
-      never start off the beat;
-    * rhythmic figures appear only on weak beats, never close to each other.
-
-All values are converted to relative ranks (0..1), so the rules work
-for any data set.
+Every column is turned into ranks (0..1) first, so the units of the data do not
+matter. The melody is made to sound like music: it starts and ends on the tonic,
+follows the chords of the bass and keeps a steady rhythm.
 """
 from dataclasses import dataclass
 
-import pandas as pd
+from data_loader import DataError
+from harmony import TICKS_PER_BEAT
 
-from data_loader import (DEFAULT_MAX_NOTES, DataError, clean, downsample,
-                         normalize, split_trend)
-from harmony import TICKS_PER_BEAT, chord_at
+# --- Columns and smoothing ---
+MAX_COLUMNS = 4                 # how many columns are used
+SMOOTH_WINDOW = 3               # smoothing of column 1 before the melody is made
+DURATION_SMOOTH_WINDOW = 5      # smoothing of column 2, so the rhythm changes in phrases
+TREND_FRACTION = 0.1            # the trend window is 10% of the series
 
-# --- Musical constants ---
-BASE_NOTE = 48                  # C3, the lowest note of the melody
-OCTAVES = 2                     # melody range in octaves
-MAX_COLUMNS = 4                 # how many columns take part in the mapping
-SMOOTH_WINDOW = 3               # light smoothing before measuring changes
-
-# Largest melodic interval in scale steps. The pentatonic scale has bigger
-# gaps between its notes, so it gets a smaller limit.
-MAX_STEP_BY_SCALE = {"Pentatonic": 2, "Major": 3, "Minor": 3}
-
-STRONG_BEAT_TICKS = 2 * TICKS_PER_BEAT   # beats 1 and 3 of a bar
-SNAP_DISTANCE = 2                        # how far a note may move to reach a chord tone
-
-# Duration levels: (upper rank limit, length in beats).
-# Rank 0..0.15 -> long, 0.15..0.65 -> medium, 0.65..1 -> short.
+# --- Rhythm ---
+STRONG_BEAT_TICKS = 2 * TICKS_PER_BEAT      # beats 1 and 3 of a bar
+# Note lengths: (upper rank limit, length in beats). A high rank gives a short note.
 DURATION_LEVELS = [(0.15, 2.0), (0.65, 1.0), (1.0, 0.5)]
-DURATION_SMOOTH_WINDOW = 5      # rhythm changes in phrases, not on every note
 
-# Ending: three cadence notes (E - D - C) and their lengths in beats.
-CADENCE_OFFSETS = [2, 1, 0]     # scale steps above the tonic
-CADENCE_BEATS = [1.0, 2.0, 4.0]
+# --- Ending ---
+CADENCE_NOTES = 3               # the last three notes form the ending
+FINAL_NOTE_BEATS = 4.0          # the last note is always the tonic and lasts a whole bar
+ENDING_LOOKBACK = 4             # how many points before the ending are examined
+ENERGETIC_RANK = 0.5            # the mean rank of the changes above this = large changes
 
-# Rhythmic figures: a one-beat note is replaced by faster notes when the
-# change in the data is large (rank of |change| above the limit).
-RUN_ACCENT = 0.90               # 4 sixteenth notes
-TRIPLET_ACCENT = 0.80           # 3 triplet notes
+# --- Rhythmic figures (a note is replaced by 3 or 4 fast notes) ---
+RUN_ACCENT = 0.90               # change rank for 4 fast notes
+TRIPLET_ACCENT = 0.80           # change rank for a triplet
 FIGURE_MIN_GAP = 6              # minimum number of notes between two figures
 
+# --- Loudness and pan ---
 VELOCITY_MIN, VELOCITY_MAX = 40, 110
-VELOCITY_TREND_SPAN = 24        # total dynamic swing given by the trend
-PAN_MIN, PAN_MAX = 10, 117      # avoid extreme left/right
-
-# Scales as semitone offsets from the root note
-SCALES = {
-    "Pentatonic": [0, 2, 4, 7, 9],
-    "Major":      [0, 2, 4, 5, 7, 9, 11],
-    "Minor":      [0, 2, 3, 5, 7, 8, 10],
-}
-DEFAULT_SCALE = "Pentatonic"
+PAN_MIN, PAN_MAX = 10, 117
 
 
-@dataclass(frozen=True)
+@dataclass
 class Note:
-    """One melody note with every parameter already converted to MIDI units."""
-    pitch: int            # 0..127
-    duration: int         # in ticks
-    velocity: int         # 0..127
-    pan: int              # 0..127 (CC10)
+    pitch: int                  # MIDI note number
+    duration: int               # in ticks
+    velocity: int               # loudness, 0..127
+    pan: int                    # 0..127
+    point: int                  # the data point this note comes from
 
 
-# ------------------------------------------------- single-value converters
-def index_to_pitch(index: int, scale_name: str = DEFAULT_SCALE,
-                   base: int = BASE_NOTE) -> int:
-    """Convert a scale-step index (0 = lowest note) to a MIDI pitch."""
-    scale = SCALES[scale_name]
-    pitch = base + 12 * (index // len(scale)) + scale[index % len(scale)]
-    return max(0, min(127, pitch))
+# ------------------------------------------------------ small helpers
+def moving_average(series, window):
+    """Average of every value with its neighbours (smooths the series)."""
+    return series.rolling(window, center=True, min_periods=1).mean()
 
 
-def to_duration(norm: float) -> int:
-    """Map 0..1 to one of the duration levels (higher value = shorter)."""
-    for upper, beats in DURATION_LEVELS:
-        if norm <= upper:
+def normalize(series):
+    return (series.rank() - 1) / (len(series) - 1)
+
+
+def to_duration(rank):
+    """Length of a note in ticks (a high rank gives a short note)."""
+    for upper_limit, beats in DURATION_LEVELS:
+        if rank <= upper_limit:
             return int(beats * TICKS_PER_BEAT)
-    return int(DURATION_LEVELS[-1][1] * TICKS_PER_BEAT)
 
 
-def to_velocity(norm: float, trend_norm: float) -> int:
-    """Velocity from the value (40..110) plus a dynamic shift from the trend."""
-    base = VELOCITY_MIN + norm * (VELOCITY_MAX - VELOCITY_MIN)
-    shift = (trend_norm - 0.5) * VELOCITY_TREND_SPAN
-    return max(1, min(127, int(base + shift)))
+def to_velocity(rank):
+    """Loudness of a note: a high rank gives a loud note."""
+    return int(VELOCITY_MIN + rank * (VELOCITY_MAX - VELOCITY_MIN))
 
 
-def to_pan(norm: float) -> int:
-    """Map 0..1 linearly to the pan range (CC10)."""
-    return int(PAN_MIN + norm * (PAN_MAX - PAN_MIN))
+def to_pan(rank):
+    return int(PAN_MIN + rank * (PAN_MAX - PAN_MIN))
 
 
-# ---------------------------------------------------------- rhythm helpers
-def align_rhythm(durations: list[int]) -> list[int]:
-    """Make the rhythm steady by aligning notes to the beat.
+# ------------------------------------------------------------ rhythm
+def align_rhythm(durations):
+    """Make the rhythm steady by keeping the notes on the beat.
 
-    * A note that starts off the beat is shortened to finish the beat,
+    * A note that starts between two beats is shortened to end on the beat,
       so short notes always come in pairs.
-    * A 2-beat note may only start on beats 1 and 3 of a bar.
-    The cadence notes at the end keep their lengths.
+    * A 2-beat note can only start on beat 1 or 3.
+    * The last note starts on a beat; if the previous note ends between two
+      beats, it is made longer up to the beat.
     """
     aligned = []
     position = 0
-    free_notes = len(durations) - len(CADENCE_BEATS)
-    for i, duration in enumerate(durations):
+    for duration in durations[:-1]:
         offset = position % TICKS_PER_BEAT
-        if offset:
+        if offset != 0:
             duration = TICKS_PER_BEAT - offset
-        elif (i < free_notes and duration >= 2 * TICKS_PER_BEAT
-              and position % STRONG_BEAT_TICKS):
+        elif duration >= 2 * TICKS_PER_BEAT and position % STRONG_BEAT_TICKS != 0:
             duration = TICKS_PER_BEAT
         aligned.append(duration)
         position += duration
+
+    offset = position % TICKS_PER_BEAT
+    if offset != 0:
+        aligned[-1] += TICKS_PER_BEAT - offset
+    aligned.append(durations[-1])
     return aligned
 
 
-def note_positions(durations: list[int]) -> list[int]:
+def make_durations(column):
+    """Length of every note, made from column 2."""
+    ranks = normalize(moving_average(column, DURATION_SMOOTH_WINDOW))
+    durations = [to_duration(rank) for rank in ranks]
+    durations[-1] = int(FINAL_NOTE_BEATS * TICKS_PER_BEAT)
+    return align_rhythm(durations)
+
+
+def note_positions(durations):
     """Start time (in ticks) of every note."""
-    positions, current = [], 0
+    positions = []
+    time = 0
     for duration in durations:
-        positions.append(current)
-        current += duration
+        positions.append(time)
+        time += duration
     return positions
 
 
-# ---------------------------------------------------------- melody helpers
-def _reflect(index: int, low: int, high: int) -> int:
-    """Bounce an index back into [low, high] instead of clipping it."""
-    while index < low or index > high:
-        if index < low:
-            index = 2 * low - index
-        if index > high:
-            index = 2 * high - index
-    return index
+# ------------------------------------------------------------ melody
+def classify_ending(change, change_ranks):
+    """Say how the data end: rising or falling, small or large changes. Used for correct ending generation."""
+    start = len(change) - CADENCE_NOTES
+    window = slice(max(1, start - ENDING_LOOKBACK), start)
+    if change.iloc[window].sum() >= 0:
+        direction = "rising"
+    else:
+        direction = "falling"
+    if change_ranks.iloc[window].mean() > ENERGETIC_RANK:
+        energy = "energetic"
+    else:
+        energy = "calm"
+    return direction + "_" + energy
 
 
-def _pitch_class(index: int, scale_name: str) -> int:
-    return index_to_pitch(index, scale_name) % 12
+def snap_to_chord(scale, step, previous, direction, chord_notes):
+    """Move a note to the nearest note of the chord, if one is close enough.
 
-
-def snap_to_chord(index: int, previous: int, direction: int, chord_tones: frozenset,
-                  scale_name: str, top: int, max_move: int) -> int:
-    """Move to the nearest scale note that belongs to the chord (if close).
-
-    A candidate is accepted only if the total move from the previous note
-    stays within `max_move` scale steps, so snapping never creates a leap.
+    The move must not make the jump from the previous note bigger than
+    scale.max_step, so snapping never creates a big leap.
     """
-    if _pitch_class(index, scale_name) in chord_tones:
-        return index
-    for distance in range(1, SNAP_DISTANCE + 1):
-        # prefer continuing in the direction the melody is moving
-        for candidate in (index + direction * distance, index - direction * distance):
-            if (0 <= candidate <= top
-                    and abs(candidate - previous) <= max_move
-                    and _pitch_class(candidate, scale_name) in chord_tones):
+    if scale.pitch_class(step) in chord_notes:
+        return step
+    for distance in range(1, scale.max_step + 1):
+        # try first the side the melody is moving to
+        for candidate in (step + direction * distance, step - direction * distance):
+            if (0 <= candidate <= scale.top
+                    and abs(candidate - previous) <= scale.max_step
+                    and scale.pitch_class(candidate) in chord_notes):
                 return candidate
-    return index
+    return step
 
 
-def melody_indices(change: pd.Series, size_n: pd.Series, positions: list[int],
-                   scale_name: str) -> list[int]:
-    """Turn changes of a data series into a melody that moves step by step.
+def make_melody(ranks, positions, scale, ending):
+    """Scale step of every note. The melody follows the value of the data.
 
-    Direction of change -> direction of the melody.
-    Size of change (as a rank) -> number of scale steps.
-    Starts on the tonic, snaps to chord tones on strong beats, calms down
-    after a leap, and is funnelled toward the final cadence.
+    The wanted step is the rank of the value spread over the whole range.
+    The melody moves towards it by at most scale.max_step steps per note.
+    It starts on the tonic, keeps to the chord notes on beats 1 and 3 and
+    after big jumps, and comes to the ending in the last notes.
     """
-    n = len(change)
-    scale_len = len(SCALES[scale_name])
-    max_step = MAX_STEP_BY_SCALE[scale_name]
-    top = scale_len * OCTAVES - 1
-    tonic = scale_len                          # first note of the 2nd octave (C4)
-    cadence_start = n - len(CADENCE_OFFSETS)   # index of the first cadence note
-    target = tonic + CADENCE_OFFSETS[0]
+    n = len(ranks)
+    cadence_start = n - CADENCE_NOTES
     final_start = positions[-1]
+    approach_start = positions[cadence_start]
+    target = scale.tonic + ending[0]
 
-    index = tonic
-    result = [index]
+    step = scale.tonic
+    melody = [step]
     for i in range(1, n):
         if i >= cadence_start:
-            result.append(tonic + CADENCE_OFFSETS[i - cadence_start])
+            melody.append(scale.tonic + ending[i - cadence_start])
             continue
-        direction = 1 if change.iloc[i] >= 0 else -1
-        step = 1 + round(size_n.iloc[i] * (max_step - 1))
-        if abs(result[-1] - (result[-2] if len(result) > 1 else result[-1])) >= max_step:
-            step = 1                           # leap recovery
-        index = _reflect(index + direction * step, 0, top)
-        if positions[i] % STRONG_BEAT_TICKS == 0:
-            chord = chord_at(positions[i], final_start, scale_name)
-            index = snap_to_chord(index, result[-1], direction, chord[1],
-                                  scale_name, top, max_step)
-        # Funnel: stay close enough to reach the cadence in time
-        left = cadence_start - i
-        index = max(target - max_step * left, min(target + max_step * left, index))
-        index = max(0, min(top, index))
-        result.append(index)
-    return result
+
+        wanted = round(ranks.iloc[i] * scale.top)
+        move = max(-scale.max_step, min(scale.max_step, wanted - step))
+        direction = 1 if wanted >= step else -1
+        step += move
+
+        if positions[i] % STRONG_BEAT_TICKS == 0 or abs(move) >= 2:
+            chord = scale.chord_at(positions[i], final_start, approach_start)
+            step = snap_to_chord(scale, step, melody[-1], direction, chord[1])
+
+        # stay close enough to the ending to reach it in time
+        steps_left = cadence_start - i
+        step = max(target - scale.max_step * steps_left,
+                   min(target + scale.max_step * steps_left, step))
+        step = max(0, min(scale.top, step))
+        melody.append(step)
+    return melody
 
 
-# ------------------------------------------------------------ whole table
-def build_notes(df: pd.DataFrame, scale_name: str = DEFAULT_SCALE,
-                max_notes: int = DEFAULT_MAX_NOTES) -> list[Note]:
-    """Convert a table of numeric columns into a list of Note objects."""
+def make_figure(melody, i, direction, count, top):
+    """Scale steps of a figure (3 or 4 fast notes) that leads into note i.
+
+    The figure starts at most one step away from the previous note, so it
+    does not add a big leap to the melody.
+    """
+    previous = melody[i - 1]
+    if melody[i] != previous:
+        direction = 1 if melody[i] > previous else -1
+    start = melody[i] - direction * (count - 1)
+    start = max(previous - 1, min(previous + 1, start))
+
+    steps = []
+    for k in range(count):
+        step = round(start + (melody[i] - start) * k / (count - 1))
+        steps.append(max(0, min(top, step)))
+    return steps
+
+
+# ------------------------------------------------------------ notes
+def build_notes(df, scale):
+    """Main function to turn the table made by load_csv() into a list of notes."""
     if df.shape[1] < 2:
         raise DataError("At least two numeric columns are required.")
-    if scale_name not in SCALES:
-        raise DataError(f"Unknown scale: {scale_name}")
+    cols = [df.iloc[:, i] for i in range(min(df.shape[1], MAX_COLUMNS))]
+    n = len(df)
 
-    # Clean and shorten raw values first; normalization comes later,
-    # separately for every parameter.
-    data = downsample(df.iloc[:, :MAX_COLUMNS].apply(clean), max_notes)
-    cols = [data[c] for c in data.columns]
-    n = len(data)
-
-    # Rhythm first: melody rules need to know where the strong beats are
-    smooth_rhythm = cols[1].rolling(
-        DURATION_SMOOTH_WINDOW, center=True, min_periods=1).mean()
-    duration_n = normalize(smooth_rhythm)
-    durations = [to_duration(duration_n.iloc[i]) for i in range(n)]
-    for k, beats in enumerate(CADENCE_BEATS):           # fixed ending rhythm
-        durations[n - len(CADENCE_BEATS) + k] = int(beats * TICKS_PER_BEAT)
-    durations = align_rhythm(durations)
+    # 1. Rhythm
+    durations = make_durations(cols[1])
     positions = note_positions(durations)
 
-    # Melody from changes of column 1
-    smooth = cols[0].rolling(SMOOTH_WINDOW, center=True, min_periods=1).mean()
+    # 2. Melody from column 1
+    smooth = moving_average(cols[0], SMOOTH_WINDOW)
     change = smooth.diff().fillna(0)
-    size_n = normalize(change.abs())
-    directions = [1 if c >= 0 else -1 for c in change]
-    indices = melody_indices(change, size_n, positions, scale_name)
+    change_ranks = normalize(change.abs())
+    ending = scale.endings[classify_ending(change, change_ranks)] + [0]
+    melody = make_melody(normalize(smooth), positions, scale, ending)
 
-    trend, _ = split_trend(cols[0])
-    trend_n = normalize(trend)
-    velocity_n = normalize(cols[2] if len(cols) > 2 else cols[1])
-    pan_n = normalize(cols[3]) if len(cols) > 3 else None
+    # 3. Loudness and pan.
+    velocity_ranks = normalize(cols[2] if len(cols) > 2 else cols[1])
+    pan_ranks = normalize(cols[3]) if len(cols) > 3 else None
 
-    scale_len = len(SCALES[scale_name])
-    top = scale_len * OCTAVES - 1
-    cadence_start = n - len(CADENCE_BEATS)
-
+    # 4. One note per data point; a big change on a weak beat becomes a figure.
     notes = []
+    cadence_start = n - CADENCE_NOTES
     last_figure = -FIGURE_MIN_GAP
     for i in range(n):
-        velocity = to_velocity(velocity_n.iloc[i], trend_n.iloc[i])
-        pan = to_pan(pan_n.iloc[i]) if pan_n is not None else 64
+        velocity = to_velocity(velocity_ranks.iloc[i])
+        pan = to_pan(pan_ranks.iloc[i]) if pan_ranks is not None else 64
 
-        accent = size_n.iloc[i]
         on_weak_beat = (positions[i] % TICKS_PER_BEAT == 0
                         and positions[i] % STRONG_BEAT_TICKS != 0)
-        can_use_figure = (0 < i < cadence_start
+        figure_allowed = (0 < i < cadence_start
                           and durations[i] == TICKS_PER_BEAT
                           and on_weak_beat
                           and i - last_figure >= FIGURE_MIN_GAP)
+        accent = change_ranks.iloc[i]
 
-        if can_use_figure and accent >= TRIPLET_ACCENT:
+        if figure_allowed and accent >= TRIPLET_ACCENT:
             count = 4 if accent >= RUN_ACCENT else 3
-            length = TICKS_PER_BEAT // count
-            # The figure leads into the target note. It starts at most one
-            # scale step away from the previous note, so there is no leap.
-            previous = indices[i - 1]
-            actual = indices[i] - previous
-            direction = (1 if actual > 0 else -1) if actual else directions[i]
-            start = indices[i] - direction * (count - 1)
-            start = max(previous - 1, min(previous + 1, start))
-            for k in range(count):
-                index = round(start + (indices[i] - start) * k / (count - 1))
-                index = max(0, min(top, index))
-                notes.append(Note(index_to_pitch(index, scale_name),
-                                  length, velocity, pan))
+            direction = 1 if change.iloc[i] >= 0 else -1
+            for step in make_figure(melody, i, direction, count, scale.top):
+                notes.append(Note(scale.pitch(step), TICKS_PER_BEAT // count,
+                                  velocity, pan, i))
             last_figure = i
         else:
-            notes.append(Note(index_to_pitch(indices[i], scale_name),
-                              durations[i], velocity, pan))
+            notes.append(Note(scale.pitch(melody[i]), durations[i],
+                              velocity, pan, i))
     return notes
+
+
+# ------------------------------------------------------------ for the window
+def point_start_ticks(notes):
+    """Time (in ticks) when the music of every data point starts."""
+    starts = {}
+    time = 0
+    for note in notes:
+        starts.setdefault(note.point, time)
+        time += note.duration
+    return [starts[i] for i in range(notes[-1].point + 1)]
+
+
+def pitch_per_point(notes):
+    """MIDI note the melody has reached at every data point (its last note)."""
+    last = {}
+    for note in notes:
+        last[note.point] = note.pitch
+    return [last[i] for i in range(notes[-1].point + 1)]
