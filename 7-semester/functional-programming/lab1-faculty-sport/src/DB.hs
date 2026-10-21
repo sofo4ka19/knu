@@ -21,7 +21,7 @@ connectDB = do
   maybePassword <- lookupEnv "DB_PASSWORD"
   password <- case maybePassword of
     Just p  -> return p
-    Nothing -> error "Enter DB_PASSWORD in .env.ps1 file"
+    Nothing -> error "Enter DB_PASSWORD in .env file"
   connect defaultConnectInfoMB4
     { ciHost     = "127.0.0.1"
     , ciPort     = 3306
