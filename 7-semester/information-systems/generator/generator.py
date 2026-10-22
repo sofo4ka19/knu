@@ -116,6 +116,34 @@ def seed_products(cur, count=30):
         )
     log.info("Seeded %s products", count)
 
+STATUSES = ["paid", "shipped", "delivered", "cancelled"]
+
+
+def update_order_status(cur):
+    new_status = random.choice(STATUSES)
+    cur.execute(
+        """UPDATE orders SET status = %s
+           WHERE id = (SELECT id FROM orders ORDER BY random() LIMIT 1)
+           RETURNING id""",
+        (new_status,),
+    )
+    row = cur.fetchone()
+    if row:
+        log.info("Order #%s status changed to %s", row[0], new_status)
+
+
+def update_customer_email(cur):
+    cur.execute(
+        """UPDATE customers SET email = %s
+           WHERE id = (SELECT id FROM customers ORDER BY random() LIMIT 1)
+           RETURNING id""",
+        (fake.unique.email(),),
+    )
+    row = cur.fetchone()
+    if row:
+        log.info("Customer #%s changed email", row[0])
+
+
 def main():
     conn = get_connection()
     cur = conn.cursor()
@@ -123,9 +151,17 @@ def main():
     seed_products(cur)
     conn.commit()
     log.info("Generator started")
+    actions = [
+        (create_customer, 2),
+        (create_order, 5),
+        (update_order_status, 3),
+        (update_customer_email, 1),
+    ]
+    functions = [f for f, _ in actions]
+    weights = [w for _, w in actions]
     while True:
         try:
-            action = random.choice([create_customer, create_order, create_order])
+            action = random.choices(functions, weights=weights)[0]
             action(cur)
             conn.commit()
         except Exception as e:
