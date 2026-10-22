@@ -144,6 +144,32 @@ def update_customer_email(cur):
         log.info("Customer #%s changed email", row[0])
 
 
+def delete_old_cancelled_orders(cur):
+    cur.execute(
+        """DELETE FROM orders
+           WHERE status = 'cancelled'
+             AND created_at < now() - interval '2 minutes'"""
+    )
+    if cur.rowcount:
+        log.info("Deleted %s old cancelled orders", cur.rowcount)
+
+
+def report_top_products(cur):
+    cur.execute(
+        """SELECT p.name, sum(oi.quantity) AS sold, sum(oi.quantity * oi.price) AS revenue
+           FROM order_items oi
+           JOIN products p ON p.id = oi.product_id
+           GROUP BY p.name
+           ORDER BY revenue DESC
+           LIMIT 5"""
+    )
+    log.info("Top products: %s", cur.fetchall())
+
+
+def read_stats(cur):
+    cur.execute("SELECT status, count(*), sum(amount) FROM orders GROUP BY status")
+    log.info("Orders by status: %s", cur.fetchall())
+
 def main():
     conn = get_connection()
     cur = conn.cursor()
@@ -152,10 +178,13 @@ def main():
     conn.commit()
     log.info("Generator started")
     actions = [
-        (create_customer, 2),
-        (create_order, 5),
-        (update_order_status, 3),
+        (create_customer, 3),
+        (create_order, 7),
+        (update_order_status, 6),
         (update_customer_email, 1),
+        (delete_old_cancelled_orders, 2),
+        (report_top_products, 1),
+        (read_stats, 1),
     ]
     functions = [f for f, _ in actions]
     weights = [w for _, w in actions]
