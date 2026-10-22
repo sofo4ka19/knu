@@ -74,17 +74,36 @@ def create_customer(cur):
 
 def create_order(cur):
     cur.execute("SELECT id FROM customers ORDER BY random() LIMIT 1")
-    row = cur.fetchone()
-    if row is None:
+    customer = cur.fetchone()
+    if customer is None:
         log.warning("No customers yet, skipping order")
         return
-    amount = round(random.uniform(5, 500), 2)
+
     cur.execute(
-        "INSERT INTO orders (customer_id, amount) VALUES (%s, %s) RETURNING id",
-        (row[0], amount),
+        "SELECT id, price FROM products ORDER BY random() LIMIT %s",
+        (random.randint(1, 4),),
     )
-    log.info("Created order #%s for customer #%s, amount %s",
-             cur.fetchone()[0], row[0], amount)
+    products = cur.fetchall()
+
+    cur.execute(
+        "INSERT INTO orders (customer_id) VALUES (%s) RETURNING id",
+        (customer[0],),
+    )
+    order_id = cur.fetchone()[0]
+
+    total = 0
+    for product_id, price in products:
+        quantity = random.randint(1, 3)
+        cur.execute(
+            """INSERT INTO order_items (order_id, product_id, quantity, price)
+               VALUES (%s, %s, %s, %s)""",
+            (order_id, product_id, quantity, price),
+        )
+        total += price * quantity
+
+    cur.execute("UPDATE orders SET amount = %s WHERE id = %s", (total, order_id))
+    log.info("Created order #%s for customer #%s: %s items, total %s",
+             order_id, customer[0], len(products), total)
 
 def seed_products(cur, count=30):
     cur.execute("SELECT count(*) FROM products")
