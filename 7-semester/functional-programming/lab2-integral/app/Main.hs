@@ -1,5 +1,9 @@
 module Main where
-import Control.Concurrent (getNumCapabilities)
+
+import Integrate
+
+f :: F
+f x = exp (negate (x * x))
 
 main :: IO ()
-main = getNumCapabilities >>= \n -> putStrLn ("Capabilities: " ++ show n)
+main = print (integrateSeq f 0 3 1e-10)
