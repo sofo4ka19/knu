@@ -27,7 +27,7 @@ timed label act = do
 main :: IO ()
 main = do
   caps <- getNumCapabilities
-  let k = caps * 8
+  let k = 64
   printf "A=%g B=%g eps=%g threads=%d chunks=%d\n"
          lowerA upperB epsilon caps k
   timed "sequential"  (evaluate (integrateSeq f lowerA upperB epsilon))
