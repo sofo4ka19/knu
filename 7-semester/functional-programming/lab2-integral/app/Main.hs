@@ -32,3 +32,4 @@ main = do
          lowerA upperB epsilon caps k
   timed "sequential" (evaluate (integrateSeq f lowerA upperB epsilon))
   timed "parMap"     (evaluate (integratePar k f lowerA upperB epsilon))
+  timed "forkIO+MVar" (integrateConc k f lowerA upperB epsilon)

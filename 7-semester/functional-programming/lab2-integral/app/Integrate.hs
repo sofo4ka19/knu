@@ -4,8 +4,8 @@ module Integrate
   , simpsonConc, integrateConc
   ) where
 
-import Control.Concurrent (forkIO, newEmptyMVar, putMVar, takeMVar)
-import Control.Exception (evaluate)
+import Control.Concurrent (forkFinally, newEmptyMVar, putMVar, takeMVar)
+import Control.Exception (evaluate, throwIO)
 import Control.Parallel.Strategies (parMap, rdeepseq)
 
 type F = Double -> Double
@@ -44,18 +44,15 @@ integratePar k f a b eps = go 2 (simpsonPar f a b k 2)
 simpsonConc :: F -> Double -> Double -> Int -> Int -> IO Double
 simpsonConc f a b k m = do
   vars  <- mapM spawn [0 .. k - 1]   -- 1) launch k threads, each computing a partial integral
-  parts <- mapM takeMVar vars        -- 2) waiting and collecting the results from each thread
+  parts <- mapM (\v -> takeMVar v >>= either throwIO return) vars        -- 2) waiting and collecting the results from each thread
   return (sum parts)                 -- 3) sum partial results to get the final result
   where
     w = (b - a) / fromIntegral k
     spawn i = do
       box <- newEmptyMVar
-      _   <- forkIO $ do
-               let l = a + fromIntegral i * w
-               r <- evaluate (simpson f l (l + w) m)
-               putMVar box r
+      let l = a + fromIntegral i * w
+      _ <- forkFinally (evaluate (simpson f l (l + w) m)) (putMVar box)
       return box
-
 
 integrateConc :: Int -> F -> Double -> Double -> Double -> IO Double
 integrateConc k f a b eps = do
@@ -65,6 +62,8 @@ integrateConc k f a b eps = do
     go m prev = do
       let m' = 2 * m
       cur <- simpsonConc f a b k m'
-      if abs (cur - prev) / 15 < eps
-        then return cur
-        else go m' cur
+      if isNaN cur || isInfinite cur
+        then ioError (userError "integral is NaN or Infinity: f is undefined on [A,B]")
+        else if abs (cur - prev) / 15 < eps
+          then return cur
+          else go m' cur
