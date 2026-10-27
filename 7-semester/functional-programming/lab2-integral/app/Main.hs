@@ -30,6 +30,6 @@ main = do
   let k = caps * 8
   printf "A=%g B=%g eps=%g threads=%d chunks=%d\n"
          lowerA upperB epsilon caps k
-  timed "sequential" (evaluate (integrateSeq f lowerA upperB epsilon))
-  timed "parMap"     (evaluate (integratePar k f lowerA upperB epsilon))
+  timed "sequential"  (evaluate (integrateSeq f lowerA upperB epsilon))
+  timed "parMap"      (evaluate (integratePar k f lowerA upperB epsilon))
   timed "forkIO+MVar" (integrateConc k f lowerA upperB epsilon)
