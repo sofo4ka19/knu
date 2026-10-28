@@ -14,6 +14,7 @@ services:
       retries: 10
     volumes:
       - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
 
   generator:
     build: ./generator
