@@ -29,5 +29,16 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     restart: unless-stopped
 
+  postgres_exporter:
+    image: prometheuscommunity/postgres-exporter:v0.15.0
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
+    restart: unless-stopped
+    ports:
+      - "9187:9187"
+
 volumes:
   pgdata:
