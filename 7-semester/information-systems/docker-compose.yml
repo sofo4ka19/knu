@@ -39,6 +39,17 @@ services:
     restart: unless-stopped
     ports:
       - "9187:9187"
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    depends_on:
+      - postgres_exporter
+    restart: unless-stopped
 
 volumes:
   pgdata:
+  prometheus_data:
