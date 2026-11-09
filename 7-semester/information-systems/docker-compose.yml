@@ -27,6 +27,7 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+      OTLP_ENDPOINT: http://tempo:4318/v1/traces
     restart: unless-stopped
 
   postgres_exporter:
@@ -70,6 +71,14 @@ services:
       - ./loki/loki-config.yml:/etc/loki/loki-config.yml:ro
       - loki_data:/loki
     restart: unless-stopped
+  tempo:
+    image: grafana/tempo:2.6.0
+    command: -config.file=/etc/tempo/tempo.yml
+    user: "0"
+    volumes:
+      - ./tempo/tempo.yml:/etc/tempo/tempo.yml:ro
+      - tempo_data:/var/tempo
+    restart: unless-stopped
 
   promtail:
     image: grafana/promtail:3.1.1
@@ -86,3 +95,4 @@ volumes:
   prometheus_data:
   grafana_data:
   loki_data:
+  tempo_data:

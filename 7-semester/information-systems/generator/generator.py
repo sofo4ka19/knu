@@ -7,6 +7,12 @@ import psycopg2
 from dotenv import load_dotenv
 from faker import Faker
 from prometheus_client import Counter, Histogram, start_http_server
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
@@ -29,6 +35,23 @@ ACTION_DURATION = Histogram(
     "Duration of generator actions",
     ["action"],
 )
+
+OTLP_ENDPOINT = os.getenv("OTLP_ENDPOINT", "http://localhost:4318/v1/traces")
+
+
+def setup_tracing():
+    provider = TracerProvider(
+        resource=Resource.create({"service.name": "shop-generator"})
+    )
+    provider.add_span_processor(
+        BatchSpanProcessor(OTLPSpanExporter(endpoint=OTLP_ENDPOINT))
+    )
+    trace.set_tracer_provider(provider)
+    Psycopg2Instrumentor().instrument()
+
+
+setup_tracing()
+tracer = trace.get_tracer("generator")
 
 
 def get_connection():
@@ -209,15 +232,16 @@ def main():
     while True:
         action = random.choices(functions, weights=weights)[0]
         name = action.__name__
-        try:
-            with ACTION_DURATION.labels(action=name).time():
-                action(cur)
-                conn.commit()
-            ACTIONS_TOTAL.labels(action=name, status="success").inc()
-        except Exception as e:
-            conn.rollback()
-            ACTIONS_TOTAL.labels(action=name, status="error").inc()
-            log.error("DB error in %s: %s", name, e)
+        with tracer.start_as_current_span(name):
+            try:
+                with ACTION_DURATION.labels(action=name).time():
+                    action(cur)
+                    conn.commit()
+                ACTIONS_TOTAL.labels(action=name, status="success").inc()
+            except Exception as e:
+                conn.rollback()
+                ACTIONS_TOTAL.labels(action=name, status="error").inc()
+                log.error("DB error in %s: %s", name, e)
         time.sleep(random.uniform(0.2, 2))
 
 if __name__ == "__main__":
