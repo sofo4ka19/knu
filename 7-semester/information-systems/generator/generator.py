@@ -6,6 +6,7 @@ import logging
 import psycopg2
 from dotenv import load_dotenv
 from faker import Faker
+from prometheus_client import Counter, Histogram, start_http_server
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
@@ -15,6 +16,19 @@ logging.basicConfig(
 )
 log = logging.getLogger("generator")
 fake = Faker()
+
+METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
+
+ACTIONS_TOTAL = Counter(
+    "generator_actions_total",
+    "Number of generator actions executed",
+    ["action", "status"],
+)
+ACTION_DURATION = Histogram(
+    "generator_action_duration_seconds",
+    "Duration of generator actions",
+    ["action"],
+)
 
 
 def get_connection():
@@ -188,16 +202,23 @@ def main():
     ]
     functions = [f for f, _ in actions]
     weights = [w for _, w in actions]
+
+    start_http_server(METRICS_PORT)
+    log.info("Metrics server started on port %s", METRICS_PORT)
+
     while True:
+        action = random.choices(functions, weights=weights)[0]
+        name = action.__name__
         try:
-            action = random.choices(functions, weights=weights)[0]
-            action(cur)
-            conn.commit()
+            with ACTION_DURATION.labels(action=name).time():
+                action(cur)
+                conn.commit()
+            ACTIONS_TOTAL.labels(action=name, status="success").inc()
         except Exception as e:
             conn.rollback()
-            log.error("DB error: %s", e)
+            ACTIONS_TOTAL.labels(action=name, status="error").inc()
+            log.error("DB error in %s: %s", name, e)
         time.sleep(random.uniform(0.2, 2))
-
 
 if __name__ == "__main__":
     main()
