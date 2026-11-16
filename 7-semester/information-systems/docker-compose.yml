@@ -89,6 +89,17 @@ services:
     depends_on:
       - loki
     restart: unless-stopped
+  auth:
+    build: ./auth
+    environment:
+      AUTH_DB_PATH: /data/auth.db
+      AUTH_ADMIN_USER: ${AUTH_ADMIN_USER}
+      AUTH_ADMIN_PASSWORD: ${AUTH_ADMIN_PASSWORD}
+    volumes:
+      - auth_data:/data
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
 
 volumes:
   pgdata:
@@ -96,3 +107,4 @@ volumes:
   grafana_data:
   loki_data:
   tempo_data:
+  auth_data:
