@@ -16,10 +16,19 @@ from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
+class TraceIdFilter(logging.Filter):
+    def filter(self, record):
+        ctx = trace.get_current_span().get_span_context()
+        record.trace_id = format(ctx.trace_id, "032x") if ctx.is_valid else "-"
+        return True
+
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s %(levelname)s %(message)s",
+    format="%(asctime)s %(levelname)s trace_id=%(trace_id)s %(message)s",
 )
+for handler in logging.getLogger().handlers:
+    handler.addFilter(TraceIdFilter())
+    
 log = logging.getLogger("generator")
 fake = Faker()
 
