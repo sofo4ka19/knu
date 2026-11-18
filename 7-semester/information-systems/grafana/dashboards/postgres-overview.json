@@ -133,7 +133,7 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 7,
+        "w": 6,
         "x": 5,
         "y": 1
       },
@@ -234,8 +234,8 @@
       },
       "gridPos": {
         "h": 5,
-        "w": 12,
-        "x": 12,
+        "w": 13,
+        "x": 11,
         "y": 1
       },
       "id": 3,
@@ -637,7 +637,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "(sum(increase(generator_actions_total{status=\"error\"}[$__range]))or vector(0))\r\n/\r\nsum(increase(generator_actions_total[$__range]))",
+          "expr": "(sum(increase(consumer_actions_total{status=\"error\"}[$__range])) or vector(0)) / sum(increase(consumer_actions_total[$__range]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -734,7 +734,7 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "sum by (action) (increase(generator_actions_total{status=\"error\"}[5m]))",
+          "expr": "sum by (action) (increase(consumer_actions_total{status=\"error\"}[5m]))",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
@@ -821,7 +821,7 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
+        "w": 10,
         "x": 0,
         "y": 22
       },
@@ -830,7 +830,7 @@
         "legend": {
           "calcs": ["last", "max"],
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -925,8 +925,8 @@
       },
       "gridPos": {
         "h": 8,
-        "w": 12,
-        "x": 12,
+        "w": 11,
+        "x": 10,
         "y": 22
       },
       "id": 7,
@@ -934,7 +934,7 @@
         "legend": {
           "calcs": ["last", "max"],
           "displayMode": "table",
-          "placement": "right",
+          "placement": "bottom",
           "showLegend": true
         },
         "tooltip": {
@@ -949,15 +949,96 @@
             "uid": "prometheus"
           },
           "editorMode": "code",
-          "expr": "histogram_quantile(0.95, sum by (le, action) (rate(generator_action_duration_seconds_bucket[5m])))",
+          "expr": "histogram_quantile(0.95, sum by (le, action) (rate(consumer_action_duration_seconds_bucket[5m])))",
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "histogram_quantile(0.95, sum by (le, action) (rate(generator_action_duration_seconds_bucket{action=~\"report_top_products|read_stats\"}[5m])))",
+          "hide": false,
+          "instant": false,
+          "legendFormat": "__auto",
+          "range": true,
+          "refId": "B"
+        }
+      ],
+      "title": "p95 action duration",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "default": true,
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 3,
+        "x": 21,
+        "y": 22
+      },
+      "id": 17,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "11.2.0",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "editorMode": "code",
+          "expr": "rabbitmq_queue_messages_ready",
           "instant": false,
           "legendFormat": "__auto",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "p95 action duration",
-      "type": "timeseries"
+      "title": "Queue Length",
+      "type": "stat"
     },
     {
       "collapsed": false,
@@ -1002,12 +1083,12 @@
             "uid": "loki"
           },
           "editorMode": "code",
-          "expr": "{service=\"generator\"}",
+          "expr": "{service=~\"generator|consumer\"} != \"Published\"",
           "queryType": "range",
           "refId": "A"
         }
       ],
-      "title": "Generator logs",
+      "title": "Application logs",
       "type": "logs"
     },
     {
@@ -1120,6 +1201,6 @@
   "timezone": "browser",
   "title": "PostgreSQL Overview",
   "uid": "dg3t17xokw740a",
-  "version": 3,
+  "version": 7,
   "weekStart": ""
 }

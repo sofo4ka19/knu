@@ -1,20 +1,24 @@
+import json
+import logging
 import os
 import random
 import time
-import logging
 
+import pika
 import psycopg2
 from dotenv import load_dotenv
 from faker import Faker
-from prometheus_client import Counter, Histogram, start_http_server
 from opentelemetry import trace
+from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from opentelemetry.propagate import inject
 from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from opentelemetry.exporter.otlp.proto.http.trace_exporter import OTLPSpanExporter
-from opentelemetry.instrumentation.psycopg2 import Psycopg2Instrumentor
+from prometheus_client import Counter, Histogram, start_http_server
 
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
+
 
 class TraceIdFilter(logging.Filter):
     def filter(self, record):
@@ -22,17 +26,26 @@ class TraceIdFilter(logging.Filter):
         record.trace_id = format(ctx.trace_id, "032x") if ctx.is_valid else "-"
         return True
 
+
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s %(levelname)s trace_id=%(trace_id)s %(message)s",
 )
 for handler in logging.getLogger().handlers:
     handler.addFilter(TraceIdFilter())
-    
+logging.getLogger("pika").setLevel(logging.WARNING)
 log = logging.getLogger("generator")
 fake = Faker()
 
+DELAY_MIN = float(os.getenv("GENERATOR_DELAY_MIN", "0.2"))
+DELAY_MAX = float(os.getenv("GENERATOR_DELAY_MAX", "2"))
 METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
+OTLP_ENDPOINT = os.getenv("OTLP_ENDPOINT", "http://localhost:4318/v1/traces")
+
+RABBITMQ_HOST = os.getenv("RABBITMQ_HOST", "localhost")
+RABBITMQ_USER = os.getenv("RABBITMQ_USER", "guest")
+RABBITMQ_PASSWORD = os.getenv("RABBITMQ_PASSWORD", "guest")
+QUEUE_NAME = "orders"
 
 ACTIONS_TOTAL = Counter(
     "generator_actions_total",
@@ -44,8 +57,6 @@ ACTION_DURATION = Histogram(
     "Duration of generator actions",
     ["action"],
 )
-
-OTLP_ENDPOINT = os.getenv("OTLP_ENDPOINT", "http://localhost:4318/v1/traces")
 
 
 def setup_tracing():
@@ -71,6 +82,41 @@ def get_connection():
         user=os.getenv("POSTGRES_USER"),
         password=os.getenv("POSTGRES_PASSWORD"),
     )
+
+
+_rabbit = {"conn": None, "channel": None}
+
+
+def get_channel():
+    conn, channel = _rabbit["conn"], _rabbit["channel"]
+    if conn is None or conn.is_closed or channel is None or channel.is_closed:
+        conn = pika.BlockingConnection(
+            pika.ConnectionParameters(
+                host=RABBITMQ_HOST,
+                credentials=pika.PlainCredentials(RABBITMQ_USER, RABBITMQ_PASSWORD),
+                heartbeat=0,
+            )
+        )
+        channel = conn.channel()
+        channel.queue_declare(queue=QUEUE_NAME, durable=True)
+        _rabbit["conn"], _rabbit["channel"] = conn, channel
+    return channel
+
+
+def publish(event_type, payload):
+    headers = {}
+    inject(headers)  # передаємо контекст трейса разом з повідомленням
+    get_channel().basic_publish(
+        exchange="",
+        routing_key=QUEUE_NAME,
+        body=json.dumps({"type": event_type, "payload": payload}),
+        properties=pika.BasicProperties(
+            delivery_mode=2,
+            content_type="application/json",
+            headers=headers,
+        ),
+    )
+    log.info("Published %s", event_type)
 
 
 def init_schema(cur):
@@ -109,48 +155,6 @@ def init_schema(cur):
     """)
 
 
-def create_customer(cur):
-    cur.execute(
-        "INSERT INTO customers (name, email) VALUES (%s, %s) RETURNING id",
-        (fake.name(), fake.unique.email()),
-    )
-    customer_id = cur.fetchone()[0]
-    log.info("Created customer #%s", customer_id)
-
-
-def create_order(cur):
-    cur.execute("SELECT id FROM customers ORDER BY random() LIMIT 1")
-    customer = cur.fetchone()
-    if customer is None:
-        log.warning("No customers yet, skipping order")
-        return
-
-    cur.execute(
-        "SELECT id, price FROM products ORDER BY random() LIMIT %s",
-        (random.randint(1, 4),),
-    )
-    products = cur.fetchall()
-
-    cur.execute(
-        "INSERT INTO orders (customer_id) VALUES (%s) RETURNING id",
-        (customer[0],),
-    )
-    order_id = cur.fetchone()[0]
-
-    total = 0
-    for product_id, price in products:
-        quantity = random.randint(1, 3)
-        cur.execute(
-            """INSERT INTO order_items (order_id, product_id, quantity, price)
-               VALUES (%s, %s, %s, %s)""",
-            (order_id, product_id, quantity, price),
-        )
-        total += price * quantity
-
-    cur.execute("UPDATE orders SET amount = %s WHERE id = %s", (total, order_id))
-    log.info("Created order #%s for customer #%s: %s items, total %s",
-             order_id, customer[0], len(products), total)
-
 def seed_products(cur, count=30):
     cur.execute("SELECT count(*) FROM products")
     if cur.fetchone()[0] > 0:
@@ -162,43 +166,33 @@ def seed_products(cur, count=30):
         )
     log.info("Seeded %s products", count)
 
+
 STATUSES = ["paid", "shipped", "delivered", "cancelled"]
 
 
+# --- записи: лише публікуємо подію, у базу пише consumer ---
+
+def create_customer(cur):
+    publish("create_customer", {"name": fake.name(), "email": fake.unique.email()})
+
+
+def create_order(cur):
+    publish("create_order", {"items": random.randint(1, 4)})
+
+
 def update_order_status(cur):
-    new_status = random.choice(STATUSES)
-    cur.execute(
-        """UPDATE orders SET status = %s
-           WHERE id = (SELECT id FROM orders ORDER BY random() LIMIT 1)
-           RETURNING id""",
-        (new_status,),
-    )
-    row = cur.fetchone()
-    if row:
-        log.info("Order #%s status changed to %s", row[0], new_status)
+    publish("update_order_status", {"status": random.choice(STATUSES)})
 
 
 def update_customer_email(cur):
-    cur.execute(
-        """UPDATE customers SET email = %s
-           WHERE id = (SELECT id FROM customers ORDER BY random() LIMIT 1)
-           RETURNING id""",
-        (fake.unique.email(),),
-    )
-    row = cur.fetchone()
-    if row:
-        log.info("Customer #%s changed email", row[0])
+    publish("update_customer_email", {"email": fake.unique.email()})
 
 
 def delete_old_cancelled_orders(cur):
-    cur.execute(
-        """DELETE FROM orders
-           WHERE status = 'cancelled'
-             AND created_at < now() - interval '2 minutes'"""
-    )
-    if cur.rowcount:
-        log.info("Deleted %s old cancelled orders", cur.rowcount)
+    publish("delete_old_cancelled_orders", {})
 
+
+# --- читання: потрібна відповідь одразу, тому напряму в базу ---
 
 def report_top_products(cur):
     cur.execute(
@@ -216,27 +210,28 @@ def read_stats(cur):
     cur.execute("SELECT status, count(*), sum(amount) FROM orders GROUP BY status")
     log.info("Orders by status: %s", cur.fetchall())
 
+
 def main():
     conn = get_connection()
     cur = conn.cursor()
     init_schema(cur)
     seed_products(cur)
     conn.commit()
-    log.info("Generator started")
+
+    start_http_server(METRICS_PORT)
+    log.info("Generator started, metrics on port %s", METRICS_PORT)
+
     actions = [
-        (create_customer, 3),
-        (create_order, 7),
-        (update_order_status, 6),
+        (create_customer, 2),
+        (create_order, 5),
+        (update_order_status, 3),
         (update_customer_email, 1),
-        (delete_old_cancelled_orders, 2),
+        (delete_old_cancelled_orders, 1),
         (report_top_products, 1),
         (read_stats, 1),
     ]
     functions = [f for f, _ in actions]
     weights = [w for _, w in actions]
-
-    start_http_server(METRICS_PORT)
-    log.info("Metrics server started on port %s", METRICS_PORT)
 
     while True:
         action = random.choices(functions, weights=weights)[0]
@@ -250,8 +245,9 @@ def main():
             except Exception as e:
                 conn.rollback()
                 ACTIONS_TOTAL.labels(action=name, status="error").inc()
-                log.error("DB error in %s: %s", name, e)
-        time.sleep(random.uniform(0.2, 2))
+                log.error("Error in %s: %s", name, e)
+        time.sleep(random.uniform(DELAY_MIN, DELAY_MAX))
+
 
 if __name__ == "__main__":
     main()
