@@ -12,14 +12,47 @@ app = Flask(__name__)
 
 LOGIN_PAGE = """
 <!doctype html>
-<title>Login</title>
-<h2>Sign in</h2>
-{% if error %}<p style="color:red">{{ error }}</p>{% endif %}
-<form method="post">
-  <input name="username" placeholder="Username" required><br>
-  <input name="password" type="password" placeholder="Password" required><br>
-  <button type="submit">Sign in</button>
-</form>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Вхід — моніторинг БД</title>
+<style>
+  :root { --bg:#111217; --card:#1b1d24; --line:#2c2f3a; --text:#e6e8ee; --muted:#8b91a3; --accent:#5794f2; --err:#f2495c; }
+  * { box-sizing: border-box; }
+  body { margin:0; min-height:100vh; display:grid; place-items:center; background:var(--bg); color:var(--text);
+         font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .card { width:min(380px, 92vw); background:var(--card); border:1px solid var(--line); border-radius:12px; padding:32px 28px; }
+  h1 { margin:0 0 4px; font-size:22px; }
+  p.sub { margin:0 0 24px; color:var(--muted); font-size:14px; }
+  label { display:block; margin:14px 0 6px; font-size:13px; color:var(--muted); }
+  input { width:100%; padding:11px 12px; border-radius:8px; border:1px solid var(--line); background:var(--bg);
+          color:var(--text); font-size:15px; }
+  input:focus { outline:2px solid var(--accent); border-color:transparent; }
+  button { width:100%; margin-top:22px; padding:12px; border:0; border-radius:8px; background:var(--accent);
+           color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  button:hover { filter:brightness(1.1); }
+  .error { margin-top:16px; padding:10px 12px; border-radius:8px; background:rgba(242,73,92,.12);
+           border:1px solid var(--err); color:#ff9aa6; font-size:14px; }
+</style>
+</head>
+<body>
+  <form class="card" method="post" action="/login">
+    <h1>Моніторинг БД</h1>
+    <p class="sub">Увійдіть, щоб відкрити дашборд</p>
+
+    <label for="u">Логін</label>
+    <input id="u" name="username" autocomplete="username" autofocus required>
+
+    <label for="p">Пароль</label>
+    <input id="p" name="password" type="password" autocomplete="current-password" required>
+
+    {% if error %}<div class="error">{{ error }}</div>{% endif %}
+
+    <button type="submit">Увійти</button>
+  </form>
+</body>
+</html>
 """
 
 
