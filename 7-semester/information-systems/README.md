@@ -5,16 +5,20 @@
 ## Архітектура
 
 ```
-браузер ──► nginx (:8080) ──auth_request──► auth (Flask + SQLite)
-              │ сесія дійсна
-              ├──► Grafana ──► Prometheus ◄── generator, consumer,
-              │       │                       postgres_exporter, rabbitmq
-              │       ├──► Loki  ◄── Promtail ◄── логи контейнерів
-              │       └──► Tempo ◄── OTLP ◄── generator, consumer
-              └──► Prometheus UI (/prometheus/)
+Доступ
+  Користувач ──запит──► Nginx :8080 ──перевірка сесії──► Сервер авторизації (Flask + SQLite)
+                           │
+                           └─ сесія дійсна ──► Grafana
 
-generator ──події──► RabbitMQ ──► consumer ──► PostgreSQL
-generator ──звіти (читання)──────────────────► PostgreSQL
+Застосунок
+  generator ──події записів──► RabbitMQ ──► consumer ──SQL: запис──► PostgreSQL
+  generator ──SQL: читання (звіти)─────────────────────────────────► PostgreSQL
+
+Збір і показ даних
+  PostgreSQL ──► postgres_exporter ──┐
+  generator, consumer, RabbitMQ ─────┴─ метрики ──► Prometheus ──► Grafana
+  generator, consumer ── stdout ──► Promtail ── логи ──► Loki ──► Grafana
+  generator, consumer ───────────── трейси (OTLP) ──► Tempo ──► Grafana
 ```
 
 Записи йдуть через чергу, читання напряму. Генератор лише публікує подію («створити замовлення», «змінити статус»), а `consumer` виконує її в базі.
