@@ -22,13 +22,70 @@ connectDB = do
   password <- case maybePassword of
     Just p  -> return p
     Nothing -> error "Enter DB_PASSWORD in .env file"
-  connect defaultConnectInfoMB4
+  conn <- connect defaultConnectInfoMB4
     { ciHost     = "127.0.0.1"
     , ciPort     = 3306
     , ciDatabase = "faculty_sport"
     , ciUser     = "haskell_app"
     , ciPassword = fromString password
     }
+  initSchema conn
+  return conn
+
+-- | Creates all tables if they are missing. Uses "IF NOT EXISTS", so it
+-- never touches an already existing table and its data.
+initSchema :: MySQLConn -> IO ()
+initSchema conn = mapM_ (execute_ conn . fromString)
+  [ "CREATE TABLE IF NOT EXISTS students ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  full_name   VARCHAR(255) NOT NULL, \
+    \  group_name  VARCHAR(100) NOT NULL, \
+    \  phone       VARCHAR(20)  NOT NULL \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS coaches ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  full_name   VARCHAR(255) NOT NULL, \
+    \  phone       VARCHAR(20)  NOT NULL \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS sections ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  name        VARCHAR(255) NOT NULL, \
+    \  coach_id    INT NOT NULL, \
+    \  FOREIGN KEY (coach_id) REFERENCES coaches(id) \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS section_members ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  stud_id     INT NOT NULL, \
+    \  sec_id      INT NOT NULL, \
+    \  FOREIGN KEY (stud_id) REFERENCES students(id), \
+    \  FOREIGN KEY (sec_id)  REFERENCES sections(id) \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS schedule ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  sec_id      INT NOT NULL, \
+    \  day_of_week VARCHAR(20) NOT NULL, \
+    \  start_time  TIME NOT NULL, \
+    \  end_time    TIME NOT NULL, \
+    \  place       VARCHAR(255) NOT NULL, \
+    \  FOREIGN KEY (sec_id) REFERENCES sections(id) \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS competitions ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  name        VARCHAR(255) NOT NULL, \
+    \  date        DATE NOT NULL, \
+    \  place       VARCHAR(255) NOT NULL, \
+    \  sec_id      INT NOT NULL, \
+    \  FOREIGN KEY (sec_id) REFERENCES sections(id) \
+    \)"
+  , "CREATE TABLE IF NOT EXISTS competition_members ( \
+    \  id          INT AUTO_INCREMENT PRIMARY KEY, \
+    \  stud_id     INT NOT NULL, \
+    \  comp_id     INT NOT NULL, \
+    \  result      VARCHAR(255) NOT NULL, \
+    \  FOREIGN KEY (stud_id) REFERENCES students(id), \
+    \  FOREIGN KEY (comp_id) REFERENCES competitions(id) \
+    \)"
+  ]
 
 insertEntity :: forall a. Entity a => MySQLConn -> a -> IO OK
 insertEntity conn item = do
