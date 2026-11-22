@@ -1,7 +1,11 @@
-module Sentences (splitSentences) where
+module Sentences ( splitSentences
+  , wordCount
+  , sortByWords
+  ) where
 
 import Types (Punctuation (..), Sentence (..), Token (..), Word (..))
 import Data.Char (isUpper)
+import Data.List (sortOn)
 
 isTerminator :: Token -> Bool
 isTerminator (TPunct (Punctuation p)) = p `elem` ".!?…"
@@ -33,3 +37,9 @@ splitSentences = go []
                 then Sentence (reverse acc') : go [] rest
                 else go acc' rest
       | otherwise = go (t : acc) ts
+
+wordCount :: Sentence -> Int
+wordCount (Sentence ts) = length [w | TWord w <- ts]
+
+sortByWords :: [Sentence] -> [Sentence]
+sortByWords = sortOn wordCount
