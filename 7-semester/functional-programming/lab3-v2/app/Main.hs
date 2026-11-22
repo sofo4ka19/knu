@@ -9,15 +9,19 @@ import Render (render)
 import Sentences (sortByWords, splitSentences, wordCount)
 import Tokenizer (tokenize)
 
+import Data.List (isPrefixOf, partition)
+
 main :: IO ()
 main = do
   setLocaleEncoding utf8
   hSetEncoding stdout utf8
   args <- getArgs
-  let inPath  = case args of
+  let (flags, files) = partition ("--" `isPrefixOf`) args
+      withCounts     = "--counts" `elem` flags
+      inPath  = case files of
         (p : _) -> p
         []      -> "data/textbook.txt"
-      outPath = case drop 1 args of
+      outPath = case drop 1 files of
         (o : _) -> o
         []      -> "data/result.txt"
   raw <- readFile inPath
@@ -27,9 +31,12 @@ main = do
                 . tokenize
                 $ text
       sorted    = sortByWords sentences
-      outLines  = ("Total number of sentences: " ++ show (length sorted))
-                : ""
-                : [ show i ++ ". [" ++ show (wordCount s) ++ " words] " ++ render s
-                  | (i, s) <- zip [1 :: Int ..] sorted ]
+      fmt (i, s)
+        | withCounts = show i ++ ". [" ++ show (wordCount s) ++ " words] " ++ render s
+        | otherwise  = render s
+      body     = map fmt (zip [1 :: Int ..] sorted)
+      outLines
+        | withCounts = ("Total number of sentences: " ++ show (length sorted)) : "" : body
+        | otherwise  = body
   writeFile outPath (unlines outLines)
   putStrLn ("Result written to " ++ outPath)
