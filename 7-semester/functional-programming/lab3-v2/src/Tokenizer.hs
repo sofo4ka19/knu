@@ -22,9 +22,11 @@ spanWord (c : cs)
 spanWord cs = ([], cs)
 
 tokenize :: [Symbol] -> [Token]
-tokenize [] = []
-tokenize xs@(c : cs)
-  | isSpace c    = tokenize cs
-  | isWordChar c = let (w, rest) = spanWord xs
-                   in  TWord (Word w) : tokenize rest
-  | otherwise    = TPunct (Punctuation c) : tokenize cs
+tokenize = go False
+  where
+    go _ [] = []
+    go sp xs@(c : cs)
+      | isSpace c    = go True cs
+      | isWordChar c = let (w, rest) = spanWord xs
+                       in  TWord sp (Word w) : go False rest
+      | otherwise    = TPunct sp (Punctuation c) : go False cs

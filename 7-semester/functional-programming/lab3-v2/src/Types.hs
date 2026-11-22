@@ -17,8 +17,8 @@ newtype Punctuation = Punctuation Symbol
   deriving (Eq, Show)
 
 data Token
-  = TWord  Word
-  | TPunct Punctuation
+  = TWord  Bool Word          -- Bool: чи був пробіл перед лексемою
+  | TPunct Bool Punctuation
   deriving (Eq, Show)
 
 newtype Sentence = Sentence [Token]
