@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // fizzbuzz
+        function fizzbuzz(n){
+            for(let i=1; i<=n; i++){
+                let message="";
+                if(i%3==0) message+="fizz";
+                if(i%5==0) message+="buzz";
+                if(message=="") message=i;
+                console.log(message);
+            }
+        }
+        const fizzbuzz1 = function(n){
+            for(let i=1; i<=n; i++){
+                let message="";
+                if(i%3==0) message+="fizz";
+                if(i%5==0) message+="buzz";
+                if(message=="") message=i;
+                console.log(message);
+            }
+        }
+        const fizzbuzz2 = (n) => {
+            for(let i=1; i<=n; i++){
+                let message="";
+                if(i%3==0) message+="fizz";
+                if(i%5==0) message+="buzz";
+                if(message=="") message=i;
+                console.log(message);
+            }
+        }
+        // cost
+        function cost1(a,b){
+            if(b/100>=1){
+                let temp = b
+                b=b%100
+                a+=(temp-b)/100
+            }
+            let grn = 'грив'
+            let cop = 'копій'
+            grn+=(a%10==1 && a%100!=11)?'ня': (a%10>=2 && a%10<=4 && (a%100<12 || a%100>14))?'ні': 'ень';
+            cop+=(b%10==1 && b%100!=11)?'ка': (b%10>=2 && b%10<=4 && (b%100<12 || b%100>14))?'ки': 'ок';
+            console.log('Вартість замовлення: '+a+' ' + grn + ' ' + b + ' ' + cop);
+        }
+        const cost = function(a,b){
+            if(b/100>=1){
+                let temp = b
+                b=b%100
+                a+=(temp-b)/100
+            }
+            let grn = 'грив'
+            let cop = 'копій'
+            grn+=(a%10==1 && a%100!=11)?'ня': (a%10>=2 && a%10<=4 && (a%100<12 || a%100>14))?'ні': 'ень';
+            cop+=(b%10==1 && b%100!=11)?'ка': (b%10>=2 && b%10<=4 && (b%100<12 || b%100>14))?'ки': 'ок';
+            console.log('Вартість замовлення: '+a+' ' + grn + ' ' + b + ' ' + cop);
+        }
+        const cost2 = (a,b) => {
+            if(b/100>=1){
+                let temp = b
+                b=b%100
+                a+=(temp-b)/100
+            }
+            let grn = 'грив'
+            let cop = 'копій'
+            grn+=(a%10==1 && a%100!=11)?'ня': (a%10>=2 && a%10<=4 && (a%100<12 || a%100>14))?'ні': 'ень';
+            cop+=(b%10==1 && b%100!=11)?'ка': (b%10>=2 && b%10<=4 && (b%100<12 || b%100>14))?'ки': 'ок';
+            console.log('Вартість замовлення: '+a+' ' + grn + ' ' + b + ' ' + cop);
+        }
+        // dots
+        function dots1(x1,y1,x2,y2){
+            console.log('first: ('+x1+', ' + y1 + ')')
+            console.log('second: ('+x2+', ' + y2 + ')')
+            if(x1*x2>0 && y1*y2>0){
+                console.log('distance = ' + Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)))
+            }
+            else{
+                const findQuater = (x,y) => {
+                    return (x==0 && y==0)?('в початку координат'):(x==0)?('на осі ОY'):(y==0)?('на осі ОX'):(y>0 && x>0)?('1 чверть'):(y>0 && x<0)?('2 чверть'):(y<0 && x<0)?('3 чверть'):('4 чверть')
+                }
+                console.log('first: '+ findQuater(x1,y1))
+                console.log('second: ' + findQuater(x2,y2))
+            }
+        }
+        const dots2 = function(x1,y1,x2,y2){
+            console.log('first: ('+x1+', ' + y1 + ')')
+            console.log('second: ('+x2+', ' + y2 + ')')
+            if(x1*x2>0 && y1*y2>0){
+                console.log('distance = ' + Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)))
+            }
+            else{
+                const findQuater = (x,y) => {
+                    return (x==0 && y==0)?('в початку координат'):(x==0)?('на осі ОY'):(y==0)?('на осі ОX'):(y>0 && x>0)?('1 чверть'):(y>0 && x<0)?('2 чверть'):(y<0 && x<0)?('3 чверть'):('4 чверть')
+                }
+                console.log('first: '+ findQuater(x1,y1))
+                console.log('second: ' + findQuater(x2,y2))
+            }
+        }
+        const dots = (x1,y1,x2,y2) => {
+            console.log('first: ('+x1+', ' + y1 + ')')
+            console.log('second: ('+x2+', ' + y2 + ')')
+            if(x1*x2>0 && y1*y2>0){
+                console.log('distance = ' + Math.sqrt(Math.pow(x1-x2,2)+Math.pow(y1-y2,2)))
+            }
+            else{
+                const findQuater = (x,y) => {
+                    return (x==0 && y==0)?('в початку координат'):(x==0)?('на осі ОY'):(y==0)?('на осі ОX'):(y>0 && x>0)?('1 чверть'):(y>0 && x<0)?('2 чверть'):(y<0 && x<0)?('3 чверть'):('4 чверть')
+                }
+                console.log('first: '+ findQuater(x1,y1))
+                console.log('second: ' + findQuater(x2,y2))
+            }
+        }
+        // run functions
+        console.log('fizzbuzz declaration with parameter 15')
+        fizzbuzz(15)
+        console.log('fizzbuzz expression with parameter 20')
+        fizzbuzz1(20)
+        console.log('fizzbuzz arrow with parameter 7')
+        fizzbuzz2(7)
+        console.log('cost declaration with parameters 2,75')
+        cost1(2,75)
+        console.log('cost expression with parameters 0,1')
+        cost(0,1)
+        console.log('cost arrow with parameters 20, 102')
+        cost2(20,102)
+        console.log('dots declaration')
+        dots1(0,0,1,0)
+        console.log('dots expression')
+        dots1(1,1,5,2)
+        console.log('dots arrow')
+        dots1(-1,2,3,-2)
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

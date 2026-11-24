@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container">
+        <input value="Field 1" type="text">
+    </div>
+    <button id="add">Add</button>
+    <button id="delete">Delete</button>
+    <script>
+        let num = 1
+        document.getElementById('add').onclick = () => {
+            num++
+            let i = document.createElement('input')
+            i.type = 'text'
+            i.value = 'Field '+num
+            document.getElementById('container').appendChild(i)
+        }
+        document.getElementById('delete').onclick = () => {
+            let cont = document.getElementById('container')
+            while(num>1){
+                cont.removeChild(cont.lastChild)
+                num--
+            }
+        }
+    </script>
+</body>
+</html>

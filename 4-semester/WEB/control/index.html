@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+        }
+        .box{
+            height: 1450px;
+            width: 1050px; /*perhaps needs changing*/
+            margin: 0 auto;
+        }
+        header{
+            width: 100%;
+            height: 50px;
+            background: black;
+        }
+        .decor{
+            width: 100%;
+            height: 125px;
+            position: absolute;
+            background: rgba(0, 0, 0, 0.25);
+            left: 0;
+            z-index: 1;
+        }
+        .decor1{
+            top: 0;
+            clip-path: polygon(0 0, 100% 0, 100% 75%, 0 100%);
+        }
+        .decor2{
+            bottom: 0;
+            clip-path: polygon(0 25%, 100% 0, 100% 100%, 0 100%);
+        }
+        main{
+            width: 100%;
+            display: flex;
+            height: 100%;
+            position: relative;
+        }
+        aside{
+            width: 35%;
+            background: #8956ff;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+        }
+        .content{
+            width: 65%;
+            background: #a57eff;
+            padding: 50px 25px;
+            box-sizing: border-box;
+        }
+        .content p{
+            line-height: 1.2;
+            text-align: justify;
+            font-size: 0.9em;
+        }
+        .bold{
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .content img{
+            width: 100%;
+            margin-top: 50px;
+            margin-bottom: 5px;
+        }
+        aside div{
+            margin-bottom: 15px;
+            background: white;
+            max-width: 75%;
+            position: relative;
+            z-index: 2;
+        }
+        aside div img{
+            width: 100%;
+            height: 100%;
+        }
+        .vertical{
+            margin: 35px;
+            align-self: center;
+            width: 35%;
+            box-shadow: 5px 7px 7px rgba(0, 0, 0, 0.75);
+        }
+        .columns{
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+        }
+        .column{
+            width: 47%;
+        }
+        ul{
+            padding-left: 15px;
+            box-sizing: border-box;
+            list-style-type: "◆ ";
+        }
+        li{
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        span{
+            background: yellow;
+        }
+        .clip{
+            clip-path: polygon(2px 5px, 100% 20px, 100% 100%, 2px 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <header></header>
+        <main>
+            <aside>
+                <div class="vertical"><img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcShqsZ3XXguZcgVUJmbBzQrLb5wswmvAXwSGg&s" alt="man"></div>
+                <div><img src="https://www.bloopanimation.com/wp-content/uploads/2021/11/animate_animation_slider.jpg" alt="instruments"></div>
+                <div><img class="clip" src="https://3.imimg.com/data3/BH/QL/MY-12724382/animation.jpg" alt="minions"></div>
+                <div><img class="clip" src="https://i.ytimg.com/vi/VmekmH0QJMs/maxresdefault.jpg" alt="drawing"></div>
+                <div><img src="https://www.arena-multimedia.com/uploads/course_images/animation.png" alt="panda"></div>
+            </aside>
+            <div class="content">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum aliquam deserunt magni? Ducimus assumenda culpa facilis quos voluptatibus! Optio alias aut vitae, corporis voluptas blanditiis expedita explicabo amet suscipit illo. Lorem ipsum dolor sit amet consectetur adipisicing elit. Error fuga dolorem modi impedit dicta enim nisi aspernatur reiciendis amet repellat sapiente incidunt, saepe consequatur maiores doloribus quibusdam! Voluptatem, voluptates ut!</p>
+                <img src="https://submarine.nl/app/uploads/2019/09/Undon_Tease-Art_1920x1080-2.jpg" alt="eyes">
+                <div class="columns">
+                    <div class="column">
+                        <p class="bold">Lorem ipsum dolor</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Perspiciatis repellendus adipisci quam eos corrupti saepe odit rerum. Magnam hic quas eaque mollitia possimus nemo harum magni! Vel ducimus harum sapiente. Lorem ipsum dolor sit amet consectetur adipisicing elit. Quasi, dicta minus omnis eaque vero voluptates alias mollitia! Ipsa eius dignissimos, assumenda repellendus facere excepturi dolor dolores laboriosam, ad veritatis rem.</p>
+                        <p class="bold">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime sequi quibusdam corrupti similique illo quidem molestiae distinctio, quis placeat, voluptatum, non quos officiis facilis eaque incidunt! Necessitatibus, aut sapiente. Architecto. Lorem ipsum dolor sit, amet consectetur adipisicing elit. Ipsa autem ducimus itaque quis laudantium nihil unde aliquam sed fugit nulla dolores sunt eaque, saepe quo minus voluptatum officiis nostrum. Pariatur.</p>
+                        <p class="bold">Lorem ipsum dolor</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste quam officia cumque unde modi recusandae itaque quas, incidunt aut eius similique error voluptatem, soluta dolorem sit molestias saepe voluptatibus velit! similique consectetur est quod ex ab fugiat dolorum. Molestias sapiente aliquid ipsum fugit.</p>
+                        <p class="bold">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veniam sapiente, sint maxime cupiditate placeat accusamus vel impedit similique consectetur est quod ex ab fugiat dolorum. Molestias sapiente aliquid ipsum fugit.</p>
+                        <p class="bold">Lorem ipsum dolor sit amet</p>
+                        <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. <span>Ea voluptatibus eveniet harum</span> deleniti, quibusdam animi eum assumenda similique exercitationem aperiam officia expedita saepe neque culpa cum aut quasi voluptatum debitis!</p>
+                    </div>
+                    <div class="column">
+                        <p class="bold">Lorem ipsum dolor sit amet consectetur adipisicing elit</p>
+                        <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Rem cum adipisci, necessitatibus laborum qui velit ea iste eligendi hic eaque provident accusamus similique non maxime officiis a. At, ratione quam. Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quasi perspiciatis voluptate illo quam mollitia commodi id recusandae vero provident ad saepe amet aliquam, corporis labore impedit voluptatibus fugiat sunt voluptates?</p>
+                        <p class="bold">Lorem</p>
+                        <ul >
+                            <li>Lorem ipsum dolor sit amet, consectetur</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime sequi quibusdam corrupti</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime sequi quibusdam corrupti</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime sequi quibusdam corrupti</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Maxime sequi quibusdam corrupti</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+                            <li>Lorem ipsum dolor sit amet, consectetur adipisicing elit</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="decor decor1"></div>
+            <div class="decor decor2"></div>
+        </main>
+    </div>
+</body>
+</html>

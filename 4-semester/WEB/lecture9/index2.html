@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <style>
+        tbody tr:hover {
+            background-color: #e8f5e9;
+        }
+        
+        .sort-icon {
+            color: #999;
+        }
+        th{
+            position: relative;
+        }
+        th span{
+            position: absolute;
+            right: 5%;
+            top: 25%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <div class="row mb-3">
+            <div class="col-md-6 col-xs-12">
+                <div class="row mb-2 align-items-center">
+                    <div class="col-4">
+                        <label class="form-label">Filter</label>
+                    </div>
+                    <div class="col-8">
+                        <div class="input-group">
+                            <input type="text" class="form-control" placeholder="Type to Search">
+                            <button class="btn btn-secondary" type="button">Clear</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mb-2 align-items-center">
+                    <div class="col-4">
+                        <label class="form-label">Sort direction</label>
+                    </div>
+                    <div class="col-3">
+                        <select class="custom-select">
+                            <option selected>Asc</option>
+                            <option>Desc</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 col-xs-12">
+                <div class="row mb-2 align-items-center">
+                    <div class="col-4">
+                        <label class="form-label">Sort</label>
+                    </div>
+                        <div class="col-6 pr-0">
+                            <select class="custom-select">
+                                <option selected>-- none --</option>
+                                <option>Person Full name</option>
+                                <option>Person age</option>
+                                <option>is Active</option>
+                            </select>
+                            </div>
+                            <div class="col-2 pl-0">
+                            <select class="custom-select" disabled>
+                                <option selected>Asc</option>
+                                <option>Desc</option>
+                            </select>
+                        </div>
+                </div>
+                <div class="row mb-2 align-items-center">
+                    <div class="col-4">
+                        <label class="form-label">Per page</label>
+                    </div>
+                    <div class="col-8">
+                        <select class="custom-select">
+                            <option selected>5</option>
+                            <option>10</option>
+                            <option>25</option>
+                            <option>50</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th scope="col"><p class="mb-0">Person Full name</p> <span class="sort-icon">↑↓</span></th>
+                        <th scope="col"><p class="mb-0">Person age</p> <span class="sort-icon">↑↓</span></th>
+                        <th scope="col">is Active</th>
+                        <th scope="col">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Dickerson Macdonald</td>
+                        <td>40</td>
+                        <td>Yes :)</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm mb-1 mb-md-0">Info modal</button>
+                            <button class="btn btn-secondary btn-sm">Show Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Larsen Shaw</td>
+                        <td>21</td>
+                        <td>No :(</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm mb-1 mb-md-0">Info modal</button>
+                            <button class="btn btn-secondary btn-sm">Show Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Mini Navarro</td>
+                        <td>9</td>
+                        <td>No :(</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm mb-1 mb-md-0">Info modal</button>
+                            <button class="btn btn-secondary btn-sm">Show Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Geneva Wilson</td>
+                        <td>89</td>
+                        <td>No :(</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm mb-1 mb-md-0">Info modal</button>
+                            <button class="btn btn-secondary btn-sm">Show Details</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Jami Carney</td>
+                        <td>38</td>
+                        <td>Yes :)</td>
+                        <td>
+                            <button class="btn btn-secondary btn-sm mb-1 mb-md-0">Info modal</button>
+                            <button class="btn btn-secondary btn-sm">Show Details</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        
+            <ul class="pagination">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item disabled">
+                    <a class="page-link" href="#">
+                        <span aria-hidden="true">&lt;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#">&gt;</a>
+                </li>
+                <li class="page-item">
+                    <a class="page-link" href="#">&raquo;</a>
+                </li>
+            </ul>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

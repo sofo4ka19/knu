@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .container{
+            display: flex;
+            flex-wrap: wrap;
+            padding: 10px;
+            justify-content: space-between;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        .block{
+            height: 100px;
+            margin: 7px;
+            flex: 1 1 19%;
+            min-width: 150px;
+        }
+        .blue{
+            background: lightblue;
+        }
+        .yellow{
+            background: orange;
+        }
+        .pink{
+            background: fuchsia;
+        }
+        .spec{
+            flex-grow: 0.6;
+        }
+        @media ((max-width: 1435px ) and (min-width: 691px)) or (max-width: 363px){
+            .spec{
+                flex-grow: 1;
+            }
+        }
+        @media (min-width: 363px) and (max-width: 527px){
+            .spec1, .spec{
+                flex-grow: 0.75;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="block blue spec1"></div>
+        <div class="block blue"></div>
+        <div class="block blue spec1"></div>
+        <div class="block yellow"></div>
+        <div class="block yellow spec1"></div>
+        <div class="block yellow"></div>
+        <div class="block pink spec"></div>
+        <div class="block pink"></div>
+    </div>
+</body>
+</html>

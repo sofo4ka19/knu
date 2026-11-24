@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #histogram{
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            margin-top: 10px;
+        }
+        #table{
+            width: 100%;
+            min-height: 500px;
+        }
+    </style>
+</head>
+<body>
+    <label for="col">enter the number of columns in histogram</label>
+    <input id="col" placeholder="enter the number of columns in histogram" type="number" min="1" max="100" value="10">
+    <button onclick="createHistogram()">Create</button>
+    <div id="histogram"></div>
+    <hr>
+    <label for="rows">enter the number of rows in the table</label>
+    <input id="rows" placeholder="enter the number of rows in the table" type="number" min="1" max="25" value="10">
+    <label for="cols">enter the number of columns in the table</label>
+    <input id="cols" placeholder="enter the number of columns in the table" type="number" min="1" max="25" value="10">
+    <button onclick="createTable()">Create</button>
+    <table id="table"></table>
+    <script>
+        function createHistogram(){
+            let parent = document.getElementById("histogram")
+            let numInput = document.getElementById("col");
+            let num=parseInt(numInput.value);
+            let width = (100/num)*0.95
+            parent.innerHTML = '';
+            if (isNaN(num) || num < 1) {
+                alert("Please enter a valid number greater than 0");
+                return;
+            }
+            for(let i=0; i<num; i++){
+                let el = document.createElement('div')
+                el.style.width=width+'%';
+                el.style.height=Math.floor(Math.random()*300 + 20) + 'px'
+                el.style.backgroundColor='#'+ Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0')
+                parent.appendChild(el)
+            }
+        }
+        function createTable(){
+            let parent = document.getElementById("table")
+            let rows = parseInt(document.getElementById("rows").value)
+            let cols = parseInt(document.getElementById("cols").value)
+            table.innerHTML=''
+            if (isNaN(rows) || rows < 1 || isNaN(cols) || cols < 1) {
+                alert("Please enter a valid number greater than 0");
+                return;
+            }
+            for(let i=0; i<rows; i++){
+                let row = document.createElement('tr')
+                for(let j=0; j<cols; j++){
+                    let col = document.createElement('td')
+                    col.style.backgroundColor = ((i+j)%2==0) ? "#000000" : "#ffffff"
+                    row.appendChild(col)
+                }
+                parent.appendChild(row)
+            }
+        }
+    </script>
+</body>
+</html>

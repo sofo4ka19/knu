@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script>
+        // task 1
+        function uniqueElements(arr1, arr2) {
+            const combined = arr1.concat(arr2);
+            const unique = [];
+            
+            combined.forEach(item => {
+                if (!unique.includes(item)) { 
+                    unique.push(item);
+                }
+            });
+            
+            return unique;
+        }
+        // task 2
+        function getEvenPositiveNumbers(arr) {
+            return arr.filter(item => {if(item > 0 && item % 2 === 0) return item});
+        }
+        // task 3
+        function hasZero(arr){
+            return arr.includes(0)
+        }
+        //task 4
+        function findFiveIndex(arr){
+            return arr.indexOf(5)
+        }
+        // task 5
+        function calculateProduct(arr){
+            return arr.reduce((product, current) => product * current, 1);
+        }
+        //task 6a
+        function sortByAlphabet(arr){            
+            return arr.sort();
+        }
+        // task 6b
+        function sortAbsolute(arr){
+            return arr.sort((a, b) => Math.abs(a) - Math.abs(b));
+        }
+        const array1 = [1, 2, 0, 4, 5, -3, 7];
+        const array2 = [5, 8, 4, -2];
+        const array3 = ["яблуко", "банан", "апельсин", "вишня"];
+        console.log('test array 1: ' + array1)
+        console.log('test array 2: ' + array2)
+        console.log('test array 3: ' + array3)
+        console.log('task 1: ' + uniqueElements(array1, array2))
+        console.log('task 2: ' + getEvenPositiveNumbers(array1))
+        console.log('task 3 for array 1: ' + hasZero(array1))
+        console.log('task 3 for array 2: ' + hasZero(array2))
+        console.log('task 4: ' + findFiveIndex(array1))
+        console.log('task 5 for array 1: ' + calculateProduct(array1))
+        console.log('task 5 for array 2: ' + calculateProduct(array2))
+        console.log('task 6a: ' + sortByAlphabet(array3))
+        console.log('task 6b: ' + sortAbsolute(array1))
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

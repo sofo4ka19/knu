@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кошик - книжковий магазин</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .error-message {
+            color: red;
+            font-size: 0.875em;
+            display: none;
+        }
+        .order-summary {
+            display: none;
+            margin-top: 20px;
+        }
+        .address-field {
+            display: none;
+            margin-top: 10px;
+        }
+        .summary-table th {
+            white-space: nowrap;
+        }
+        .book-item {
+            border-bottom: 1px solid #dee2e6;
+            padding: 8px 0;
+        }
+        .book-item:last-child {
+            border-bottom: none;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="mb-4">Замовлення на придбання товару</h1>
+        
+        <form id="orderForm" class="bg-white p-4 rounded shadow-sm">
+            <div class="mb-3">
+                <label for="bookSelect" class="form-label">Назва товару</label>
+                <select onchange="updateBookSelection()" class="form-select" id="bookSelect">
+                    <option value="" selected disabled>Оберіть книгу</option>
+                </select>
+            </div>
+            
+            <div class="mb-3">
+                <label for="quantity" class="form-label">Кількість</label>
+                <input oninput="updateBookQuantity()" type="number" class="form-control" id="quantity" min="0" value="0">
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Вартість замовлених книг</label>
+                <div class="form-control-plaintext" id="bookCost">0.00</div>
+            </div>
+            
+            <div class="mb-3">
+                <label class="form-label">Спосіб доставки замовлення</label>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="delivery" id="postDelivery" value="post" checked>
+                    <label class="form-check-label" for="postDelivery">Поштою (+5%)</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="radio" name="delivery" id="homeDelivery" value="home">
+                    <label class="form-check-label" for="homeDelivery">Доставка до дому (+15%)</label>
+                </div>
+                
+                <div id="addressField" class="address-field">
+                    <label for="address" class="form-label">Адреса доставки</label>
+                    <input type="text" class="form-control" id="address">
+                </div>
+                
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" id="giftWrap">
+                    <label class="form-check-label" for="giftWrap">У святковій упаковці (+10%)</label>
+                </div>
+            </div>
+            
+            <div class="mb-3">
+                <label for="promoCode" class="form-label">Промокод</label>
+                <div class="input-group">
+                    <input type="text" class="form-control" id="promoCode" placeholder="Введіть промокод">
+                    <button onclick="applyPromoCode()" class="btn btn-outline-secondary" type="button" id="applyPromo">Застосувати</button>
+                </div>
+                <div id="promoMessage" class="mt-2"></div>
+            </div>
+            
+            <div class="mb-3 border-top pt-3">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5>Загальна вартість замовлення</h5>
+                    <div class="fs-4 fw-bold" id="totalCost">0.00</div>
+                </div>
+                <button onclick="calculateTotal()" type="button" class="btn btn-primary mt-2" id="calculateBtn">Підрахувати</button>
+            </div>
+            
+            <div class="mb-3">
+                <h5>Дані замовника</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label for="firstName" class="form-label">Ім'я</label>
+                        <input type="text" class="form-control" id="firstName" required>
+                        <div class="error-message" id="firstNameError">Будь ласка, введіть ім'я</div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="lastName" class="form-label">Прізвище</label>
+                        <input type="text" class="form-control" id="lastName" required>
+                        <div class="error-message" id="lastNameError">Будь ласка, введіть прізвище</div>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label for="phone" class="form-label">Номер телефону</label>
+                    <input type="tel" class="form-control" id="phone" placeholder="+38 (044) 123 45 67" required>
+                    <div class="error-message" id="phoneError">Будь ласка, введіть коректний номер телефону у форматі +38 (XXX) XXX XX XX</div>
+                </div>
+            </div>
+            
+            <div class="d-flex justify-content-between">
+                <button onclick="resetForm()" type="button" class="btn btn-secondary" id="resetBtn">Відновити початкові значення полів</button>
+                <button type="submit" class="btn btn-success">Відіслати дані</button>
+            </div>
+        </form>
+        
+        <div id="orderSummary" class="order-summary bg-white p-4 rounded shadow-sm mt-4">
+            <h3 class="mb-4">Відомість замовлення</h3>
+            <div id="summaryContent"></div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Дані про книги
+        const books = [
+            {id: 1, title: "Гаррі Поттер і філософський камінь", author: "Дж. К. Ролінґ", price: 25.50},
+            {id: 2, title: "Володар перснів: Братство персня", author: "Дж. Р. Р. Толкін", price: 22.75},
+            {id: 3, title: "1984", author: "Джордж Орвелл", price: 30.00},
+            {id: 4, title: "Маленький принц", author: "Антуан де Сент-Екзюпері", price: 18.90},
+            {id: 5, title: "Гра престолів", author: "Джордж Р. Р. Мартін", price: 27.30},
+            {id: 6, title: "Шерлок Холмс: Вивчення в багряних тонах", author: "Артур Конан Дойл", price: 21.45},
+            {id: 7, title: "Аліса в Країні Чудес", author: "Льюїс Керрол", price: 19.99},
+            {id: 8, title: "Мобі Дік", author: "Герман Мелвілл", price: 24.80},
+            {id: 9, title: "Дракула", author: "Брем Стокер", price: 26.50},
+            {id: 10, title: "Франкенштейн", author: "Мері Шеллі", price: 23.10},
+        ];
+
+        // Промокоди та їх знижки
+        const promoCodes = {
+            'WELCOME10': 10,
+            'BOOKLOVER15': 15,
+            'READMORE20': 20,
+            'DISCOUNT5': 5,
+            'SPECIAL12': 12
+        };
+        
+        // Поточний стан замовлення
+        const orderState = {
+            selectedBooks: {},
+            currentPromo: null,
+            currentPromoDiscount: 0,
+            deliveryMethod: 'post',
+            giftWrap: false,
+            subtotal: 0,
+            total: 0
+        };
+
+        // DOM елементи
+        const elements = {
+            bookSelect: document.getElementById('bookSelect'),
+            quantityInput: document.getElementById('quantity'),
+            bookCostElement: document.getElementById('bookCost'),
+            totalCostElement: document.getElementById('totalCost'),
+            postDelivery: document.getElementById('postDelivery'),
+            homeDelivery: document.getElementById('homeDelivery'),
+            giftWrap: document.getElementById('giftWrap'),
+            addressField: document.getElementById('addressField'),
+            addressInput: document.getElementById('address'),
+            promoCodeInput: document.getElementById('promoCode'),
+            promoMessage: document.getElementById('promoMessage'),
+            firstNameInput: document.getElementById('firstName'),
+            lastNameInput: document.getElementById('lastName'),
+            phoneInput: document.getElementById('phone'),
+            orderForm: document.getElementById('orderForm'),
+            orderSummary: document.getElementById('orderSummary'),
+            summaryContent: document.getElementById('summaryContent')
+        };
+
+        // Ініціалізація форми
+        function initForm() {
+            // Заповнення випадаючого списку книг
+            books.forEach(book => {
+                const option = document.createElement('option');
+                option.value = book.id;
+                option.textContent = `${book.title} (${book.author}) - ${book.price.toFixed(2)} грн`;
+                elements.bookSelect.appendChild(option);
+            });
+
+            // Обробники подій
+            elements.homeDelivery.addEventListener('change', function() {
+                elements.addressField.style.display = this.checked ? 'block' : 'none';
+                orderState.deliveryMethod = 'home';
+            });
+
+            elements.postDelivery.addEventListener('change', function() {
+                elements.addressField.style.display = 'none';
+                orderState.deliveryMethod = 'post';
+            });
+
+            elements.giftWrap.addEventListener('change', function() {
+                orderState.giftWrap = this.checked;
+            });
+
+            elements.orderForm.addEventListener('submit', submitOrder);
+        }
+
+        // Обробка зміни вибору книги
+        function updateBookSelection() {
+            const bookId = parseInt(elements.bookSelect.value);
+            
+            if (bookId) {
+                // Встановлюємо кількість для обраної книги або 0, якщо її ще не було
+                const quantity = orderState.selectedBooks[bookId] || 0;
+                elements.quantityInput.value = quantity;
+            } else {
+                elements.quantityInput.value = 0;
+            }
+            
+            updateAllBooksCost();
+        }
+
+        // Обновка кількості книги
+        function updateBookQuantity() {
+            const bookId = parseInt(elements.bookSelect.value);
+            const quantity = parseInt(elements.quantityInput.value) || 0;
+            
+            if (bookId) {
+                if (quantity > 0) {
+                    orderState.selectedBooks[bookId] = quantity;
+                } else if (bookId in orderState.selectedBooks) {
+                    delete orderState.selectedBooks[bookId];
+                }
+            }
+            
+            updateAllBooksCost();
+        }
+
+        // Розрахунок загальної вартості всіх книг (без доставки та промокодів)
+        function updateAllBooksCost() {
+            const totalBooksCost = Object.entries(orderState.selectedBooks).reduce((sum, [bookId, quantity]) => {
+                const book = books.find(b => b.id === parseInt(bookId));
+                return sum + (book.price * quantity);
+            }, 0);
+            
+            elements.bookCostElement.textContent = totalBooksCost.toFixed(2);
+        }
+
+        // Розрахунок загальної проміжної суми всіх книг
+        function calculateSubtotal() {
+            orderState.subtotal = Object.entries(orderState.selectedBooks).reduce((sum, [bookId, quantity]) => {
+                const book = books.find(b => b.id === parseInt(bookId));
+                return sum + (book.price * quantity);
+            }, 0);
+        }
+
+        // Розрахунок загальної суми
+        function calculateTotal() {
+            calculateSubtotal();
+            
+            let total = orderState.subtotal;
+            
+            // Оновлення стану доставки та подарункової упаковки
+            orderState.deliveryMethod = elements.homeDelivery.checked ? 'home' : 'post';
+            orderState.giftWrap = elements.giftWrap.checked;
+            
+            // Додавання вартості доставки
+            if (orderState.deliveryMethod === 'home') {
+                total *= 1.15;
+            } else {
+                total *= 1.05;
+            }
+            
+            // Додавання вартості подарункової упаковки
+            if (orderState.giftWrap) {
+                total *= 1.10; // +10%
+            }
+            
+            // Застосування знижки за промокодом
+            if (orderState.currentPromoDiscount > 0) {
+                total *= (1 - orderState.currentPromoDiscount / 100);
+            }
+            
+            orderState.total = total;
+            elements.totalCostElement.textContent = total.toFixed(2);
+        }
+
+        // Застосування промокоду
+        function applyPromoCode() {
+            const promoCode = elements.promoCodeInput.value.trim();
+            
+            if (promoCode in promoCodes) {
+                orderState.currentPromo = promoCode;
+                orderState.currentPromoDiscount = promoCodes[promoCode];
+                elements.promoMessage.textContent = `Промокод "${promoCode}" успішно застосовано! Знижка: ${orderState.currentPromoDiscount}%`;
+                elements.promoMessage.style.color = 'green';
+            } else {
+                orderState.currentPromo = null;
+                orderState.currentPromoDiscount = 0;
+                elements.promoMessage.textContent = 'Невірний промокод. Спробуйте ще раз.';
+                elements.promoMessage.style.color = 'red';
+            }
+        }
+
+        // Валідація телефону
+        function validatePhone(phone) {
+            const phoneRegex = /^\+38 \(\d{3}\) \d{3} \d{2} \d{2}$/;
+            return phoneRegex.test(phone);
+        }
+
+        // Скидання форми з використанням вбудованої функції reset()
+        function resetForm() {
+            elements.orderForm.reset();
+            
+            // Скидання стану замовлення
+            orderState.selectedBooks = {};
+            orderState.currentPromo = null;
+            orderState.currentPromoDiscount = 0;
+            orderState.deliveryMethod = 'post';
+            orderState.giftWrap = false;
+            orderState.subtotal = 0;
+            orderState.total = 0;
+            
+            // Скидання відображуваних значень
+            elements.bookCostElement.textContent = '0.00';
+            elements.totalCostElement.textContent = '0.00';
+            elements.addressField.style.display = 'none';
+            elements.promoMessage.textContent = '';
+            elements.orderSummary.style.display = 'none';
+            
+            // Приховання повідомлень про помилки
+            document.querySelectorAll('.error-message').forEach(el => {
+                el.style.display = 'none';
+            });
+        }
+
+        // Відправка форми
+        function submitOrder(e) {
+            e.preventDefault();
+            
+            // Валідація даних
+            let isValid = true;
+            
+            if (!elements.firstNameInput.value.trim()) {
+                document.getElementById('firstNameError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('firstNameError').style.display = 'none';
+            }
+            
+            if (!elements.lastNameInput.value.trim()) {
+                document.getElementById('lastNameError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('lastNameError').style.display = 'none';
+            }
+            
+            if (!validatePhone(elements.phoneInput.value.trim())) {
+                document.getElementById('phoneError').style.display = 'block';
+                isValid = false;
+            } else {
+                document.getElementById('phoneError').style.display = 'none';
+            }
+            
+            if (Object.keys(orderState.selectedBooks).length === 0) {
+                alert('Будь ласка, додайте хоча б одну книгу до замовлення');
+                isValid = false;
+            }
+            
+            // Перевірка адреси для доставки додому
+            if (elements.homeDelivery.checked && !elements.addressInput.value.trim()) {
+                alert('Будь ласка, введіть адресу доставки');
+                elements.addressInput.focus();
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                return;
+            }
+            
+            // Автоматично підраховуємо загальну суму перед відправкою
+            calculateTotal();
+            
+            // Формування відомості замовлення
+            generateOrderSummary();
+            elements.orderSummary.style.display = 'block';
+        }
+
+        // Генерація підсумку замовлення
+        function generateOrderSummary() {
+            const deliveryMethod = orderState.deliveryMethod === 'home' ? 'Доставка до дому' : 'Поштою';
+            const giftWrapText = orderState.giftWrap ? 'Так' : 'Ні';
+            const address = orderState.deliveryMethod === 'home' ? elements.addressInput.value : 'Не застосовується';
+            
+            let promoText = 'Не застосовано';
+            if (orderState.currentPromo) {
+                promoText = `${orderState.currentPromo} (знижка ${orderState.currentPromoDiscount}%)`;
+            }
+            
+            // Формування списку книг
+            const booksList = Object.entries(orderState.selectedBooks).map(([bookId, quantity]) => {
+                const book = books.find(b => b.id === parseInt(bookId));
+                const bookTotal = book.price * quantity;
+                return `
+                    <div class="book-item">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <strong>${book.title}</strong><br>
+                                <small class="text-muted">${book.author}</small>
+                            </div>
+                            <div class="text-end">
+                                ${quantity} × ${book.price.toFixed(2)} грн = <strong>${bookTotal.toFixed(2)} грн</strong>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            const summaryHTML = `
+                <div class="mb-4">
+                    <h5>Дані замовника:</h5>
+                    <p>${elements.firstNameInput.value.trim()} ${elements.lastNameInput.value.trim()}<br>
+                    Телефон: ${elements.phoneInput.value.trim()}</p>
+                </div>
+                
+                <h5 class="mb-3">Замовлені книги:</h5>
+                <div class="mb-4">
+                    ${booksList}
+                </div>
+                
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Вартість книг:</span>
+                        <strong>${orderState.subtotal.toFixed(2)} грн</strong>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Спосіб доставки:</span>
+                        <span>${deliveryMethod}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Святкова упаковка:</span>
+                        <span>${giftWrapText}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Адреса доставки:</span>
+                        <span>${address}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Промокод:</span>
+                        <span>${promoText}</span>
+                    </div>
+                    <div class="d-flex justify-content-between border-top pt-2 mt-2 fs-5">
+                        <span>До сплати:</span>
+                        <strong>${orderState.total.toFixed(2)} грн</strong>
+                    </div>
+                </div>
+            `;
+            
+            elements.summaryContent.innerHTML = summaryHTML;
+        }
+
+        // Ініціалізація форми при завантаженні сторінки
+        window.addEventListener('load', initForm);
+    </script>
+</body>
+</html>

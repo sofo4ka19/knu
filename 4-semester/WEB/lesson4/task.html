@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+        .box{
+            position: absolute;
+            width: 40%;
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 10px;
+            box-sizing: border-box;
+            background-repeat: no-repeat;
+            background-size:cover;
+        }
+        .box1{
+            background-image: url(https://images.pexels.com/photos/220067/pexels-photo-220067.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500);
+            top: 0;
+            left: 0;
+        }
+        .box2{
+            background-image: url(https://png.pngtree.com/background/20210711/original/pngtree-romantic-purple-happy-valentines-day-background-picture-image_1169259.jpg);
+            top: 150px;
+            left: 30%;
+            justify-content: flex-start;
+            z-index: 2;
+        }
+        .box3{
+            background-image: url(https://png.pngtree.com/thumb_back/fw800/background/20240522/pngtree-abstract-background-defocused-pink-lights-bokeh-image_15682778.jpg);
+            top: 0;
+            right: 0;
+        }
+        img{
+            object-fit: cover;
+        }
+        main{
+            width: 65%;
+        }
+        .image img{
+            border: 5px solid white;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        main .image img{
+            height: 250px;
+        }
+        .text{
+            width: 100%;
+            background: white;
+            padding:15px;
+            box-sizing: border-box;
+            height: fit-content;
+        }
+        .info{
+            margin-top: 10px;
+            width: 100%;
+            border: 2px solid white;
+            box-sizing: border-box;
+            border-radius: 5px;
+        }
+        ul{
+            width: 100%;
+            padding-top: 3px;
+            box-sizing: border-box;
+            background: grey;
+            display: flex;
+            justify-content: flex-start;
+            align-items: flex-end;
+        }
+        li{
+            color: blue;
+            background: lightgrey;
+            font-weight: bold;
+            padding: 5px;
+            margin-left: 3px;
+            border-radius: 5px 5px 0 0;
+            list-style-type: none;
+        }
+        .active{
+            color: crimson;
+            background: white;
+        }
+        li:hover{
+            color: purple;
+        }
+        a{
+            text-decoration: underline;
+            color: blue;
+            font-weight: bold;
+        }
+        .text img{
+            border: 5px solid grey;
+            width: 50%;
+            float: left;
+            margin-right: 10px;
+        }
+        .text p{
+            margin-bottom: 10px;
+        }
+        .spec ul{
+            background: lightskyblue;
+        }
+        .spec li{
+            color: white;
+            font-weight: normal;
+            background: blue;
+        }
+        .spec .active{
+            background: lightgreen;
+        }
+        .spec li:hover{
+            background: orange;
+        }
+        .spec img{
+            border: 5px solid lightgreen;
+        }
+        aside{
+            width: 30%;
+        }
+        aside .image img{
+            height: 125px;
+            border: 3px solid white;
+        }
+        .image p{
+            color: white;
+            font-weight: bold;
+            text-align: center;
+        }
+        .image{
+            margin-bottom: 5%;
+        }
+        .box1 aside{
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .box1 aside .image{
+            width: 47%;
+        }
+        .box1 aside .image img{
+            aspect-ratio: 1 / 1;
+            height: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="box box1">
+        <main>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/07/85/55/82/360_F_785558298_1P6kEf1TODNFsI44DuEiVyiOFTsfd2AJ.jpg" alt="snake">
+                <p>Lorem ipsum dolor sit amet consectetur</p>
+            </div>
+            <div class="info">
+                <ul>
+                    <li class="active">About Animals</li>
+                    <li>Marketplaces</li>
+                    <li>Tuls + Network</li>
+                </ul>
+                <div class="text">
+                    <img src="https://img.freepik.com/free-vector/hand-drawn-cartoon-wild-animals-collection_1284-44322.jpg?t=st=1741166661~exp=1741170261~hmac=4c7f4eabca277601bcacf7b469afe5587c2ca7049c316f884282392b40e04e96&w=900" alt="animal">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Consequatur similique delectus error deserunt? Accusamus ea voluptas placeat aperiam quasi! Earum aperiam et laboriosam dignissimos rerum eos aliquid saepe molestias consequatur! Lorem ipsum dolor sit amet consectetur adipisicing elit. Asperiores eos, quisquam ullam quo earum amet nisi maxime, illum beatae iste animi doloremque reprehenderit illo neque soluta facere saepe culpa nemo!</p>
+                    <a href="#">Visit The Animal Website</a>
+                </div>
+            </div>
+        </main>
+        <aside>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/05/68/07/62/360_F_568076205_K4L3nlnvdRvt9DfMY0wt2h6cAxgso7KW.jpg" alt="fox">
+                <p>6:00 am</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/fun-3d-cartoon-cow_183364-123090.jpg?t=st=1741173370~exp=1741176970~hmac=44aca19610f62cd8565bc385f1efede7de22fd8979f984a13fac2aca83e5978a&w=740" alt="cow">
+                <p>8:00 am</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/cute-tiger-studio_23-2150875495.jpg?t=st=1741173417~exp=1741177017~hmac=48e32739823b720399558aa9bcf64fdc4873e5a26229a9f18d01482b87a01ba5&w=900" alt="tiger">
+                <p>10:00 am</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/cute-possum-with-flowers_23-2151041066.jpg?t=st=1741173464~exp=1741177064~hmac=8ed29eceb617bcd795b8bd07920a5e8c662a6bf97361cd94ff05843fc9ba0739&w=1380" alt="possum">
+                <p>12:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/07/85/55/82/360_F_785558298_1P6kEf1TODNFsI44DuEiVyiOFTsfd2AJ.jpg" alt="snake">
+                <p>2:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/happy-3d-cartoon-animal-outdoors-grassland_23-2151442468.jpg?t=st=1741173492~exp=1741177092~hmac=d78f1c6bec85de70f8c77847b4a97e546185ff27fba113b25e001340529018fe&w=1800" alt="coala">
+                <p>4:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/view-cartoon-animated-3d-penguin_23-2150881964.jpg?t=st=1741173529~exp=1741177129~hmac=357522a49c1d88a8461374b1bc2c749698cc67d7123aac443ebcd351bce40fd3&w=900" alt="pinguin">
+                <p>6:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/cute-possum-with-food_23-2151041081.jpg?t=st=1741173552~exp=1741177152~hmac=aad518af0074fc14bb5c5c22ce3dc592f5d27f48a450a60425284f638045a6ca&w=1380" alt="possum">
+                <p>8:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-photo/happy-3d-cartoon-animal-outdoors-grassland_23-2151442439.jpg?t=st=1741173572~exp=1741177172~hmac=6682cde0330ce0483e282b7049aefd8aeeb157de5200a124e7b69a16eef0aa97&w=1800" alt="bobr">
+                <p>10:00 pm</p>
+            </div>
+            <div class="image">
+                <img src="https://classroomclipart.com/image/static2/preview2/firefly-cartoon-character-insect-clipart-27919.jpg" alt="bug">
+                <p>12:00 am</p>
+            </div>
+        </aside>
+    </div>
+    <div class="box box2">
+        <main>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/05/68/07/62/360_F_568076205_K4L3nlnvdRvt9DfMY0wt2h6cAxgso7KW.jpg" alt="fox">
+                <p></p>
+            </div>
+            <div class="info spec">
+                <ul>
+                    <li class="active">About Animal</li>
+                    <li>Marketplaces</li>
+                    <li>Tuls + Network</li>
+                </ul>
+                <div class="text">
+                    <img src="https://img.freepik.com/free-vector/hand-drawn-cartoon-wild-animals-collection_1284-44322.jpg?t=st=1741166661~exp=1741170261~hmac=4c7f4eabca277601bcacf7b469afe5587c2ca7049c316f884282392b40e04e96&w=900" alt="animals">
+                    <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Qui recusandae sequi, officiis magnam laboriosam eligendi suscipit amet soluta nemo quibusdam iste corporis consequuntur dolore mollitia commodi quasi cupiditate omnis alias. Lorem, ipsum dolor sit amet consectetur adipisicing elit. Unde eos quia nam qui reprehenderit quo iusto ratione perferendis, aperiam repellendus sit aspernatur atque eum aliquid amet! Molestiae accusamus ducimus ab?</p>
+                    <a href="#">Visit the Animal Website</a>
+                </div>
+            </div>
+        </main>
+    </div>
+    <div class="box box3">
+        <main>
+            <div class="image">
+                <img src="https://classroomclipart.com/image/static2/preview2/firefly-cartoon-character-insect-clipart-27919.jpg" alt="bug">
+                <p>Lorem ipsum dolor sit amet consectetur adipisicing</p>
+            </div>
+            <div class="info">
+                <ul>
+                    <li class="active">About Animals</li>
+                    <li>Marketplaces</li>
+                    <li>Tuls + Network</li>
+                </ul>
+                <div class="text">
+                    <img src="https://img.freepik.com/free-vector/hand-drawn-cartoon-wild-animals-collection_1284-44322.jpg?t=st=1741166661~exp=1741170261~hmac=4c7f4eabca277601bcacf7b469afe5587c2ca7049c316f884282392b40e04e96&w=900" alt="anumals">
+                    <p>Lorem ipsum dolor sit, amet consectetur adipisicing elit. Atque, quia odit expedita similique dicta ab maxime, et delectus quos nesciunt rerum velit nemo facere ratione nobis provident explicabo esse optio?Lorem ipsum dolor sit amet consectetur adipisicing elit. Tempora temporibus asperiores error, quam quis nemo aut est fugit unde vel possimus fuga repellat nobis facere aspernatur, maxime quod vitae totam.</p>
+                    <a href="#">Visit The Animals Website</a>
+                </div>
+            </div>
+        </main>
+        <aside>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/05/68/07/62/360_F_568076205_K4L3nlnvdRvt9DfMY0wt2h6cAxgso7KW.jpg" alt="fox">
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+            <div class="image">
+                <img src="https://t3.ftcdn.net/jpg/07/85/55/82/360_F_785558298_1P6kEf1TODNFsI44DuEiVyiOFTsfd2AJ.jpg" alt="snake">
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+            <div class="image">
+                <img src="https://classroomclipart.com/image/static2/preview2/firefly-cartoon-character-insect-clipart-27919.jpg" alt="bug">
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+            <div class="image">
+                <img src="https://img.freepik.com/free-vector/hand-drawn-cartoon-wild-animals-collection_1284-44322.jpg?t=st=1741166661~exp=1741170261~hmac=4c7f4eabca277601bcacf7b469afe5587c2ca7049c316f884282392b40e04e96&w=900" alt="animals">
+                <p>Lorem ipsum dolor sit amet</p>
+            </div>
+        </aside>
+    </div>
+</body>
+</html>

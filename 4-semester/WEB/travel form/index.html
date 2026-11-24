@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Планувальник подорожей</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f0f2f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #3498db, #8e44ad);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-bottom: 10px;
+        }
+        
+        .content {
+            padding: 20px;
+        }
+        
+        .country-selection {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        
+        label {
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 18px;
+        }
+        
+        select {
+            padding: 10px 15px;
+            border-radius: 5px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            flex-grow: 1;
+            max-width: 300px;
+            cursor: pointer;
+        }
+        
+        .flag {
+            margin-left: 20px;
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 5px;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .landmarks {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .landmark-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+        }
+        
+        .landmark-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .landmark-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+        
+        .landmark-info {
+            padding: 15px;
+        }
+        
+        .landmark-title {
+            font-size: 18px;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .landmark-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+        
+        .price {
+            color: #e74c3c;
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+        }
+        
+        .custom-checkbox {
+            display: none;
+        }
+        
+        .checkbox-label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        
+        .checkbox-label::before {
+            content: '';
+            width: 20px;
+            height: 20px;
+            border: 2px solid #3498db;
+            border-radius: 4px;
+            margin-right: 10px;
+            display: inline-block;
+        }
+        
+        .custom-checkbox:checked + .checkbox-label::before {
+            background-color: #3498db;
+            content: '✓';
+            color: white;
+            text-align: center;
+            line-height: 20px;
+            font-size: 14px;
+        }
+        
+        .total-section {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .total-price {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2ecc71;
+            margin-top: 10px;
+        }
+        
+        .no-landmarks {
+            text-align: center;
+            padding: 50px 0;
+            color: #999;
+            font-size: 18px;
+        }
+        
+        @media (max-width: 768px) {
+            .landmarks {
+                grid-template-columns: 1fr;
+            }
+            
+            .country-selection {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .flag {
+                margin-left: 0;
+                margin-top: 15px;
+            }
+            
+            select {
+                max-width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Планувальник подорожей</h1>
+            <p>Оберіть країну, виберіть пам'ятки та розрахуйте вартість поїздки</p>
+        </header>
+        
+        <div class="content">
+            <div class="country-selection">
+                <label for="country-select">Оберіть країну:</label>
+                <select id="country-select">
+                    <option value="">-- Виберіть країну --</option>
+                    <option value="ukraine">Україна</option>
+                    <option value="france">Франція</option>
+                    <option value="italy">Італія</option>
+                    <option value="japan">Японія</option>
+                    <option value="egypt">Єгипет</option>
+                </select>
+                <img id="flag" class="flag" src="" alt="Прапор країни" style="display: none;">
+            </div>
+            
+            <div id="landmarks" class="landmarks">
+            </div>
+            
+            <div class="total-section">
+                <h2>Загальна вартість квитків</h2>
+                <div class="total-price">0 грн</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const countriesData = {
+            ukraine: {
+                name: "Україна",
+                flag: "https://upload.wikimedia.org/wikipedia/commons/4/49/Flag_of_Ukraine.svg",
+                currency: "грн",
+                landmarks: [
+                    {
+                        id: "ua1",
+                        name: "Софія Київська",
+                        image: "https://st-sophia.org.ua/wp-content/uploads/2023/08/m-01.png",
+                        description: "Софійський собор - пам'ятка української архітектури та монументального живопису XI-XVIII століть. Розташований у центрі Києва.",
+                        price: 150
+                    },
+                    {
+                        id: "ua2",
+                        name: "Замок Паланок",
+                        image: "https://guide.karpaty.ua/uploads/place/main_photo/55005d244b61722583000000/palanok_main.jpg",
+                        description: "Середньовічний замок у місті Мукачево, одна з найвідоміших історичних та архітектурних пам'яток Закарпаття.",
+                        price: 120
+                    },
+                    {
+                        id: "ua3",
+                        name: "Кам'янець-Подільська фортеця",
+                        image: "https://karpaty.love/uploads/posts/2017-12/1513090759_vyd-na-kamjanec-podilsku-fortecju.jpg",
+                        description: "Середньовічна фортеця, розташована на скелястому півострові, утвореному річкою Смотрич у місті Кам'янець-Подільський.",
+                        price: 130
+                    }
+                ]
+            },
+            france: {
+                name: "Франція",
+                flag: "https://upload.wikimedia.org/wikipedia/commons/c/c3/Flag_of_France.svg",
+                currency: "євро",
+                landmarks: [
+                    {
+                        id: "fr1",
+                        name: "Ейфелева вежа",
+                        image: "https://travel.24tv.ua/resources/photos/news/202010/1434043.jpg?v=1661267619000",
+                        description: "Металева решітчаста вежа на Марсовому полі в Парижі, найвідоміша архітектурна пам'ятка Франції.",
+                        price: 25
+                    },
+                    {
+                        id: "fr2",
+                        name: "Лувр",
+                        image: "https://faktypro.com.ua/uploads/img/mini/25-cikavih-faktiv-pro-luvr-900-600.jpg",
+                        description: "Один із найбільших і найвідоміших музеїв світу, розташований у центрі Парижа на правому березі Сени.",
+                        price: 15
+                    },
+                    {
+                        id: "fr3",
+                        name: "Собор Паризької Богоматері",
+                        image: "https://waytravel.com.ua/wp-content/uploads/2024/07/notr-dam-de-pari.jpg",
+                        description: "Середньовічний католицький собор у IV окрузі Парижа, відомий як шедевр французької готичної архітектури.",
+                        price: 10
+                    }
+                ]
+            },
+            italy: {
+                name: "Італія",
+                flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/0/03/Flag_of_Italy.svg/250px-Flag_of_Italy.svg.png",
+                currency: "євро",
+                landmarks: [
+                    {
+                        id: "it1",
+                        name: "Колізей",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/thumb/d/de/Colosseo_2020.jpg/960px-Colosseo_2020.jpg",
+                        description: "Найбільший амфітеатр Римської імперії, розташований у центрі Рима. Одна з найпопулярніших туристичних пам'яток Італії.",
+                        price: 16
+                    },
+                    {
+                        id: "it2",
+                        name: "Венеціанські канали",
+                        image: "https://selfguide.ru/wp-content/uploads/2012/08/Italy-Venice.jpg",
+                        description: "Унікальна система водних шляхів у Венеції, яка замінює вулиці і є символом цього міста.",
+                        price: 80
+                    },
+                    {
+                        id: "it3",
+                        name: "Пізанська вежа",
+                        image: "https://www.5.ua/media/pictures/original/153829.jpg?t=1542900821",
+                        description: "Дзвіниця Пізанського собору, відома своїм нахилом, який виник ще під час будівництва в XII столітті.",
+                        price: 18
+                    }
+                ]
+            },
+            japan: {
+                name: "Японія",
+                flag: "https://upload.wikimedia.org/wikipedia/commons/9/9e/Flag_of_Japan.svg",
+                currency: "єн",
+                landmarks: [
+                    {
+                        id: "jp1",
+                        name: "Гора Фудзі",
+                        image: "https://aquanews.com.ua/wp-content/uploads/2024/05/gora-fudziyama_5c0a71e6d9a22.jpg",
+                        description: "Найвища гора Японії і один із символів країни. Діючий стратовулкан, священний для японців.",
+                        price: 3000
+                    },
+                    {
+                        id: "jp2",
+                        name: "Замок Хімедзі",
+                        image: "https://lh3.googleusercontent.com/proxy/emzwH6w489wFXkq0JNw4cjZV0W2gHCErI-RdN4CjpIb7BLpGtdDJ7iovrwn8tjUSc3w3sY5WF18LBBdKOQIGR15tfGVENu1mritXX9evQxkM5MiZQFxbbg",
+                        description: "Найбільший і найкрасивіший замок Японії, побудований у XVII столітті. Відомий як 'Замок Білої Чаплі'.",
+                        price: 1000
+                    },
+                    {
+                        id: "jp3",
+                        name: "Святилище Ісе",
+                        image: "https://s1.amanogawa.space/media/2021/09/ise-shi-temple-04-1024x600.jpg",
+                        description: "Найважливіше синтоїстське святилище Японії, присвячене богині сонця Аматерасу.",
+                        price: 0
+                    }
+                ]
+            },
+            egypt: {
+                name: "Єгипет",
+                flag: "https://upload.wikimedia.org/wikipedia/commons/thumb/f/fe/Flag_of_Egypt.svg/800px-Flag_of_Egypt.svg.png",
+                currency: "фунтів",
+                landmarks: [
+                    {
+                        id: "eg1",
+                        name: "Піраміди Гізи",
+                        image: "https://www.volynnews.com/files/news/2023/02-07/355471/ce0ce612-c533b940168c8583467cc15645078bd5.jpg",
+                        description: "Найвідоміші єгипетські піраміди, розташовані на плато Гіза. Єдине з 'Семи чудес світу', що збереглося до наших днів.",
+                        price: 200
+                    },
+                    {
+                        id: "eg2",
+                        name: "Долина Царів",
+                        image: "https://upload.wikimedia.org/wikipedia/commons/0/0c/Luxor%2C_Tal_der_K%C3%B6nige_%281995%2C_860x605%29.jpg",
+                        description: "Некрополь фараонів Нового царства, де знаходяться гробниці багатьох фараонів, включаючи Тутанхамона.",
+                        price: 240
+                    },
+                    {
+                        id: "eg3",
+                        name: "Храм Абу-Сімбел",
+                        image: "https://kuku.travel/wp-content/uploads/2020/03/1-3.jpg",
+                        description: "Давньоєгипетський храмовий комплекс, вирубаний у скелі за наказом фараона Рамзеса II у XIII столітті до н.е.",
+                        price: 180
+                    }
+                ]
+            }
+        };
+        
+        const countrySelect = document.getElementById('country-select');
+        const flagImage = document.getElementById('flag');
+        const landmarksContainer = document.getElementById('landmarks');
+        const totalPriceElement = document.querySelector('.total-price');
+        
+        function updateTotalPrice() {
+            const selectedCountry = countrySelect.value;
+            if (!selectedCountry) return;
+            
+            const currency = countriesData[selectedCountry].currency;
+            const totalPrice = [...document.querySelectorAll('.custom-checkbox:checked')]
+                .reduce((sum, checkbox) => sum + parseFloat(checkbox.dataset.price), 0);
+            
+            totalPriceElement.textContent = `${totalPrice} ${currency}`;
+        }
+        
+        function displayLandmarks(countryCode) {
+            landmarksContainer.innerHTML = '';
+            
+            if (!countryCode) {
+                landmarksContainer.innerHTML = '<div class="no-landmarks">Оберіть країну для перегляду пам\'яток</div>';
+                totalPriceElement.textContent = '0 грн';
+                flagImage.style.display = 'none';
+                return;
+            }
+            
+            const country = countriesData[countryCode];
+            
+            flagImage.src = country.flag;
+            flagImage.alt = `Прапор ${country.name}`;
+            flagImage.style.display = 'block';
+            totalPriceElement.textContent = `0 ${country.currency}`;
+            
+            country.landmarks.forEach(landmark => {
+                const card = document.createElement('div');
+                card.className = 'landmark-card';
+                
+                card.innerHTML = `
+                    <img class="landmark-image" src="${landmark.image}" alt="${landmark.name}">
+                    <div class="landmark-info">
+                        <h3 class="landmark-title">${landmark.name}</h3>
+                        <p class="landmark-description">${landmark.description}</p>
+                        <div class="price">${landmark.price} ${country.currency}</div>
+                        <div class="checkbox-container">
+                            <input type="checkbox" id="${landmark.id}" class="custom-checkbox" data-price="${landmark.price}">
+                            <label for="${landmark.id}" class="checkbox-label">Додати до плану подорожі</label>
+                        </div>
+                    </div>
+                `;
+                
+                landmarksContainer.appendChild(card);
+                
+                document.getElementById(landmark.id).addEventListener('change', updateTotalPrice);
+            });
+        }
+        
+        countrySelect.addEventListener('change', () => displayLandmarks(countrySelect.value));
+        window.addEventListener('load', function() {
+            countrySelect.value = '';
+            displayLandmarks('');
+        });
+    </script>
+</body>
+</html>

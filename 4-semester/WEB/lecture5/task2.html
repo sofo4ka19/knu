@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        header, footer{
+            position: fixed;
+            background: darkred;
+            color: white;
+            width: 100%;
+            height: 100px;
+            left:0;
+        }
+        header{
+            top: 0;
+        }
+        footer{
+            bottom: 0;
+        }
+        main, aside{
+            top: 100px;
+            bottom: 100px;
+        }
+        aside{
+            background: lightcoral;
+            position: fixed;
+            width: 15%;
+        }
+        .left{
+            left: 0;
+        }
+        .right{
+            right: 0;
+        }
+        main{
+            width: 70%;
+            position: absolute;
+            left: 15%;
+            background: red;
+        }
+    </style>
+</head>
+<body>
+    <header>header</header>
+    <aside class="left">left</aside>
+    <main>content</main>
+    <aside class="right">right</aside>
+    <footer>footer</footer>
+</body>
+</html>

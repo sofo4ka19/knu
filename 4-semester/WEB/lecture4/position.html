@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .parent{
+            position: relative;
+            margin: 50px 0;
+            padding: 10px;
+        }
+        .t1{
+            position: relative;
+            top: 30px;
+            right: 20px;
+        }
+        .t2{
+            z-index: 2;
+            width: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .t3{
+            position: absolute;
+            left: 0;
+            right: 0;
+        }
+        .b2{
+            position: relative;
+        }
+        .t4{
+            position: absolute;
+            top: calc(100% + 10px);
+        }
+    </style>
+</head>
+<body>
+    <div style="background:#ccc">Блок 1</div>
+    <div style="background:#9cc">Блок 2</div>
+    <div class="t1" style="background:#c9c">Блок 3</div>
+    
+    <div class="parent" style="border: 1px solid red">
+        <div style="background:#ccc">Блок 1</div>
+        <div style="background:#9cc">Блок 2</div>
+        <div class="t2" style="background:#c9c">Блок 3</div>
+    </div>
+    
+    <div style="background:#ccc">Блок 1</div>
+    <div style="background:#9cc">Блок 2</div>
+    <div class="t3" style="background:#c9c">Блок 3</div>
+
+    <div class="parent">
+        <div style="background:#ccc">Блок 1</div>
+        <div class="b2" style="background:#9cc">Блок 2</div>
+        <div class="t4" style="background:#c9c">Блок 3</div>
+    </div>
+    
+</body>
+</html>

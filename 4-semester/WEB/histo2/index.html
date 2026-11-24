@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Гістограма продажів</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        .chart {
+            display: flex;
+            height: 300px;
+            align-items: flex-end;
+            justify-content: center;
+            gap: 30px;
+            margin-top: 50px;
+            padding-bottom: 20px;
+        }
+        .bar-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 60px;
+        }
+        .bar {
+            width: 50px;
+            background-color: mediumorchid;
+            transition: height 0.5s ease;
+            border-radius: 5px 5px 0 0;
+        }
+        .bar-label {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .value-label {
+            margin-bottom: 5px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Продажі по категоріям</h1>
+    <div class="chart" id="chart"></div>
+
+    <script>
+        const salesData = [
+            { category: "Електроніка", sales: 120 },
+            { category: "Одяг", sales: 80 },
+            { category: "Книги", sales: 45 },
+            { category: "Спорт", sales: 60 }
+        ];
+
+        const maxSales = Math.max(...salesData.map(item => item.sales));
+        
+        const chart = document.getElementById('chart');
+        
+        salesData.forEach(item => {
+            const barHeight = (item.sales / maxSales) * 250;
+            
+            const barContainer = document.createElement('div');
+            barContainer.className = 'bar-container';
+            
+            const valueLabel = document.createElement('div');
+            valueLabel.className = 'value-label';
+            valueLabel.textContent = item.sales;
+            
+            const bar = document.createElement('div');
+            bar.className = 'bar';
+            bar.style.height = `${barHeight}px`;
+            
+            const barLabel = document.createElement('div');
+            barLabel.className = 'bar-label';
+            barLabel.textContent = item.category;
+            
+            barContainer.appendChild(valueLabel);
+            barContainer.appendChild(bar);
+            barContainer.appendChild(barLabel);
+            
+            chart.appendChild(barContainer);
+        });
+    </script>
+</body>
+</html>

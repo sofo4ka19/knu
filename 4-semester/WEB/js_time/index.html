@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div class="container">
+        
+        <!-- Секція з інформацією про поточне відвідування -->
+        <div>
+            <h2>Інформація про поточний сеанс</h2>
+            <div id="visit-datetime"></div>
+            <div id="session-duration">Тривалість поточного сеансу: 00:00:00</div>
+        </div>
+        
+        <!-- Секція з інформацією про минуле відвідування -->
+        <div>
+            <h2>Інформація про минулий сеанс</h2>
+            <div id="previous-session">Завантаження...</div>
+        </div>
+        
+        <!-- Секція для обчислення різниці між датами -->
+        <div>
+            <h2>Розрахунок різниці між датами</h2>
+            <div>
+                <label for="custom-date">Виберіть минулу дату та час:</label>
+                <input type="datetime-local" id="custom-date">
+            </div>
+            <button id="calculate-difference">Розрахувати різницю</button>
+            <div id="date-difference"></div>
+        </div>
+    </div>
+    
+    <script>
+            const visitTime = new Date();
+            
+            const dateTimeOptions = {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            };
+            
+            const days = [
+                'Неділя',
+                'Понеділок',
+                'Вівторок',
+                'Середа',
+                'Четвер',
+                "П'ятниця",
+                'Субота'
+            ];
+            
+            // Відображення інформації про поточне відвідування
+            document.getElementById('visit-datetime').textContent = 'Початок сеансу: ' +
+                visitTime.toLocaleDateString('uk-UA', dateTimeOptions) + ", " + days[visitTime.getDay()];
+            
+            // Тривалість поточного сеансу
+            let sessionSeconds = 0;
+            const sessionDurationElement = document.getElementById('session-duration');
+            
+            // Оновлення форматованого часу (години:хвилини:секунди)
+            function updateFormattedTime() {
+                const hours = Math.floor(sessionSeconds / 3600);
+                const minutes = Math.floor((sessionSeconds % 3600) / 60);
+                const seconds = sessionSeconds % 60;
+                
+                return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Запуск таймера для відстеження тривалості поточного сеансу
+            const sessionTimer = setInterval(() => {
+                sessionSeconds++;
+                sessionDurationElement.textContent = `Тривалість поточного сеансу: ${updateFormattedTime()}`;
+            }, 1000);
+            
+            
+            // Функція для збереження даних сеансу
+            function saveSessionData() {
+                const sessionData = {
+                    startTime: visitTime.toISOString(),
+                    duration: sessionSeconds,
+                    formattedStartTime: visitTime.toLocaleDateString('uk-UA', dateTimeOptions) + ", " + days[visitTime.getDay()],
+                    formattedDuration: updateFormattedTime()
+                };
+                
+                localStorage.setItem('previousSession', JSON.stringify(sessionData));
+            }
+            
+            // Завантаження даних минулого сеансу при старті сторінки
+            function loadPreviousSessionData() {
+                const previousSessionElement = document.getElementById('previous-session');
+                const previousSessionData = localStorage.getItem('previousSession');
+                
+                if (previousSessionData) {
+                    const sessionData = JSON.parse(previousSessionData);
+                    previousSessionElement.textContent = `Минулий сеанс: ${sessionData.formattedStartTime}, тривалість: ${sessionData.formattedDuration}`;
+                } else {
+                    previousSessionElement.textContent = 'Інформація про минулий сеанс відсутня';
+                }
+            }
+            
+            loadPreviousSessionData();
+            
+            // Зберегти дані поточного сеансу перед закриттям сторінки
+            window.addEventListener('beforeunload', function() {
+                clearInterval(sessionTimer);
+                saveSessionData();
+            });
+            
+            // Обчислення різниці між введеною датою і поточним часом
+            
+            const dateInput = document.getElementById('custom-date');
+            const calculateButton = document.getElementById('calculate-difference');
+            const differenceResult = document.getElementById('date-difference');
+            
+            // Встановлення максимальної дати для вводу 
+            function setMaxDate() {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const hours = String(today.getHours()).padStart(2, '0');
+                const minutes = String(today.getMinutes()).padStart(2, '0');
+                
+                dateInput.max = `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            
+            setMaxDate();
+            
+            // Функція обчислення різниці між датами
+            function calculateDateDifference() {
+                const selectedDate = new Date(dateInput.value);
+                
+                // Перевірка валідності дати
+                if (isNaN(selectedDate.getTime())) {
+                    differenceResult.textContent = 'Будь ласка, введіть коректну дату';
+                    return;
+                }
+                
+                const currentDate = new Date();
+                
+                // Перевірка чи дата в минулому
+                if (selectedDate >= currentDate) {
+                    differenceResult.textContent = 'Введіть дату, яка знаходиться в минулому';
+                    return;
+                }
+                
+                // Обчислення різниці
+                const timeDiff = currentDate.getTime() - selectedDate.getTime();
+                
+                let years = currentDate.getFullYear() - selectedDate.getFullYear();
+                let months = currentDate.getMonth() - selectedDate.getMonth();
+                let days = currentDate.getDate() - selectedDate.getDate();
+                
+                // Корегування місяців і років у разі від'ємної кількості днів або місяців
+                if (days < 0) {
+                    const prevMonthDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 0);
+                    days += prevMonthDate.getDate();
+                    months--;
+                }
+                
+                if (months < 0) {
+                    months += 12;
+                    years--;
+                }
+                
+                const remainingTime = timeDiff - 
+                    (years * 365 * 24 * 60 * 60 * 1000) - 
+                    (months * 30 * 24 * 60 * 60 * 1000) - 
+                    (days * 24 * 60 * 60 * 1000);
+                
+                const hoursDiff = Math.floor(remainingTime / (1000 * 60 * 60));
+                const minutesDiff = Math.floor((remainingTime % (1000 * 60 * 60)) / (1000 * 60));
+                
+                // Відмінки слів для правильного відображення кількості
+                function getWordForm(number, forms) {
+                    const cases = [2, 0, 1, 1, 1, 2];
+                    return forms[(number % 100 > 4 && number % 100 < 20) ? 2 : cases[Math.min(number % 10, 5)]];
+                }
+                
+                const yearForms = ['рік', 'роки', 'років'];
+                const monthForms = ['місяць', 'місяці', 'місяців'];
+                const dayForms = ['день', 'дні', 'днів'];
+                const hourForms = ['година', 'години', 'годин'];
+                const minuteForms = ['хвилина', 'хвилини', 'хвилин'];
+                
+                // Форматування повідомлення
+                let timeDiffMessage = 'З моменту введеної дати пройшло: ';
+                
+                if (years > 0) {
+                    timeDiffMessage += `${years} ${getWordForm(years, yearForms)}, `;
+                }
+                if (months > 0) {
+                    timeDiffMessage += `${months} ${getWordForm(months, monthForms)}, `;
+                }
+                if (days > 0) {
+                    timeDiffMessage += `${days} ${getWordForm(days, dayForms)}, `;
+                }
+                if (hoursDiff > 0) {
+                    timeDiffMessage += `${hoursDiff} ${getWordForm(hoursDiff, hourForms)}, `;
+                }
+                timeDiffMessage += `${minutesDiff} ${getWordForm(minutesDiff, minuteForms)}`;
+                
+                differenceResult.innerHTML = `${timeDiffMessage}<br>` +
+                    `Обрана дата: ${selectedDate.toLocaleDateString('uk-UA', dateTimeOptions)}`;
+            }
+            
+            // Додавання обробника події до кнопки розрахунку
+            if (calculateButton) {
+                calculateButton.addEventListener('click', calculateDateDifference);
+            }
+        
+    </script>
+</body>
+</html>
