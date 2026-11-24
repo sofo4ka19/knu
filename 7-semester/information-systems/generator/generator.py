@@ -38,7 +38,7 @@ log = logging.getLogger("generator")
 fake = Faker()
 
 DELAY_MIN = float(os.getenv("GENERATOR_DELAY_MIN", "0.2"))
-DELAY_MAX = float(os.getenv("GENERATOR_DELAY_MAX", "0.5"))
+DELAY_MAX = float(os.getenv("GENERATOR_DELAY_MAX", "2"))
 METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
 OTLP_ENDPOINT = os.getenv("OTLP_ENDPOINT", "http://localhost:4318/v1/traces")
 
